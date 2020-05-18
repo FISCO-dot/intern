@@ -23,19 +23,19 @@ export default class customAnimationComponent extends cc.Component {
         type: cc.Integer,
         displayName: "default animation"
     })
-    defaultPlay : number = 0;
-    @property({
+    defaultPlay : number = 0;                                 //默认播放动画选择，超过最大数量默认播放最后一个
+    @property({                                               //在属性面板添加任意数量的动画
         type: [customAnimation],
         displayName: "动画"
     })
     effects: customAnimation[] = [];
-    anim:cc.Animation = null; //anim->节点下的animation component
-    animNum:number = 0;//节点下的动画计算
-    // LIFE-CYCLE CALLBACKS:
+    anim:cc.Animation = null;                                 //anim->节点下的animation component
+    animNum:number = 0;                                       //节点下的动画计算
+   
 
     onLoad () {
         if(this.effects[0].SpriteAtlas){
-            this.CreateClip();
+            this.CreateClip();                                //拖拽添加
         }
     }
     initializeSprite(){
@@ -65,7 +65,7 @@ export default class customAnimationComponent extends cc.Component {
             this.animNum++;
         }
         console.log('get clips '+ this.anim.getClips().length)
-        var animState = this.anim.play(String(this.defaultPlay > (this.effects.length-1) ? 0:this.defaultPlay));
+        var animState = this.anim.play(String(this.defaultPlay > (this.effects.length-1) ?(this.effects.length-1):this.defaultPlay));
         console.log('playing '+ animState.name)
         if(this.loop == 0){
             animState.wrapMode = cc.WrapMode.Loop;
@@ -74,7 +74,7 @@ export default class customAnimationComponent extends cc.Component {
             animState.wrapMode = cc.WrapMode.Normal;
         }
     }
-    addClip(clip,duration:number = 1){
+    addClip(clip,duration:number = 1){                         //脚本控制
         var newClip = new customAnimation ;
         newClip.SpriteAtlas = clip;
         newClip.duration = duration;

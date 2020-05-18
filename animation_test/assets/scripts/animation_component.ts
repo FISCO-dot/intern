@@ -45,7 +45,7 @@ export default class customAnimationComponent extends cc.Component {
             this.CreateClip();                                //拖拽添加
         }
     }
-    initializeSprite(){
+    initializeSprite(){                                       //如果没有设置初始图片则自动加载动画中的第一个作为初始图片
         var sp = this.node.getComponent(cc.Sprite)
         if(!sp){
             sp = this.node.addComponent(cc.Sprite)

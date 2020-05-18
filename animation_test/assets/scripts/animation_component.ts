@@ -2,7 +2,10 @@ let loopType = cc.Enum({
     循环: 0,
     单次: 1,
 });
-
+let onLoadedType = cc.Enum({
+    加载播放: 0,
+    加载不播放: 1,
+});
 
 const {ccclass, property} = cc._decorator;
 @ccclass("customAnimation")
@@ -14,7 +17,10 @@ class customAnimation {
 }
 @ccclass
 export default class customAnimationComponent extends cc.Component {
-
+    @property({
+        type:cc.Enum(onLoadedType)
+    })
+    onloadedtype = onLoadedType.加载不播放;
     @property({
         type:cc.Enum(loopType)
     })
@@ -24,6 +30,7 @@ export default class customAnimationComponent extends cc.Component {
         displayName: "default animation"
     })
     defaultPlay : number = 0;                                 //默认播放动画选择，超过最大数量默认播放最后一个
+    @property
     @property({                                               //在属性面板添加任意数量的动画
         type: [customAnimation],
         displayName: "动画"
@@ -61,34 +68,37 @@ export default class customAnimationComponent extends cc.Component {
             }
             var clip = cc.AnimationClip.createWithSpriteFrames(this.effects[animCount].SpriteAtlas.getSpriteFrames(),sample)
             clip.name = String(animCount);
+            clip.wrapMode = this.loop == 0 ? cc.WrapMode.Loop:cc.WrapMode.Normal
             this.anim.addClip(clip);
             this.animNum++;
         }
-        console.log('get clips '+ this.anim.getClips().length)
-        var animState = this.anim.play(String(this.defaultPlay > (this.effects.length-1) ?(this.effects.length-1):this.defaultPlay));
-        console.log('playing '+ animState.name)
-        if(this.loop == 0){
-            animState.wrapMode = cc.WrapMode.Loop;
+        if(this.onloadedtype == 0){
+            var animState = this.anim.play(String(this.defaultPlay > (this.effects.length-1) ?(this.effects.length-1):this.defaultPlay));
+            console.log('playing '+ animState.name)
         }
-        else{
-            animState.wrapMode = cc.WrapMode.Normal;
-        }
+
     }
     addClip(clip,duration:number = 1){                         //脚本控制
-        var newClip = new customAnimation ;
-        newClip.SpriteAtlas = clip;
-        newClip.duration = duration;
-        this.effects.push(newClip);
+        var newAtlas = new customAnimation ;
+        newAtlas.SpriteAtlas = clip;
+        newAtlas.duration = duration;
+        var sample = newAtlas.SpriteAtlas.getSpriteFrames().length / duration;
+        var newClip = cc.AnimationClip.createWithSpriteFrames(newAtlas.SpriteAtlas.getSpriteFrames(),sample)
+        this.effects.push(newAtlas);
         if(!this.anim){
             this.initializeSprite();
         }
-        clip.name = String(this.animNum)
-        this.anim.addClip(clip);
+        newClip.name = String(this.animNum)
+        this.anim.addClip(newClip);
         this.animNum++;
     }
     removeClip(clip,force:boolean = false){
-        if(!this.anim || !(clip instanceof cc.AnimationClip))
-        return
+        if(this.anim ==null || !(clip instanceof cc.AnimationClip)){
+            console.log('jinlaile')
+            return
+        }
+        
+        
         this.anim.removeClip(clip,force);
         this.effects.splice(Number(clip.name),1)
         this.animNum--;

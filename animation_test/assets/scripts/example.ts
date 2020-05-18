@@ -14,7 +14,7 @@ export default class NewClass extends cc.Component {
         console.log('add after '+this.customAnimationComponent.anim.getClips().length)
         var clip = this.node.getComponent(cc.Animation).getClips()[1];
         console.log('clip '+ clip.duration)
-
+        // this.node.getComponent(cc.Animation).play('1')
         this.customAnimationComponent.removeClip(clip,true);
         console.log('remove after '+this.customAnimationComponent.anim.getClips().length)
         console.log('effect after '+this.customAnimationComponent.effects.length)

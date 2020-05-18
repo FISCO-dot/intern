@@ -3,8 +3,8 @@ let loopType = cc.Enum({
     单次: 1,
 });
 let onLoadedType = cc.Enum({
-    加载播放: 0,
-    加载不播放: 1,
+    运行播放: 0,
+    运行不播放: 1,
 });
 
 const {ccclass, property} = cc._decorator;
@@ -20,11 +20,11 @@ export default class customAnimationComponent extends cc.Component {
     @property({
         type:cc.Enum(onLoadedType)
     })
-    onloadedtype = onLoadedType.加载不播放;
+    onloadedtype = onLoadedType.运行不播放;                   //是否运行后自动播放
     @property({
         type:cc.Enum(loopType)
     })
-    loop = loopType.循环;
+    loop = loopType.循环;                                     //是否循环播放
     @property({
         type: cc.Integer,
         displayName: "default animation"
@@ -82,19 +82,19 @@ export default class customAnimationComponent extends cc.Component {
         var newAtlas = new customAnimation ;
         newAtlas.SpriteAtlas = clip;
         newAtlas.duration = duration;
-        var sample = newAtlas.SpriteAtlas.getSpriteFrames().length / duration;
-        var newClip = cc.AnimationClip.createWithSpriteFrames(newAtlas.SpriteAtlas.getSpriteFrames(),sample)
+        var sample = clip.getSpriteFrames().length / duration;
+        var Clip = cc.AnimationClip.createWithSpriteFrames(newAtlas.SpriteAtlas.getSpriteFrames(),sample)
         this.effects.push(newAtlas);
         if(!this.anim){
             this.initializeSprite();
         }
-        newClip.name = String(this.animNum)
-        this.anim.addClip(newClip);
+        Clip.name = String(this.animNum)
+        Clip.wrapMode = this.loop == 0 ? cc.WrapMode.Loop:cc.WrapMode.Normal
+        this.anim.addClip(Clip);
         this.animNum++;
     }
     removeClip(clip,force:boolean = false){
         if(this.anim ==null || !(clip instanceof cc.AnimationClip)){
-            console.log('jinlaile')
             return
         }
         

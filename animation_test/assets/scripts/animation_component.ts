@@ -56,7 +56,7 @@ export default class customAnimationComponent extends cc.Component {
             sp.spriteFrame = ori;
         }
     }
-    CreateClip(){
+    CreateClip(){                                           //产生拖拽添加的动画
         this.initializeSprite();
         this.anim = this.node.addComponent(cc.Animation)
         for(var animCount = 0;animCount < this.effects.length;animCount++){
@@ -66,7 +66,7 @@ export default class customAnimationComponent extends cc.Component {
             else {
                 var sample = this.effects[animCount].SpriteAtlas.getSpriteFrames().length / this.effects[animCount].duration
             }
-            var clip = cc.AnimationClip.createWithSpriteFrames(this.effects[animCount].SpriteAtlas.getSpriteFrames(),sample)
+            var clip = cc.AnimationClip.createWithSpriteFrames(this.effects[animCount].SpriteAtlas.getSpriteFrames(),sample)//图集创建动画
             clip.name = String(animCount);
             clip.wrapMode = this.loop == 0 ? cc.WrapMode.Loop:cc.WrapMode.Normal
             this.anim.addClip(clip);
@@ -78,7 +78,7 @@ export default class customAnimationComponent extends cc.Component {
         }
 
     }
-    addClip(clip,duration:number = 1){                         //脚本控制
+    addClip(clip,duration:number = 1){                         //脚本控制添加动画，clip为cplist图集
         var newAtlas = new customAnimation ;
         newAtlas.SpriteAtlas = clip;
         newAtlas.duration = duration;
@@ -93,12 +93,10 @@ export default class customAnimationComponent extends cc.Component {
         this.anim.addClip(Clip);
         this.animNum++;
     }
-    removeClip(clip,force:boolean = false){
+    removeClip(clip,force:boolean = false){                    //脚本控制删除动画，clip为cc.animationclip
         if(this.anim ==null || !(clip instanceof cc.AnimationClip)){
             return
         }
-        
-        
         this.anim.removeClip(clip,force);
         this.effects.splice(Number(clip.name),1)
         this.animNum--;

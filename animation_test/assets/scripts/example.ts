@@ -18,8 +18,6 @@ export default class NewClass extends cc.Component {
         this.customAnimationComponent.removeClip(clip,true);
         console.log('remove after '+this.customAnimationComponent.anim.getClips().length)
         console.log('effect after '+this.customAnimationComponent.effects.length)
-
-
     }
 
 }

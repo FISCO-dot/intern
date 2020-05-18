@@ -74,7 +74,7 @@ export default class customAnimationComponent extends cc.Component {
             animState.wrapMode = cc.WrapMode.Normal;
         }
     }
-    addClip(clip,duration){
+    addClip(clip,duration:number = 1){
         var newClip = new customAnimation ;
         newClip.SpriteAtlas = clip;
         newClip.duration = duration;
@@ -86,7 +86,7 @@ export default class customAnimationComponent extends cc.Component {
         this.anim.addClip(clip);
         this.animNum++;
     }
-    removeClip(clip,force){
+    removeClip(clip,force:boolean = false){
         if(!this.anim || !(clip instanceof cc.AnimationClip))
         return
         this.anim.removeClip(clip,force);

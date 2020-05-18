@@ -10,7 +10,7 @@ export default class NewClass extends cc.Component {
 
 
     onLoad () {
-        this.customAnimationComponent.addClip(this.spriteAtlas,1);
+        this.customAnimationComponent.addClip(this.spriteAtlas);
         console.log('add after '+this.customAnimationComponent.anim.getClips().length)
         var clip = this.node.getComponent(cc.Animation).getClips()[0];
         this.customAnimationComponent.removeClip(clip,true);

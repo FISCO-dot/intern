@@ -8,7 +8,7 @@ const {ccclass, property} = cc._decorator;
 @ccclass('CustomAnimation')
 export default class CustomAnimation {
 
-    @property(cc.Sprite)
+    @property(cc.SpriteAtlas)
     SpriteAtlas: cc.SpriteAtlas = null
     @property(cc.Float)
     duration : number = 1
@@ -16,14 +16,14 @@ export default class CustomAnimation {
         type:cc.Enum(loopType)
     })
     loop = loopType.defineTimes                                     //是否循环播放
+    
     @property({
         type:cc.Integer,
         visible(){
-            return this.loop == 1;
+            return this.loop == 0;
         }
     })
     looptime:number = 1;
-    
 
     _startFrame : number = 0        
      @property({
@@ -34,8 +34,7 @@ export default class CustomAnimation {
     get startFrame():number{
         return this._startFrame
     }
-    set startFrame(value){
-            
+    set startFrame(value){            
         if(value >= this._endFrame) value = this._endFrame -1;
         if(value < 0) value = 0
         this._startFrame = value
@@ -69,15 +68,8 @@ export default class CustomAnimation {
     set frameTag(value){
         if(value < this._startFrame) value =this._startFrame
         if(value > this._endFrame) value = this._endFrame
-        this._frameTag = value;
-        
+        this._frameTag = value;       
     }
-    
 
-    
-    editor:{
-        executeInEditMode: true
-        requireComponent:cc.SpriteFrame
-    }
 
 }

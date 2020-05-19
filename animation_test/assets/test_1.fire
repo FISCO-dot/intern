@@ -78,9 +78,6 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 8
-      },
-      {
         "__id__": 9
       }
     ],
@@ -305,14 +302,26 @@
     "customAnimation": [
       {
         "__id__": 7
+      },
+      {
+        "__id__": 8
       }
     ],
-    "_id": "fbN5a2D+JGvb3KMhsQSjgA"
+    "_id": "edE3T/niVMMrPGqcVf0fvf"
   },
   {
     "__type__": "CustomAnimation",
     "SpriteAtlas": {
       "__uuid__": "f45197d1-55b9-4263-a4ea-5f3dddd39cb7"
+    },
+    "duration": 1,
+    "loop": 0,
+    "looptime": 2
+  },
+  {
+    "__type__": "CustomAnimation",
+    "SpriteAtlas": {
+      "__uuid__": "6613036a-906e-4858-b912-8c17f0831f60"
     },
     "duration": 1,
     "loop": 0,
@@ -334,27 +343,5 @@
     "_fitWidth": false,
     "_fitHeight": true,
     "_id": "23B5GcZXdOvYLDg/KP6OCy"
-  },
-  {
-    "__type__": "6d468XvGgBBUr1UmLjeof35",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 2
-    },
-    "_enabled": true,
-    "playOnLoad": 1,
-    "defaultPlay": 0,
-    "customAnimation": {
-      "__id__": 10
-    },
-    "_id": "6cmrmCkStEWp8jJEMbkf6M"
-  },
-  {
-    "__type__": "CustomAnimation",
-    "SpriteAtlas": null,
-    "duration": 1,
-    "loop": 0,
-    "looptime": 1
   }
 ]

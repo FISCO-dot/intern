@@ -1,6 +1,6 @@
 let loopType = cc.Enum({
-    loop: 1,
-    defineTimes: 0,
+    loop: 0,
+    defineTimes: 1,
 });
 
 const {ccclass, property} = cc._decorator;
@@ -10,6 +10,7 @@ export default class CustomAnimation {
 
     @property(cc.SpriteAtlas)
     SpriteAtlas: cc.SpriteAtlas = null
+    
     @property(cc.Float)
     duration : number = 1
     @property({
@@ -20,11 +21,11 @@ export default class CustomAnimation {
     @property({
         type:cc.Integer,
         visible(){
-            return this.loop == 0;
+            return this.loop == 1;
         }
     })
     looptime:number = 1;
-
+    @property({type:cc.Integer})
     _startFrame : number = 0        
      @property({
         type:cc.Integer,
@@ -40,7 +41,7 @@ export default class CustomAnimation {
         this._startFrame = value
     }
 
-
+    @property({type:cc.Integer})
     _endFrame : number = 1
     @property({
         type:cc.Integer,
@@ -54,21 +55,6 @@ export default class CustomAnimation {
     set endFrame(value){
         if(value >= this.SpriteAtlas.getSpriteFrames().length) value = this.SpriteAtlas.getSpriteFrames().length-1
         this._endFrame = value;
-    }
-
-    _frameTag: number = 0
-    @property({
-        type:cc.Integer,
-        min:0,
-        displayName:'Frame Tag'
-    })
-    get frameTag():number{
-        return this._frameTag
-    }
-    set frameTag(value){
-        if(value < this._startFrame) value =this._startFrame
-        if(value > this._endFrame) value = this._endFrame
-        this._frameTag = value;       
     }
 
 

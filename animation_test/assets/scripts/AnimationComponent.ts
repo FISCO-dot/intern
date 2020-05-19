@@ -54,9 +54,11 @@ export default class CustomAnimationComponent extends cc.Component {
     set defaultPlay(v:number){
         this._defaultPlay = v;
         let atlas =this.node.getComponent(cc.Sprite)
-        cc.log('_defa'+this._defaultPlay)
-        cc.log('atlas',this.customAnimation[this._defaultPlay].SpriteAtlas.getSpriteFrames()[this._frameTag].name  )
-        atlas.spriteFrame = this.customAnimation[this._defaultPlay].SpriteAtlas.getSpriteFrames()[this._frameTag]
+        // cc.log('_defa'+this._defaultPlay)
+        // cc.log('atlas',this.customAnimation[this._defaultPlay].SpriteAtlas.getSpriteFrames()[this._frameTag].name  )
+        // atlas.spriteFrame = this.customAnimation[this._defaultPlay].SpriteAtlas.getSpriteFrames()[this._frameTag]
+        this.anim = this.customAnimation[this._defaultPlay]
+        this.frames = this.customAnimation[this._defaultPlay].SpriteAtlas.getSpriteFrames()
     }                                    
     @property(CustomAnimation)                                              
     customAnimation : CustomAnimation[] = []
@@ -75,6 +77,7 @@ export default class CustomAnimationComponent extends cc.Component {
     stopLoopCount :number =1;
 
     onLoad(){
+        
         if(!this.sprite){
             this.sprite = this.addComponent(cc.Sprite);
         }

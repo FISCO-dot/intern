@@ -101,17 +101,22 @@ export default class CustomAnimationComponent extends cc.Component {
             this.playing = true;
         }
     }
-    play( animationIndex:number = 0,beginFrame:number=0,loop:number=0){           //loop = 0为循环，loop >0 为循环次数
+    play( animationIndex:number = 0,beginFrame:number=0,loop:number=0,reverse:boolean = false){           //loop = 0为循环，loop >0 为循环次数
         this.initialize();
         this.sprite = this.getComponent(cc.Sprite);
         this.anim = this.customAnimation[this._defaultPlay]
+        
         this.frames = this.customAnimation[animationIndex].SpriteAtlas.getSpriteFrames()
-        console.log('loop'+loop)
-        this.beginFrame = beginFrame
+        if(reverse == true) {this.frames = this.frames.reverse();cc.log('frame'+this.frames)}
+        
+        this.beginFrame = reverse == false?beginFrame : this.frames.length-1-beginFrame
+        cc.log(this.beginFrame)
+        if(this.beginFrame >= this.frames.length) cc.error('begin Frame too big')
         this.loopTime = loop;
         this.playing = true
         this.start()
     }
+
     stopAnim(frameIndex:number=0,loopCount:number = 1){
         this.seed = true;  
         this.stopFrameIndex = frameIndex;

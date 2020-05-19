@@ -128,8 +128,10 @@ export default class CustomAnimationComponent extends cc.Component {
         this.total_time  = 0;
         this.timesDone = 0;
     }
-
-    resumeAnim(){
+    pause(){
+        this.playing = false
+    }
+    resume(){
         this.playing =true;
     }
     update(dt){

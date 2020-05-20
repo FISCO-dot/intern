@@ -169,15 +169,18 @@ export default class CustomAnimationComponent extends cc.Component {
                 this.index =this.framesToPlay.length-1
                 this.no_frame = true;       
             }
-            // cc.log('index',this.index)
             this.sprite.spriteFrame = this.framesToPlay[this.index]; 
         }
         else{
             if (this.index > this.framesToPlay.length-1){ // 播放完了一边，从index=0开始
                 this.timeLine = 0
                 this.timesDone++
+                this.sprite.spriteFrame = this.framesToPlay[this.index-1]
             }
-            this.sprite.spriteFrame = this.framesToPlay[this.index]
+            
+            else this.sprite.spriteFrame = this.framesToPlay[this.index]
+            cc.log('index',this.index)
+
         }
 
     }

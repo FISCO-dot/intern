@@ -7,7 +7,7 @@ const {ccclass, property,disallowMultiple,playOnFocus,executeInEditMode} = cc._d
 @ccclass
 @disallowMultiple
 @executeInEditMode
-// @playOnFocus
+@playOnFocus
 export default class CustomAnimationComponent extends cc.Component {
     
     @property({type:cc.SpriteFrame})
@@ -54,8 +54,7 @@ export default class CustomAnimationComponent extends cc.Component {
     set defaultPlay(v:number){
         if(v > this.customAnimation.length-1) v = this.customAnimation.length-1;
         this._defaultPlay = v;
-        this.anim = this.customAnimation[this._defaultPlay]
-        this.frames = this.customAnimation[this._defaultPlay]._SpriteAtlas.getSpriteFrames()
+        this.play(this.defaultPlay,1)
     }                                    
     @property(CustomAnimation)                                              
     customAnimation : CustomAnimation[] = []
@@ -65,6 +64,7 @@ export default class CustomAnimationComponent extends cc.Component {
     framesToPlay:cc.SpriteFrame[] = []
     playing : boolean = false;
     total_time : number = 0;
+    timeLine:number = 0;
     anim : CustomAnimation = null;
     timesDone: number = 0;
     loopTime:number=0;
@@ -73,17 +73,17 @@ export default class CustomAnimationComponent extends cc.Component {
     seed :boolean= false;
     stopFrameIndex:number = 0;
     stopLoopCount :number =1;
-
+    loopFrom:number = 0;
     onLoad(){        
         if(!this.sprite){
             this.sprite = this.addComponent(cc.Sprite);
         }
         this.sprite = this.getComponent(cc.Sprite);
         this.anim = this.customAnimation[this._defaultPlay]
-        this.frames = this.anim._SpriteAtlas.getSpriteFrames()
-        this.initializeFrame();
         this.loopTime = this.anim.looptime;
-        this.beginFrame=this.anim._startFrame
+        this.beginFrame=this.anim._startFrame;
+        this.frames = this.anim._SpriteAtlas.getSpriteFrames().slice(this.beginFrame);
+        this.initializeFrame();
         if(this.playOnLoad == 1 )
         {
             this.playing = true;
@@ -93,18 +93,26 @@ export default class CustomAnimationComponent extends cc.Component {
         this.playing = false;
         this.no_frame = false;
         this.total_time  = 0;
+        this.timeLine = 0;
         this.timesDone = 0;
         this.seed = false;
         this.stopFrameIndex = 0;
         this.stopLoopCount  =1;
+        this.framesToPlay = [];
+        this.loopFrom = 0;
     }
     initializeFrame(){
         if (this.frames.length <= 0) {
             this.no_frame = true;
             return;
         }
-        this.sprite.spriteFrame = this.frames[this.beginFrame]; 
-        if(this.loopTime == 0) this.framesToPlay = this.frames
+        // this.sprite.spriteFrame = this.frames[this.beginFrame]; 
+        if(this.loopTime == 0) {
+            this.loopFrom = this.framesToPlay.length
+            
+            this.framesToPlay = this.framesToPlay.concat(this.frames)
+            cc.log('frametoplay'+this.framesToPlay.length)
+        }
         else{
             for(var i = this.loopTime;i>0;i--){
                 this.framesToPlay = this.framesToPlay.concat(this.frames)
@@ -112,26 +120,30 @@ export default class CustomAnimationComponent extends cc.Component {
         }
 
     }
-    play(animationIndex:number = 0,beginFrame:number=0,loop:number=0,reverse:boolean = false){           //loop = 0为循环，loop >0 为循环次数
+    play(animationIndex:number,loop:number,beginFrame:number=0,reverse:boolean = false){           //loop = 0为循环，loop >0 为循环次数
         this.initialize()
-        this.anim = this.customAnimation[animationIndex]        
-        this.frames = this.anim._SpriteAtlas.getSpriteFrames()
-        this.initializeFrame()
-        if(reverse == true) {this.frames = this.frames.reverse();cc.log('frame'+this.frames)}     
-        this.beginFrame = reverse == false?beginFrame : this.frames.length-1-beginFrame
-        if(this.beginFrame >= this.frames.length) cc.error('begin Frame too big')
+        this.anim = this.customAnimation[animationIndex]       
+        if(beginFrame >= this.anim._SpriteAtlas.getSpriteFrames().length) cc.error('begin Frame too big') 
+        this.frames = (!reverse) ? this.anim._SpriteAtlas.getSpriteFrames().slice(beginFrame):this.anim._SpriteAtlas.getSpriteFrames().slice(0,beginFrame).reverse()
+        this.beginFrame = beginFrame;
         this.loopTime = loop
+        this.initializeFrame()
         this.playing = true
     }
-    playAdditive(animation:number,beginFrame:number=0,loop:number=0,reverse:boolean =false){
+    playAdditive(animationIndex:number,loop:number,beginFrame:number=0,reverse:boolean =false){
         if(this.playing == true){
             if(this.loopTime == 0) return
             else{
-
+                if(beginFrame >= this.anim._SpriteAtlas.getSpriteFrames().length) cc.error('begin Frame too big') 
+                this.beginFrame = beginFrame
+                this.loopTime = loop
+                this.anim = this.customAnimation[animationIndex]
+                this.frames = (!reverse) ? this.anim._SpriteAtlas.getSpriteFrames().slice(beginFrame):this.anim._SpriteAtlas.getSpriteFrames().slice(0,beginFrame).reverse()
+                this.initializeFrame()
             }
         }
 
-        else this.play(animation,beginFrame,loop,reverse)
+        else this.play(animationIndex,beginFrame,loop,reverse)
     }
     stop(frameIndex:number=0,loopCount:number = 1){
         this.seed = true;  
@@ -142,43 +154,31 @@ export default class CustomAnimationComponent extends cc.Component {
         this.playing = false
     }
     resume(){
-        this.playing =true;
+        this.playing =true
     }
     update(dt){
-        if(this.seed == true &&this.index == this.stopFrameIndex && this.timesDone == this.stopLoopCount){this.playing = false}    //stop    
+        if(this.seed == true &&(this.index-this.loopFrom) == this.stopFrameIndex && this.timesDone == this.stopLoopCount){this.playing = false}    //stop    
         if (this.no_frame == true || this.playing == false){ 
             return;
         }        
-        this.total_time += dt;
-        this.index = Math.floor(this.total_time / (this.anim.duration/(this.frames.length-1)))+this.beginFrame;
+        this.total_time += dt;               //控制播放时间
+        this.timeLine += dt;                    //控制动画帧
+        this.index = this.timesDone == 0?Math.floor(this.timeLine / (this.anim.duration/(this.frames.length-1))):Math.floor(this.timeLine / (this.anim.duration/(this.frames.length-1)))+this.loopFrom         //当前播放桢
         if (this.loopTime != 0){ 
-            if(this.timesDone < this.loopTime){
-                if (this.index >= this.frames.length-1){ // 播放完了
-                    this.index = this.beginFrame;
-                    this.total_time = 0;
-                    this.timesDone++;
-                    console.log('count '+this.timesDone)
-                }
-                this.sprite.spriteFrame = this.frames[this.index]; 
+            if(this.index > this.framesToPlay.length-1){
+                this.index =this.framesToPlay.length-1
+                this.no_frame = true;       
             }
-            else{
-                this.playing = true;
-                this.no_frame = true;
-            }
+            // cc.log('index',this.index)
+            this.sprite.spriteFrame = this.framesToPlay[this.index]; 
         }
         else{
-            if (this.index >= this.frames.length-1){ // 播放完了
-                this.index = this.beginFrame; 
-                this.total_time = 0;
-                this.timesDone++;
-                console.log('count '+this.timesDone)
-
+            if (this.index > this.framesToPlay.length-1){ // 播放完了一边，从index=0开始
+                this.timeLine = 0
+                this.timesDone++
             }
-         
-            this.sprite.spriteFrame = this.frames[this.index]; 
+            this.sprite.spriteFrame = this.framesToPlay[this.index]
         }
 
     }
-
-
 }

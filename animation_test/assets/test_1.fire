@@ -168,7 +168,7 @@
       "array": [
         0,
         0,
-        269.1183395046843,
+        269.2391966375316,
         0,
         0,
         0,
@@ -258,8 +258,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 145,
-      "height": 158
+      "width": 142,
+      "height": 148
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -304,11 +304,11 @@
     },
     "_enabled": true,
     "_spriteFrame": {
-      "__uuid__": "39f07807-57ad-4b8b-8f28-f743abb66d29"
+      "__uuid__": "65b4e0a0-0b8f-463e-aabc-9db91501b014"
     },
-    "_frameTag": 1,
+    "_frameTag": 3,
     "playOnLoad": 1,
-    "_defaultPlay": 1,
+    "_defaultPlay": 0,
     "customAnimation": [
       {
         "__id__": 7
@@ -321,22 +321,22 @@
   },
   {
     "__type__": "CustomAnimation",
-    "SpriteAtlas": {
+    "_SpriteAtlas": {
       "__uuid__": "6613036a-906e-4858-b912-8c17f0831f60"
     },
     "duration": 1,
-    "loop": 0,
-    "looptime": 6,
+    "loop": 1,
+    "looptime": 1,
     "_startFrame": 0,
     "_endFrame": 3
   },
   {
     "__type__": "CustomAnimation",
-    "SpriteAtlas": {
+    "_SpriteAtlas": {
       "__uuid__": "f45197d1-55b9-4263-a4ea-5f3dddd39cb7"
     },
     "duration": 1,
-    "loop": 0,
+    "loop": 1,
     "looptime": 1,
     "_startFrame": 0,
     "_endFrame": 3
@@ -367,7 +367,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "ef9ba4f4-c7a9-4050-bcbc-4b30bfc008a0"
+      "__uuid__": "65b4e0a0-0b8f-463e-aabc-9db91501b014"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -381,7 +381,7 @@
     "_fillRange": 0,
     "_isTrimmedMode": true,
     "_atlas": {
-      "__uuid__": "f45197d1-55b9-4263-a4ea-5f3dddd39cb7"
+      "__uuid__": "6613036a-906e-4858-b912-8c17f0831f60"
     },
     "_id": "255+UzRklFj4ESLqEI5byi"
   },

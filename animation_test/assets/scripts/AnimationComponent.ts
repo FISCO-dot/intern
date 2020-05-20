@@ -29,7 +29,7 @@ export default class CustomAnimationComponent extends cc.Component {
     get frameTag():number{
         return this._frameTag
     }
-    set frameTag(value:number){
+    set frameTag(value:number){                         //修改frametag预览某一帧的图片
         var def_anim = this.customAnimation[this._defaultPlay]
         if(value < def_anim._startFrame) value =def_anim._startFrame
         if(value > def_anim._endFrame) value = def_anim._endFrame
@@ -51,7 +51,7 @@ export default class CustomAnimationComponent extends cc.Component {
     get defaultPlay():number{
         return this._defaultPlay;
     }
-    set defaultPlay(v:number){
+    set defaultPlay(v:number){                              //修改defalut后播放一次
         if(v > this.customAnimation.length-1) v = this.customAnimation.length-1;
         this._defaultPlay = v;
         this.play(this.defaultPlay,1)
@@ -101,7 +101,7 @@ export default class CustomAnimationComponent extends cc.Component {
         this.framesToPlay = [];
         this.loopFrom = 0;
     }
-    initializeFrame(){
+    initializeFrame(){                      //将图片压入即将播放的队列
         if (this.frames.length <= 0) {
             this.no_frame = true;
             return;
@@ -125,14 +125,14 @@ export default class CustomAnimationComponent extends cc.Component {
         this.anim = this.customAnimation[animationIndex]       
         if(beginFrame >= this.anim._SpriteAtlas.getSpriteFrames().length) cc.error('begin Frame too big') 
         this.frames = (!reverse) ? this.anim._SpriteAtlas.getSpriteFrames().slice(beginFrame):this.anim._SpriteAtlas.getSpriteFrames().slice(0,beginFrame).reverse()
-        this.beginFrame = beginFrame;
+        this.beginFrame = beginFrame
         this.loopTime = loop
         this.initializeFrame()
         this.playing = true
     }
-    playAdditive(animationIndex:number,loop:number,beginFrame:number=0,reverse:boolean =false){
+    playAdditive(animationIndex:number,loop:number,beginFrame:number=0,reverse:boolean =false){  //在播放现有动画后继续播放，如果正在播放的为循环则直接播放后插入的动画
         if(this.playing == true){
-            if(this.loopTime == 0) return
+            if(this.loopTime == 0) this.play(animationIndex,loop,beginFrame,reverse)
             else{
                 if(beginFrame >= this.anim._SpriteAtlas.getSpriteFrames().length) cc.error('begin Frame too big') 
                 this.beginFrame = beginFrame
@@ -145,15 +145,15 @@ export default class CustomAnimationComponent extends cc.Component {
 
         else this.play(animationIndex,beginFrame,loop,reverse)
     }
-    stop(frameIndex:number=0,loopCount:number = 1){
+    stop(frameIndex:number=0,loopCount:number = 1){             //在播放某一遍某一帧后停止
         this.seed = true;  
         this.stopFrameIndex = frameIndex;
         this.stopLoopCount = loopCount;
     }
-    pause(){
+    pause(){                                                    //暂停
         this.playing = false
     }
-    resume(){
+    resume(){                                                   //恢复
         this.playing =true
     }
     update(dt){

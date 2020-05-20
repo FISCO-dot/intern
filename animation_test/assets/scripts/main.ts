@@ -12,7 +12,7 @@ export default class NewClass extends cc.Component {
         var main = this.node.getComponent('AnimationComponent')
         console.log('main'+ main.loopTime)
         main.play(1,3,0,true);
-        // main.stopAnim(1,4)
+        // main.stop(1,4)
     }
 
     // update (dt) {}

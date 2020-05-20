@@ -8,9 +8,18 @@ const {ccclass, property} = cc._decorator;
 @ccclass('CustomAnimation')
 export default class CustomAnimation {
 
-    @property(cc.SpriteAtlas)
-    SpriteAtlas: cc.SpriteAtlas = null
-    
+    @property({type:cc.SpriteAtlas})
+    _SpriteAtlas: cc.SpriteAtlas = null
+    @property({
+        type:cc.SpriteAtlas
+    })
+    get sa(){
+        return this._SpriteAtlas
+    }
+    set sa(v:cc.SpriteAtlas){
+        this._SpriteAtlas = v;
+        this._endFrame = this._SpriteAtlas.getSpriteFrames().length-1
+    }
     @property(cc.Float)
     duration : number = 1
     @property({
@@ -53,7 +62,7 @@ export default class CustomAnimation {
         return this._endFrame;
     }
     set endFrame(value){
-        if(value >= this.SpriteAtlas.getSpriteFrames().length) value = this.SpriteAtlas.getSpriteFrames().length-1
+        if(value >= this._SpriteAtlas.getSpriteFrames().length) value = this._SpriteAtlas.getSpriteFrames().length-1
         this._endFrame = value;
     }
 

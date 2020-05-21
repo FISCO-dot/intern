@@ -29,13 +29,15 @@ export default class CustomAnimationComponent extends cc.Component {
     get frameTag():number{
         return this._frameTag
     }
-    set frameTag(value:number){                         //修改frametag预览某一帧的图片
+    set frameTag(value:number){                         //修改frametag预览某一帧的图片,没有sprite时要先set frametag再set defalutPlay 
         var def_anim = this.customAnimation[this._defaultPlay]
         if(value < def_anim._startFrame) value =def_anim._startFrame
         if(value > def_anim._endFrame) value = def_anim._endFrame
         this._frameTag = value;  
         this._spriteFrame = def_anim._SpriteAtlas.getSpriteFrames()[this._frameTag]
+        this.onLoad();
         this.sprite.spriteFrame = this._spriteFrame
+        cc.log('framg' + this.sprite.spriteFrame.name)
     }
     @property({
         type:cc.Enum(onLoadedType)
@@ -54,6 +56,7 @@ export default class CustomAnimationComponent extends cc.Component {
     set defaultPlay(v:number){                              //修改defalut后播放一次
         if(v > this.customAnimation.length-1) v = this.customAnimation.length-1;
         this._defaultPlay = v;
+        this.onLoad();
         this.play(this.defaultPlay,1)
     }                                    
     @property(CustomAnimation)                                              
@@ -79,10 +82,12 @@ export default class CustomAnimationComponent extends cc.Component {
             this.sprite = this.addComponent(cc.Sprite);
         }
         this.sprite = this.getComponent(cc.Sprite);
+        
         this.anim = this.customAnimation[this._defaultPlay]
         this.loopTime = this.anim.looptime;
         this.beginFrame=this.anim._startFrame;
         this.frames = this.anim._SpriteAtlas.getSpriteFrames().slice(this.beginFrame);
+        this.sprite.spriteFrame = this.frames[this.beginFrame]; 
         this.initializeFrame();
         if(this.playOnLoad == 1 )
         {
@@ -106,7 +111,7 @@ export default class CustomAnimationComponent extends cc.Component {
             this.no_frame = true;
             return;
         }
-        // this.sprite.spriteFrame = this.frames[this.beginFrame]; 
+        
         if(this.loopTime == 0) {
             this.loopFrom = this.framesToPlay.length
             
@@ -177,11 +182,8 @@ export default class CustomAnimationComponent extends cc.Component {
                 this.timesDone++
                 this.sprite.spriteFrame = this.framesToPlay[this.index-1]
             }
-            
             else this.sprite.spriteFrame = this.framesToPlay[this.index]
             cc.log('index',this.index)
-
         }
-
     }
 }

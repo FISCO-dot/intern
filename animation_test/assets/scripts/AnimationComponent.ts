@@ -79,6 +79,7 @@ export default class CustomAnimationComponent extends cc.Component {
     loopFrom:number = 0;
     finished:boolean = false;
     speed:number = 1;
+    frame:number;
     onLoad(){        
         if(!this.sprite){
             this.sprite = this.addComponent(cc.Sprite);
@@ -109,6 +110,7 @@ export default class CustomAnimationComponent extends cc.Component {
         this.loopFrom = 0;
         this.finished = false;
         this.speed = 1;
+        this.frame = null;
     }
     initializeFrame(){                      //将图片压入即将播放的队列
         if (this.frames.length <= 0) {
@@ -208,9 +210,10 @@ export default class CustomAnimationComponent extends cc.Component {
             else this.sprite.spriteFrame = this.framesToPlay[this.index]
             // cc.log('index',this.index)
         }
-        if(this.timeLine % (this.anim.duration/this.speed/(this.frames.length-1)) < 0.1){
+        if(this.frame != this.index){
             this.node.dispatchEvent(new cc.Event.EventCustom('No.'+String(this.index)+' playing',true))   //抛出哪一帧正在播放
-            // cc.log('frame----'+this.index)
+            this.frame = this.index
+            cc.log('frame----'+this.index)
         }
 
     }

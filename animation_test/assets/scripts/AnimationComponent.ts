@@ -77,6 +77,8 @@ export default class CustomAnimationComponent extends cc.Component {
     stopFrameIndex:number = 0;
     stopLoopCount :number =1;
     loopFrom:number = 0;
+    finished:boolean = false;
+    speed:number = 1;
     onLoad(){        
         if(!this.sprite){
             this.sprite = this.addComponent(cc.Sprite);
@@ -105,6 +107,8 @@ export default class CustomAnimationComponent extends cc.Component {
         this.stopLoopCount  =1;
         this.framesToPlay = [];
         this.loopFrom = 0;
+        this.finished = false;
+        this.speed = 1;
     }
     initializeFrame(){                      //将图片压入即将播放的队列
         if (this.frames.length <= 0) {
@@ -114,7 +118,6 @@ export default class CustomAnimationComponent extends cc.Component {
         
         if(this.loopTime == 0) {
             this.loopFrom = this.framesToPlay.length
-            
             this.framesToPlay = this.framesToPlay.concat(this.frames)
             cc.log('frametoplay'+this.framesToPlay.length)
         }
@@ -145,10 +148,29 @@ export default class CustomAnimationComponent extends cc.Component {
                 this.anim = this.customAnimation[animationIndex]
                 this.frames = (!reverse) ? this.anim._SpriteAtlas.getSpriteFrames().slice(beginFrame):this.anim._SpriteAtlas.getSpriteFrames().slice(0,beginFrame).reverse()
                 this.initializeFrame()
+
             }
         }
 
-        else this.play(animationIndex,beginFrame,loop,reverse)
+        else this.play(animationIndex,loop,beginFrame,reverse)
+    }
+    loadAnim(url:string,loop:number,duration:number,beginFrame:number = 0,reverse:boolean=false){           //动态加载资源
+        var anim = new CustomAnimation
+        cc.loader.loadRes(url,cc.SpriteAtlas,(err,atlas)=>{  
+            if(beginFrame >= atlas.getSpriteFrames().length) cc.error('begin Frame too big') 
+            anim.duration = duration;
+            anim._SpriteAtlas = atlas;
+            if(loop) {anim.loop = 1 ;anim.looptime = loop;}
+            else anim.loop = 0;
+            anim._endFrame = atlas.getSpriteFrames().length-1;
+            this.customAnimation.push(anim);
+            this.node.dispatchEvent(new cc.Event.EventCustom('loaded',true))
+            // this.frames = (!reverse) ? atlas.getSpriteFrames().slice(beginFrame):atlas.getSpriteFrames().slice(0,beginFrame).reverse()            
+            // this.beginFrame = beginFrame
+            // this.loopTime = loop
+            // this.initializeFrame()
+            // this.playing = true
+        })
     }
     stop(frameIndex:number=0,loopCount:number = 1){             //在播放某一遍某一帧后停止
         this.seed = true;  
@@ -161,14 +183,18 @@ export default class CustomAnimationComponent extends cc.Component {
     resume(){                                                   //恢复
         this.playing =true
     }
+    speedControl(speed:number){                                    //播放速度控制
+        this.speed =speed;
+    }
     update(dt){
         if(this.seed == true &&(this.index-this.loopFrom) == this.stopFrameIndex && this.timesDone == this.stopLoopCount){this.playing = false}    //stop    
         if (this.no_frame == true || this.playing == false){ 
-            return;
+            if(this.no_frame == true&& this.finished == false) {this.node.dispatchEvent(new cc.Event.EventCustom('finished', true));this.finished = true};
+            return
         }        
         this.total_time += dt;               //控制播放时间
         this.timeLine += dt;                    //控制动画帧
-        this.index = this.timesDone == 0?Math.floor(this.timeLine / (this.anim.duration/(this.frames.length-1))):Math.floor(this.timeLine / (this.anim.duration/(this.frames.length-1)))+this.loopFrom         //当前播放桢
+        this.index = this.timesDone == 0?Math.floor(this.timeLine / (this.anim.duration*this.speed/(this.frames.length-1))):Math.floor(this.timeLine / (this.anim.duration*this.speed/(this.frames.length-1)))+this.loopFrom         //当前播放桢
         if (this.loopTime != 0){ 
             if(this.index > this.framesToPlay.length-1){
                 this.index =this.framesToPlay.length-1
@@ -185,5 +211,6 @@ export default class CustomAnimationComponent extends cc.Component {
             else this.sprite.spriteFrame = this.framesToPlay[this.index]
             cc.log('index',this.index)
         }
+        this.node.dispatchEvent(new cc.Event.EventCustom('No.'+String(this.index)+' playing',true))
     }
 }

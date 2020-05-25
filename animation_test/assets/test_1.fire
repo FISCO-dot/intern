@@ -168,7 +168,7 @@
       "array": [
         0,
         0,
-        269.2391966375316,
+        342.18828767032636,
         0,
         0,
         0,
@@ -304,10 +304,10 @@
     },
     "_enabled": true,
     "_spriteFrame": {
-      "__uuid__": "65b4e0a0-0b8f-463e-aabc-9db91501b014"
+      "__uuid__": "40e8e8bf-bf39-4fec-b85b-924dc3f70395"
     },
-    "_frameTag": 3,
-    "playOnLoad": 1,
+    "_frameTag": 2,
+    "playOnLoad": 0,
     "_defaultPlay": 0,
     "customAnimation": [
       {
@@ -383,7 +383,7 @@
     "_atlas": {
       "__uuid__": "6613036a-906e-4858-b912-8c17f0831f60"
     },
-    "_id": "255+UzRklFj4ESLqEI5byi"
+    "_id": "1186gTkOxAW6kMHpDLSmzD"
   },
   {
     "__type__": "cc.Canvas",

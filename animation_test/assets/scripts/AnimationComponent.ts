@@ -154,28 +154,25 @@ export default class CustomAnimationComponent extends cc.Component {
 
         else this.play(animationIndex,loop,beginFrame,reverse)
     }
-    loadAnim(url:string,loop:number,duration:number,beginFrame:number = 0,reverse:boolean=false){           //动态加载资源
+    loadAnim(url:string,loop:number,duration:number,customFunc?){           //动态加载资源,可自定义回调函数或者调用事件
         var anim = new CustomAnimation
         cc.loader.loadRes(url,cc.SpriteAtlas,(err,atlas)=>{  
-            if(beginFrame >= atlas.getSpriteFrames().length) cc.error('begin Frame too big') 
             anim.duration = duration;
             anim._SpriteAtlas = atlas;
             if(loop) {anim.loop = 1 ;anim.looptime = loop;}
             else anim.loop = 0;
             anim._endFrame = atlas.getSpriteFrames().length-1;
             this.customAnimation.push(anim);
+            customFunc();
             this.node.dispatchEvent(new cc.Event.EventCustom('loaded',true))
-            // this.frames = (!reverse) ? atlas.getSpriteFrames().slice(beginFrame):atlas.getSpriteFrames().slice(0,beginFrame).reverse()            
-            // this.beginFrame = beginFrame
-            // this.loopTime = loop
-            // this.initializeFrame()
-            // this.playing = true
         })
     }
+    
     stop(frameIndex:number=0,loopCount:number = 1){             //在播放某一遍某一帧后停止
         this.seed = true;  
         this.stopFrameIndex = frameIndex;
         this.stopLoopCount = loopCount;
+
     }
     pause(){                                                    //暂停
         this.playing = false
@@ -194,7 +191,7 @@ export default class CustomAnimationComponent extends cc.Component {
         }        
         this.total_time += dt;               //控制播放时间
         this.timeLine += dt;                    //控制动画帧
-        this.index = this.timesDone == 0?Math.floor(this.timeLine / (this.anim.duration*this.speed/(this.frames.length-1))):Math.floor(this.timeLine / (this.anim.duration*this.speed/(this.frames.length-1)))+this.loopFrom         //当前播放桢
+        this.index = this.timesDone == 0?Math.floor(this.timeLine / (this.anim.duration/this.speed/(this.frames.length-1))):Math.floor(this.timeLine / (this.anim.duration*this.speed/(this.frames.length-1)))+this.loopFrom         //当前播放桢
         if (this.loopTime != 0){ 
             if(this.index > this.framesToPlay.length-1){
                 this.index =this.framesToPlay.length-1

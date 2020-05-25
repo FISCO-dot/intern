@@ -18,9 +18,10 @@ export default class NewClass extends cc.Component {
         //     cc.log('-------------------animation is  over----------------')
         // })
         
-        main.loadAnim('/AnimationAtlas/pig',0,1,()=>{
-            cc.log('---------111----------'+main.customAnimation.length)
-        })
+        // main.loadAnim('/AnimationAtlas/pig',0,1,()=>{
+        //     cc.log('---------111----------'+main.customAnimation.length)
+        // })
+        
         // this.node.parent.on(('loaded'),function(event){
         //     cc.log('---------'+main.customAnimation.length+'---------')
         // })

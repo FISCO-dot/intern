@@ -186,7 +186,7 @@ export default class CustomAnimationComponent extends cc.Component {
     update(dt){
         if(this.seed == true &&(this.index-this.loopFrom) == this.stopFrameIndex && this.timesDone == this.stopLoopCount){this.playing = false}    //stop    
         if (this.no_frame == true || this.playing == false){ 
-            if(this.no_frame == true&& this.finished == false) {this.node.dispatchEvent(new cc.Event.EventCustom('finished', true));this.finished = true};
+            if(this.no_frame == true&& this.finished == false) {this.node.dispatchEvent(new cc.Event.EventCustom('finished', true));this.finished = true};//抛出播放完毕事件
             return
         }        
         this.total_time += dt;               //控制播放时间
@@ -206,8 +206,12 @@ export default class CustomAnimationComponent extends cc.Component {
                 this.sprite.spriteFrame = this.framesToPlay[this.index-1]
             }
             else this.sprite.spriteFrame = this.framesToPlay[this.index]
-            cc.log('index',this.index)
+            // cc.log('index',this.index)
         }
-        this.node.dispatchEvent(new cc.Event.EventCustom('No.'+String(this.index)+' playing',true))
+        if(this.timeLine % (this.anim.duration/this.speed/(this.frames.length-1)) < 0.1){
+            this.node.dispatchEvent(new cc.Event.EventCustom('No.'+String(this.index)+' playing',true))   //抛出哪一帧正在播放
+            // cc.log('frame----'+this.index)
+        }
+
     }
 }

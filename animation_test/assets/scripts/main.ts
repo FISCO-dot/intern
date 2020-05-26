@@ -1,8 +1,8 @@
-const {ccclass, property} = cc._decorator;
-
+import {eventCenter} from './AnimationComponent'
+const {ccclass} = cc._decorator;
 @ccclass
 export default class NewClass extends cc.Component {
-
+    
     onLoad () {
         
         
@@ -12,7 +12,10 @@ export default class NewClass extends cc.Component {
         var main = this.node.getComponent('AnimationComponent')
         main.play(1,1);
         main.playAdditive(0,1)
-        main.speedControl(0.5)
+        eventCenter.on('finished',()=>{
+            cc.log('finsished receive')
+        })
+        
         // main.stop(1,4)
         // this.node.parent.on(('finished'),function(event){
         //     cc.log('-------------------animation is  over----------------')

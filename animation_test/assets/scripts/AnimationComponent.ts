@@ -1,8 +1,12 @@
+import * as Ceve from './eventCenter'
 import CustomAnimation from './CustomAnimation'
+let eventCenter = new Ceve.eventCenter()
+export {eventCenter}
 let onLoadedType = cc.Enum({
     autoPlay: 1,
     doNotAutoPlay: 0,
 });
+
 const {ccclass, property,disallowMultiple,playOnFocus,executeInEditMode} = cc._decorator;
 @ccclass
 @disallowMultiple
@@ -61,6 +65,7 @@ export default class CustomAnimationComponent extends cc.Component {
     }                                    
     @property(CustomAnimation)                                              
     customAnimation : CustomAnimation[] = []
+
     sprite: cc.Sprite = null;
     no_frame: boolean = false;
     frames :cc.SpriteFrame[] = []
@@ -80,6 +85,7 @@ export default class CustomAnimationComponent extends cc.Component {
     finished:boolean = false;
     speed:number = 1;
     frame:number;
+    
     onLoad(){        
         if(!this.sprite){
             this.sprite = this.addComponent(cc.Sprite);
@@ -188,7 +194,12 @@ export default class CustomAnimationComponent extends cc.Component {
     update(dt){
         if(this.seed == true &&(this.index-this.loopFrom) == this.stopFrameIndex && this.timesDone == this.stopLoopCount){this.playing = false}    //stop    
         if (this.no_frame == true || this.playing == false){ 
-            if(this.no_frame == true&& this.finished == false) {this.node.dispatchEvent(new cc.Event.EventCustom('finished', true));this.finished = true};//抛出播放完毕事件
+            if(this.no_frame == true&& this.finished == false) {
+                // this.node.dispatchEvent(new cc.Event.EventCustom('finished', true));
+                eventCenter.emit('finished',true)
+                
+                this.finished = true
+            };//抛出播放完毕事件
             return
         }        
         this.total_time += dt;               //控制播放时间
@@ -213,7 +224,7 @@ export default class CustomAnimationComponent extends cc.Component {
         if(this.frame != this.index){
             this.node.dispatchEvent(new cc.Event.EventCustom('No.'+String(this.index)+' playing',true))   //抛出哪一帧正在播放
             this.frame = this.index
-            cc.log('frame----'+this.index)
+            // cc.log('frame----'+this.index)
         }
 
     }

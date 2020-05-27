@@ -1,31 +1,25 @@
 
 
  export class eventCenter {
-    bindFuncList = [];// 
-    
+    bindFuncList = [];              // 以事件名称作为数组索引，二维数组保存回调函数
+    emitList = [];                  // 当没有监听的时候保存事件及传入参数
     /**
-     * bindFuncList结构如下
+     * bindFuncList结构如下：
      * [
      * 'event1':[func1,func2],
-     * 'event2',[func3,func4]
+     * 'event2':[func3,func4]
      * ]
      */
     /**
-     * 当暂时没有监听，或者场景没有初始化的时候，会将提前收到的消息和数据，
-     * 保存到emitList中，结构如下：
+     * emitList结构如下：
      * [
      * 'event1':[args1,args2],
      * 'event2':[args3,args4];
      * ]
      */
-    emitList = [];
-    /**
-     * 设置监听
-     * @param {监听的事件的名字} key 
-     * @param {监听的回调方法} cbFunc 
-     */
+    
     // 设置事件监听
-    on(key,cbFunc){
+    on(key,cbFunc){                     //key -> 监听的事件的名字  cbFunc -> 监听的回调方法
         if (this.bindFuncList[key]){
             this.bindFuncList[key].push(cbFunc);
         }else {
@@ -34,17 +28,13 @@
             this.bindFuncList[key] = ary;
         }
     }
-    /**
-     * 触发事件监听函数
-     * @param {监听的事件的名字} key 
-     * @param {调用时传的参数} args 
-     */
+
     // emit事件，发送消息
-    emit(key,args){
-        var ary = this.bindFuncList[key];
+    emit(key,...args){                      //key->监听的事件的名字   args->调用时传的参数
+        var ary = this.bindFuncList[key];   //取得回调函数
         if(ary){// 如果已经注册了事件，就直接发送消息
             for (var i in ary) {
-                if (ary.hasOwnProperty(i)) {
+                if (ary[i]) {
                     try {
                         ary[i].call(this,args);
                     } catch (error) {
@@ -56,7 +46,7 @@
             if (this.emitList[key]){
                 this.emitList[key].push(args);
             }else {
-                ary = [];
+                ary = [];         //取得传入参数
                 ary.push(args);
                 this.emitList[key] = ary;
             }
@@ -65,15 +55,15 @@
     // emitAll，将所有消息都emit
     emitAll(){
         for (var key in this.emitList) {
-            if (this.emitList.hasOwnProperty(key)) {
+            if (this.emitList[key]) {
                 var emitAry = this.emitList[key];
                 for (var j in emitAry) {
-                    if (emitAry.hasOwnProperty(j)) {
+                    if (emitAry[j] ){
                         var args = emitAry[j];// 去除参数
                         var ary = this.bindFuncList[key];// 去除监听的方法
                         // 开始执行事件
                         for (var iterator in ary) {
-                            if (ary.hasOwnProperty(iterator)) {
+                            if (ary[iterator]) {
                                 try {
                                     ary[iterator].call(this,args);
                                 } catch (error) {

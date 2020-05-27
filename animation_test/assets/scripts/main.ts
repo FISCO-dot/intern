@@ -12,8 +12,8 @@ export default class NewClass extends cc.Component {
         var main = this.node.getComponent('AnimationComponent')
         main.play(1,1);
         main.playAdditive(0,1)
-        eventCenter.on('finished',()=>{
-            cc.log('finsished receive')
+        eventCenter.on('finished',(data)=>{
+            cc.log('finsished receive'+data)
         })
         
         // main.stop(1,4)

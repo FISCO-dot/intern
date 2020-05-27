@@ -196,7 +196,7 @@ export default class CustomAnimationComponent extends cc.Component {
         if (this.no_frame == true || this.playing == false){ 
             if(this.no_frame == true&& this.finished == false) {
                 // this.node.dispatchEvent(new cc.Event.EventCustom('finished', true));
-                eventCenter.emit('finished',true)
+                eventCenter.emit('finished')
                 
                 this.finished = true
             };//抛出播放完毕事件
@@ -222,7 +222,8 @@ export default class CustomAnimationComponent extends cc.Component {
             // cc.log('index',this.index)
         }
         if(this.frame != this.index){
-            this.node.dispatchEvent(new cc.Event.EventCustom('No.'+String(this.index)+' playing',true))   //抛出哪一帧正在播放
+            // this.node.dispatchEvent(new cc.Event.EventCustom('No.'+String(this.index)+' playing',true))   //抛出哪一帧正在播放
+            eventCenter.emit('Frame'+String(this.index))
             this.frame = this.index
             // cc.log('frame----'+this.index)
         }

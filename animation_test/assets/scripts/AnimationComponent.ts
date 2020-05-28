@@ -226,6 +226,7 @@ export default class CustomAnimationComponent extends cc.Component {
             eventCenter.emit('Frame'+String(this.index))
             this.frame = this.index
             // cc.log('frame----'+this.index)
+            
         }
 
     }

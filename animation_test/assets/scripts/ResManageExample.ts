@@ -9,9 +9,9 @@ export default class ResExample extends cc.Component {
     dumpLabel: cc.Label = null;
     onLoad(){
         this.onOwnLoadRes();
-        // this.node.parent.on('mousedown',(event)=>{
-        //     this.onMyUnloadRes()
-        // })
+        this.node.parent.on('mousedown',(event)=>{
+            this.onOwnUnloadRes()
+        })
     }
     start(){
     }
@@ -26,13 +26,16 @@ export default class ResExample extends cc.Component {
 
     onUnloadRes() {
         this.attachNode.removeAllChildren(true);
-        cc.log('jinlaile'+this.attachNode.children.length)
-
         cc.loader.releaseRes("Prefab/HelloWorld");
     }
 
     onMyLoadRes() {
         ResLoader.getInstance().loadRes("Prefab/HelloWorld", cc.Prefab, (error: Error, prefab: cc.Prefab) => {
+            if (!error) {
+                cc.instantiate(prefab).parent = this.attachNode;
+            }
+        });
+        ResLoader.getInstance().loadRes("Prefab/Pig", cc.Prefab, (error: Error, prefab: cc.Prefab) => {
             if (!error) {
                 cc.instantiate(prefab).parent = this.attachNode;
             }
@@ -50,12 +53,19 @@ export default class ResExample extends cc.Component {
             if (!error) {
                 cc.instantiate(prefab).parent = this.attachNode;
             }
+            // MyResLoader.getInstance().getCacheInfo("Prefab/HelloWorld")
         });
-        
+        // MyResLoader.getInstance().loadRes("Prefab/Pig", cc.Prefab, (error: Error, prefab: cc.Prefab) => {
+        //     if (!error) {
+        //         cc.instantiate(prefab).parent = this.attachNode;
+        //     }
+        //     MyResLoader.getInstance().getCacheInfo("Prefab/HelloWorld")
+        // });
     }
     onOwnUnloadRes(){
-        this.attachNode.removeAllChildren(true);
-        ResLoader.getInstance().releaseRes("Prefab/HelloWorld");
+        this.attachNode.removeAllChildren();
+        MyResLoader.getInstance().releaseRes("Prefab/HelloWorld");
+        
     }
     onDump() {
         let Loader:any = cc.loader;

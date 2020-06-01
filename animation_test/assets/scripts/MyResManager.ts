@@ -99,7 +99,7 @@ export default class ResLoader{
                 resArgs.onCompleteCallback(error, resource);               
             }
             console.timeEnd("loadRes|"+resArgs.url);
-            console.log(`before delete ${this._uuidTree.size}`)
+            // console.log(`before delete ${this._uuidTree.size}`)
         }
         let res = cc.loader.getRes(resArgs.url, resArgs.type);
         if (res) {
@@ -117,10 +117,9 @@ export default class ResLoader{
     public releaseRes(url:string,type?:typeof cc.Asset)
     public releaseRes(){
         let resArgs :LoadResArgs = this._makeResArgs.apply(this,arguments)
-        console.time("releaseRes|"+resArgs.url);
+        // console.time("releaseRes|"+resArgs.url);
         let ccloader: any = cc.loader;
         let itemUuid = ccloader._getResUuid(resArgs.url, resArgs.type, false)
-        cc.log('itemUuid----' + itemUuid.length)
         if (!itemUuid || itemUuid.length == 0) {
             console.warn(`releaseRes item is null ${resArgs.url} ${resArgs.type}`);
             return;
@@ -134,7 +133,7 @@ export default class ResLoader{
                 cc.log("resoure ID :" +element + "has released")
             })
         }
-        console.log(`After delete ${this._uuidTree.size}`)
+        // console.log(`After delete ${this._uuidTree.size}`)
     }
 
     /**

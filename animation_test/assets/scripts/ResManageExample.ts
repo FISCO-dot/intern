@@ -7,6 +7,8 @@ export default class ResExample extends cc.Component {
     attachNode: cc.Node = null;
     @property(cc.Label)
     dumpLabel: cc.Label = null;
+
+
     onLoad(){
         this.onOwnLoadRes();
         this.node.parent.on('mousedown',(event)=>{

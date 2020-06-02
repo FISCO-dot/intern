@@ -1,4 +1,8 @@
-
+let layoutType = cc.Enum({
+    x: 0,
+    y: 1,
+    grid:2
+});
 
 const {ccclass, property} = cc._decorator;
 
@@ -40,6 +44,7 @@ export default class CustomScroll extends cc.Component {
         displayName:'Horizontal'
     })
     scrollHorizontal=false
+
     @property({
         type:cc.Integer,
         displayName:'Bar Width'

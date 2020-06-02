@@ -308,9 +308,10 @@
     },
     "viewWidth": 150,
     "pageNum": 5,
-    "height": 80,
+    "height": 30,
     "scrollVertical": true,
     "scrollHorizontal": false,
+    "layoutType": 1,
     "barWidth": 12,
     "_id": "afYtwthplJVa+Ga8FR+0PP"
   },

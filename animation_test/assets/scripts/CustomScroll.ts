@@ -87,7 +87,7 @@ export default class CustomScroll extends cc.Component {
 
         let layout = this.content.addComponent(cc.Layout)
         layout.resizeMode = 1;//container
-
+        layout.affectedByScale = true
         
         //创建scrollbar
         this.node.addChild(this.scrollBar);
@@ -167,11 +167,11 @@ export default class CustomScroll extends cc.Component {
         for(var i = 0;i<length;i++){
           var labelNode = new cc.Node();
           var item = cc.instantiate(this.itemPrefab)
-          if(this.scrollVertical) item.height = this.height
-          if(this.scrollHorizontal) item.width = this.height
           item.addChild(labelNode)
           let itemLabel = labelNode.addComponent(cc.Label)
           itemLabel.string = String(startIndex+i)
+          if(this.scrollVertical) item.scale = this.height /item.height
+          if(this.scrollHorizontal) item.scale = this.height / item.width
           this.content.addChild(item)
       }
       this.createFromIndex += length; 
@@ -192,9 +192,8 @@ export default class CustomScroll extends cc.Component {
         //向下加载数据
         //当开始位置比value_set的长度小则代表没加载完
          if(this.index  < 100 &&
-            this.createFromIndex - this.index <= this.pageNum)//content小于1个PAGE的高度
+            this.createFromIndex - this.index <= this.pageNum)//剩余item数量小于1个PAGE的数量且未显示完就继续加载
         {
-	        //_autoScrolling在引擎源码中负责处理scrollview的滚动动作
             if(scrollView.isAutoScrolling){ //等自动滚动结束后再加载防止滚动过快，直接跳到非常后的位置
                 scrollView.elastic = false; //关闭回弹效果 美观
                 

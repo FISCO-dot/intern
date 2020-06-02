@@ -46,6 +46,13 @@ export default class CustomScroll extends cc.Component {
     scrollHorizontal=false
 
     @property({
+        type:cc.Enum,
+        visible(){
+            return this.scrollHorizontal && this.scrollVertical
+        }
+    })
+    layoutType = layoutType.y
+    @property({
         type:cc.Integer,
         displayName:'Bar Width'
     })
@@ -97,13 +104,13 @@ export default class CustomScroll extends cc.Component {
         scrollView.vertical = this.scrollVertical;
         scrollView.horizontal = this.scrollHorizontal;
         if(this.scrollVertical && this.scrollHorizontal) {
-            this._setVerticleBar(2)
-            layout.type = 3;
+            
+            layout.type = this.layoutType;
             let horizontalBar = cc.instantiate(this.scrollBar)
             this.node.addChild(horizontalBar)
             scrollView.horizontalScrollBar = horizontalBar.getComponent(cc.Scrollbar)
             horizontalBar.getComponent(cc.Scrollbar).direction = 0;
-
+            this._setVerticleBar(2)
 
         }
         else if(this.scrollVertical && !this.scrollHorizontal) {

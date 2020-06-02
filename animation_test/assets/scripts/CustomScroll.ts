@@ -12,17 +12,45 @@ export default class CustomScroll extends cc.Component {
     viewBg :cc.SpriteFrame = null;
     @property(cc.SpriteFrame)
     barBg :cc.SpriteFrame = null;
+    @property(cc.Integer)
+    viewWidth:number = 0
+    @property({
+        type:cc.Integer,
+        min: 0,
+        displayName:'Item Numbers On A Page'
+    })
+    pageNum:number = 8;
+    @property({
+        type:cc.Integer,
+        min: 0,
+        displayName:'Item Length',
+        tooltip:'滚动方向尺寸'
+        
+    })
+    height:number = 80;
+    @property({
+        displayName:'Vertical'
+    })
+    scrollVertical=true
+    @property({
+        displayName:'Horizontal'
+    })
+    scrollHorizontal=false
+    @property({
+        type:cc.Integer,
+        displayName:'Bar Width'
+    })
+    barWidth:number = 12
 
-    view:cc.Node = null;
-    content :cc.Node = null;
-    scrollBar:cc.Node = null;
-    bar:cc.Node = null;
+    view:cc.Node = new cc.Node();
+    content :cc.Node = new cc.Node();
+    scrollBar:cc.Node = new cc.Node();
+    bar:cc.Node = new cc.Node();
 
-    index = 0;
-    createToIndex = 0;
+    index:number = 0;
+    createFromIndex = 0;
     oriY : number = 0;
-    pageNum:number = 0;
-    height:number = 0;
+    
     // LIFE-CYCLE CALLBACKS:
 
 
@@ -30,16 +58,21 @@ export default class CustomScroll extends cc.Component {
         //setparams
         let sprite = this.node.addComponent(cc.Sprite);
         sprite.spriteFrame = this.viewBg;
-
+        this.node.width = 960;
+        this.node.height = 640
         //创建scroll view
         let scrollView = this.node.addComponent(cc.ScrollView);
         this.node.addChild(this.view)
         this.view.addChild(this.content)
+        
         this.view.addComponent(cc.Mask)
-        this.view.width = this.node.width;
-        this.view.height = this.node.height
+        this.view.width = this.viewWidth;
+        
         scrollView.content = this.content;
+        this.content.width = this.viewWidth-this.barWidth
+        this.content.x = -this.barWidth;
         let layout = this.content.addComponent(cc.Layout)
+        layout.resizeMode = 1;//container
 
         
         //创建scrollbar
@@ -47,95 +80,129 @@ export default class CustomScroll extends cc.Component {
         let barComponent= this.scrollBar.addComponent(cc.Scrollbar)
         scrollView.verticalScrollBar = barComponent
         this.scrollBar.addChild(this.bar);
-        let barWidget = this.scrollBar.addComponent(cc.Widget)
-        barWidget.isAlignBottom = true;
-        barWidget.isAlignTop = true;
-        barWidget.isAlignRight = true;
-        barWidget.top = 0;
-        barWidget.right = 0;
-        barWidget.bottom = 0;
-
-
-        //setparams
-        this.pageNum = 8;
-
-            //vertical =1
-        scrollView.vertical = true;
-        barComponent.direction = 1;
-        layout.type = 1
-            //bar params
-        this.scrollBar.width = 12;
         let barSprite = this.bar.addComponent(cc.Sprite)
-        barSprite.spriteFrame = null;
+        barSprite.spriteFrame = this.barBg;
         barComponent.handle = barSprite
-            //layout params :container = 1
-        layout.resizeMode = 1
-        layout.spacingY = 20;
-        layout.paddingTop = 0;
-        layout.paddingBottom = 0;
+         
+        //setparams
+
+        //direction
+        scrollView.vertical = this.scrollVertical;
+        scrollView.horizontal = this.scrollHorizontal;
+        if(this.scrollVertical && this.scrollHorizontal) {
+            this._setVerticleBar(2)
+            layout.type = 3;
+            let horizontalBar = cc.instantiate(this.scrollBar)
+            this.node.addChild(horizontalBar)
+            scrollView.horizontalScrollBar = horizontalBar.getComponent(cc.Scrollbar)
+            horizontalBar.getComponent(cc.Scrollbar).direction = 0;
+
+
+        }
+        else if(this.scrollVertical && !this.scrollHorizontal) {
+            this.content.height = this.pageNum*this.height
+            this.view.height = this.content.height
+            layout.type = 2;
+            barComponent.direction = 1;
+            layout.spacingY = 0;
+            layout.paddingTop = 0;
+            layout.paddingBottom = 0;
+            this._setVerticleBar(1)
+        }
+        else if(!this.scrollVertical && this.scrollHorizontal) {
+            this.content.width = this.pageNum*this.height
+            this.view.width = this.content.width
+            layout.type = 1;
+            barComponent.direction = 0;
+            layout.spacingX = 0;
+            layout.paddingLeft = 0;
+            layout.paddingRight = 0;
+            this._setVerticleBar(0)
+        }
+        else layout.type = 0;
+
+        //bar params
+
+        
 
     }
+
     start(){
-        this.index = 0;
-        this.createToIndex = 0;
+        this.createFromIndex = 0;
+        this._createItem(this.createFromIndex);
+        this.content.setPosition(0,-this.content.height)
         this.oriY = this.content.position.y
-        this._createItem(this.createToIndex);
     }
     private _createItem(startIndex:number){
-        for(var i = 0;i<this.pageNum*3;i++){
+
+        if(startIndex + this.pageNum * 3>100)
+        {
+            //超过数据范围的长度
+            var length = 100-startIndex;
+        }
+        else var length = 3*this.pageNum
+        for(var i = 0;i<length;i++){
+          var labelNode = new cc.Node();
           var item = cc.instantiate(this.itemPrefab)
-          var itemLabel = item.addComponent(cc.Label)
+          item.height = this.height
+          item.addChild(labelNode)
+          let itemLabel = labelNode.addComponent(cc.Label)
           itemLabel.string = String(startIndex+i)
           this.content.addChild(item)
       }
+      this.createFromIndex += length; 
+      this.content.y -= length /2 *this.height;
+      this.oriY -= length /2 *this.height;
+      cc.log(`jinlail----index${this.index}lentth${length}`)
     }
     private _loadScrollRecord(){
+        let scrollView = this.node.getComponent(cc.ScrollView)
+        this.index = Math.floor((this.content.position.y-this.oriY) / this.height)
+
         //向下加载数据
         //当开始位置比value_set的长度小则代表没加载完
-         if(this.index + this.pageNum * 3 < 100 &&
-          this.star-this.index  <  this.pageNum>)//content超过2个PAGE的高度
+         if(this.index  < 100 &&
+            this.createFromIndex - this.index <= this.pageNum)//content小于1个PAGE的高度
         {
 	        //_autoScrolling在引擎源码中负责处理scrollview的滚动动作
-            if(this.scrollView.isAutoScrolling){ //等自动滚动结束后再加载防止滚动过快，直接跳到非常后的位置
-                this.scrollView.elastic = false; //关闭回弹效果 美观
-                return;
+            if(scrollView.isAutoScrolling){ //等自动滚动结束后再加载防止滚动过快，直接跳到非常后的位置
+                scrollView.elastic = false; //关闭回弹效果 美观
+                
             }
             var down_loaded = this.pageNum; 
-            this.startIndex += down_loaded;
-            
-            if(this.startIndex + this.pageNum * 3>this.valueSet.length)
-            {
-                //超过数据范围的长度
-                var out_len = this.startIndex + this.pageNum * 3 - this.valueSet.length;
-                down_loaded -= out_len;
-                this.startIndex -= out_len;
-            }
-            this.load_recode(this.startIndex);
-            this.content.position.y -= down_loaded * this.high;
+            this._createItem(this.createFromIndex);
+
             return;
         }
-        //向上加载
-        if(this.startIndex>0 && this.content.position.y<=this.startY)
-        {
-            if(this.scrollView.isAutoScrolling){ 
-                this.scrollView.elastic = false;
-                return;
-             }
-            var up_loaded = this.pageNum;
-            this.startIndex -= up_loaded;
-            if(this.startIndex<0){
-                up_loaded +=this.startIndex;
-                this.startIndex=0;
-            }
-            this.load_recode(this.startIndex);
-            this.content.position.y += up_loaded * this.high;
-        }
+
     }
     public setScrollViewParams(bg,width,height,direction,prefab){
 
     }
 
-    public set
+    private _setVerticleBar(direction:number){
+        //bar params
+        if(direction == 1)
+        {
+            this.scrollBar.x = this.viewWidth/2
+            this.scrollBar.height = this.view.height
+            this.scrollBar.width = this.barWidth;
+        }
+        else if(direction == 0 ){
+            this.scrollBar.y = this.view.height
+            this.scrollBar.height = this.barWidth
+            this.scrollBar.width = this.viewWidth
+       }
+       else{
 
-    // update (dt) {}
+       }
+
+    }
+
+    
+
+    update (dt) {
+        this._loadScrollRecord();
+        // cc.log('------+++'+this.index)
+    }
 }

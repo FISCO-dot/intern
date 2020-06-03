@@ -96,6 +96,7 @@ export default class CustomScroll extends cc.Component {
         this.node.height = 640
         //创建scroll view
         let scrollView = this.node.addComponent(cc.ScrollView);
+        scrollView.elastic =true
         scrollView.bounceDuration = 0.1
         this.node.addChild(this.view)
         this.view.addComponent(cc.Sprite).spriteFrame = this.viewBg
@@ -110,8 +111,7 @@ export default class CustomScroll extends cc.Component {
         layout.resizeMode = 1;//children
         layout.affectedByScale = true
         
-        //创建scrollbar
-        this._setBar();
+
         
         //direction
         scrollView.vertical = this.scrollVertical;
@@ -162,18 +162,20 @@ export default class CustomScroll extends cc.Component {
         this._createItem(this.createFromIndex);
 
         this.content.setPosition(this.content.width/2-this.viewWidth/2,-(this.content.height/2-this.viewHeight/2))
-        cc.log('weishaa'+this.content.y)
+        //创建scrollbar
+        this._setBar();
         this.oriY = this.content.position.y
         this.oriX = this.content.position.x
     }
     private _createItem(startIndex:number){
 
-        if(startIndex + (this.pageNumX * this.pageNumY) * 3> this.itemNumX * this.itemNumY)
+        if(startIndex + (this.pageNumX * this.pageNumY) * 4> this.itemNumX * this.itemNumY)
         {
             //超过数据范围的长度
             var length = this.itemNumX * this.itemNumY - startIndex;
         }
-        else var length = 3*(this.pageNumX * this.pageNumY)
+
+        else var length = 4*(this.pageNumX * this.pageNumY)
         
         for(var i = 0;i<length;i++){
             var labelNode = new cc.Node();
@@ -184,8 +186,10 @@ export default class CustomScroll extends cc.Component {
             item.scaleX = this.width / item.width
             item.scaleY = this.height / item.height
             this.content.addChild(item)
-            this.content.getComponent(cc.Layout).updateLayout()
+            
+            
         }
+        this.content.getComponent(cc.Layout).updateLayout()
         // cc.log(`width====${this.content.width}heigth===${this.content.height}`)
         this.createFromIndex += length; 
         if(this.itemNumY > 1){//itemNumY =1 时不改变y的位置
@@ -194,15 +198,18 @@ export default class CustomScroll extends cc.Component {
         }
 
         //先排x后排y，因此超过了itemx就不用更改x位置了
-        if(startIndex < this.itemNumX -1){
-            cc.log(`index${this.index}lentth${length}itemX${this.itemNumX}`)
-            if(startIndex + length < this.itemNumX-1){
+        if(startIndex <= this.itemNumX -1){
+            if(startIndex + length < this.itemNumX -1){
+                cc.log(`index${this.index}lentth${length}itemX${this.itemNumX}`)
+                cc.log('11111')
                 this.content.x += length  *this.width / 2;
                 this.oriX += length  *this.width/2;
             }
             else{
+                cc.log('2222')
                 this.content.x += ((this.itemNumX) - startIndex)  *this.width/2;
-                this.oriX += (this.itemNumX  - startIndex)  *this.width/2;
+                this.oriX =  this.content.x
+                
             }
         }
         
@@ -217,12 +224,13 @@ export default class CustomScroll extends cc.Component {
         this.node.emit(`roll schedule ${this.index}`)   //抛出滚动进度事件
         //向下加载数据
         //当开始位置比总的长度小则代表没加载完
-         if(this.createFromIndex  < (this.itemNumX * this.itemNumY)  &&
-            (this.createFromIndex -1 - this.index <= (this.itemNumX * this.pageNumY))  )//剩余item数量小于1个PAGE的数量且未显示完就继续加载，由于是按行加载，对列数多的缓冲效果没有对行多的好
+         if(this.createFromIndex  < (this.itemNumX * this.itemNumY)    &&
+         (this.createFromIndex -1 - this.index <= 2*(this.itemNumX * this.pageNumY)) )//剩余item数量小于1个PAGE的数量且未显示完就继续加载，由于是按行加载，对列数多的缓冲效果没有对行多的好
         {
 
             this._createItem(this.createFromIndex);
-            return;
+            cc.log(`width${this.content.width}x${this.content.x}`)
+
         }
         if(this.index <=0) scrollView.elastic = false;
 
@@ -243,8 +251,10 @@ export default class CustomScroll extends cc.Component {
             let barSprite = bar.addComponent(cc.Sprite)
             barSprite.spriteFrame = this.barBg;
             barComponent.handle = barSprite
+
             ScrollbarX.x = 0
-            ScrollbarX.y = -this.view.height/2
+            ScrollbarX.y = this.itemNumY>1? -this.view.height/2:(this.view.height-this.content.height)/2-this.height/2
+            cc.log('viewheight'+this.view.height)
             ScrollbarX.height = this.barWidth
             ScrollbarX.width = this.view.width;
         }
@@ -259,7 +269,7 @@ export default class CustomScroll extends cc.Component {
             let barSprite = bar.addComponent(cc.Sprite)
             barSprite.spriteFrame = this.barBg;
             barComponent.handle = barSprite
-            ScrollbarY.x = this.view.width/2
+            ScrollbarY.x = this.itemNumX>1? this.view.width/2:this.content.width/2-this.viewWidth/2+this.width/2
             ScrollbarY.y = 0
             ScrollbarY.height = this.view.height
             ScrollbarY.width = this.barWidth

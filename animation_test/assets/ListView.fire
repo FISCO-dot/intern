@@ -306,12 +306,12 @@
     "barBg": {
       "__uuid__": "1a32fc76-f0bd-4f66-980f-56929c0ca0b3"
     },
-    "scrollVertical": true,
+    "scrollVertical": false,
     "scrollHorizontal": true,
     "viewWidth": 300,
     "viewHeight": 300,
-    "itemNumY": 50,
-    "itemNumX": 50,
+    "itemNumY": 30,
+    "itemNumX": 30,
     "height": 80,
     "width": 80,
     "barWidth": 12,

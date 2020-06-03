@@ -297,9 +297,6 @@
       "__id__": 5
     },
     "_enabled": true,
-    "test": {
-      "__uuid__": "d9507eef-deba-49fa-b3e0-ee0573131dd2"
-    },
     "itemPrefab": {
       "__uuid__": "34d3d76f-69d5-4969-989f-e0addfa1f8fd"
     },
@@ -310,7 +307,7 @@
       "__uuid__": "1a32fc76-f0bd-4f66-980f-56929c0ca0b3"
     },
     "scrollVertical": true,
-    "scrollHorizontal": false,
+    "scrollHorizontal": true,
     "viewWidth": 300,
     "viewHeight": 300,
     "itemNumY": 50,

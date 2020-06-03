@@ -252,8 +252,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 500,
-      "height": 500
+      "width": 960,
+      "height": 640
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -297,6 +297,9 @@
       "__id__": 5
     },
     "_enabled": true,
+    "test": {
+      "__uuid__": "d9507eef-deba-49fa-b3e0-ee0573131dd2"
+    },
     "itemPrefab": {
       "__uuid__": "34d3d76f-69d5-4969-989f-e0addfa1f8fd"
     },
@@ -306,12 +309,14 @@
     "barBg": {
       "__uuid__": "1a32fc76-f0bd-4f66-980f-56929c0ca0b3"
     },
-    "viewWidth": 150,
-    "pageNum": 5,
-    "height": 30,
     "scrollVertical": true,
     "scrollHorizontal": false,
-    "layoutType": 1,
+    "viewWidth": 300,
+    "viewHeight": 300,
+    "itemNumY": 50,
+    "itemNumX": 50,
+    "height": 80,
+    "width": 80,
     "barWidth": 12,
     "_id": "afYtwthplJVa+Ga8FR+0PP"
   },

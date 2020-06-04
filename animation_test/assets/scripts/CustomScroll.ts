@@ -95,60 +95,18 @@ export default class CustomScroll extends cc.Component {
         this.node.width = 960;
         this.node.height = 640
         //创建scroll view
-        let scrollView = this.node.addComponent(cc.ScrollView);
-        scrollView.elastic =true
-        scrollView.bounceDuration = 0.1
-        this.node.addChild(this.view)
-        this.view.addComponent(cc.Sprite).spriteFrame = this.viewBg
-        this.view.addChild(this.content)
-        this.view.addComponent(cc.Mask)
-        this.view.width = this.viewWidth
-        this.view.height = this.viewHeight
-        this.view.setPosition(0,0)
-        scrollView.content = this.content;
+        this._setScrollView();
+        //设置layout
+        this._setLayout();
+        //创建scrollbar
+        this._setBar();
 
-        let layout = this.content.addComponent(cc.Layout)
-        layout.resizeMode = 1;//children
-        layout.affectedByScale = true
         
 
         
         //direction
-        scrollView.vertical = this.scrollVertical;
-        scrollView.horizontal = this.scrollHorizontal;
-        if(this.scrollVertical||this.scrollHorizontal){
-            if(!this.scrollVertical) {
-                layout.type = 1;
-                layout.spacingX = 0;
-                layout.paddingLeft = 0;
-                layout.paddingRight = 0;
-            }
-            else if(!this.scrollHorizontal){
-                layout.type = 2
-                layout.spacingY = 0;
-                layout.paddingTop = 0;
-                layout.paddingBottom = 0;
-            }
-            else{
-                layout.type = 3
-                layout.startAxis = 0//行多horizontal列多verticle  
-                layout.cellSize.height = this.height;
-                layout.cellSize.width = this.width;
-                layout.startAxis = 0;
-                layout.spacingX = 0;
-                layout.paddingLeft = 0;
-                layout.paddingRight = 0;
-                layout.spacingY = 0;
-                layout.paddingTop = 0;
-                layout.paddingBottom = 0;
-                this.content.width = this.width * this.itemNumX
-                this.content.height = this.height * this.itemNumY
-                cc.log(`JINLAIle--width====${this.content.width}heigth===${this.content.height}`)
-            }
-        }
-        else{
-            layout.type = 0;
-        }
+
+        
 
 
     }
@@ -157,13 +115,11 @@ export default class CustomScroll extends cc.Component {
     start(){
         this.pageNumX = this.scrollHorizontal? Math.floor(this.view.width/this.width):1;
         this.pageNumY = this.scrollVertical? Math.floor(this.view.height/this.height):1;
-
+        //初始化单元
         this.createFromIndex = 0;
         this._createItem(this.createFromIndex);
-
         this.content.setPosition(this.content.width/2-this.viewWidth/2,-(this.content.height/2-this.viewHeight/2))
-        //创建scrollbar
-        this._setBar();
+        //设置参考位置
         this.oriY = this.content.position.y
         this.oriX = this.content.position.x
     }
@@ -194,7 +150,7 @@ export default class CustomScroll extends cc.Component {
         this.createFromIndex += length; 
         if(this.itemNumY > 1){//itemNumY =1 时不改变y的位置
             this.content.y -= (Math.floor((startIndex + length+1) / this.itemNumX) - Math.floor((startIndex+1) / this.itemNumX)) *this.height / 2;
-            this.oriY -= (Math.floor((startIndex + length+1) / this.itemNumX) - Math.floor((startIndex + 1)/ this.itemNumX)) * this.height / 2;
+            this.oriY = this.content.y
         }
 
         //先排x后排y，因此超过了itemx就不用更改x位置了
@@ -203,7 +159,7 @@ export default class CustomScroll extends cc.Component {
                 cc.log(`index${this.index}lentth${length}itemX${this.itemNumX}`)
                 cc.log('11111')
                 this.content.x += length  *this.width / 2;
-                this.oriX += length  *this.width/2;
+                this.oriX = this.content.x
             }
             else{
                 cc.log('2222')
@@ -279,5 +235,59 @@ export default class CustomScroll extends cc.Component {
 
     update (dt) {
         this._loadScrollRecord();
+    }
+
+    private _setScrollView(){
+        let scrollView = this.node.addComponent(cc.ScrollView);
+        scrollView.elastic =true
+        scrollView.bounceDuration = 0.1
+        this.node.addChild(this.view)
+        this.view.addComponent(cc.Sprite).spriteFrame = this.viewBg
+        this.view.addChild(this.content)
+        this.view.addComponent(cc.Mask)
+        this.view.width = this.viewWidth
+        this.view.height = this.viewHeight
+        this.view.setPosition(0,0)
+        scrollView.content = this.content;
+        scrollView.vertical = this.scrollVertical;
+        scrollView.horizontal = this.scrollHorizontal;
+    }
+    private _setLayout(){
+        let layout = this.content.addComponent(cc.Layout)
+        layout.resizeMode = 1;//children
+        layout.affectedByScale = true
+        if(this.scrollVertical||this.scrollHorizontal){
+            if(!this.scrollVertical) {
+                layout.type = 1;
+                layout.spacingX = 0;
+                layout.paddingLeft = 0;
+                layout.paddingRight = 0;
+            }
+            else if(!this.scrollHorizontal){
+                layout.type = 2
+                layout.spacingY = 0;
+                layout.paddingTop = 0;
+                layout.paddingBottom = 0;
+            }
+            else{
+                layout.type = 3
+                layout.startAxis = 0//行多horizontal列多verticle  
+                layout.cellSize.height = this.height;
+                layout.cellSize.width = this.width;
+                layout.startAxis = 0;
+                layout.spacingX = 0;
+                layout.paddingLeft = 0;
+                layout.paddingRight = 0;
+                layout.spacingY = 0;
+                layout.paddingTop = 0;
+                layout.paddingBottom = 0;
+                this.content.width = this.width * this.itemNumX
+                this.content.height = this.height * this.itemNumY
+                cc.log(`JINLAIle--width====${this.content.width}heigth===${this.content.height}`)
+            }
+        }
+        else{
+            layout.type = 0;
+        }
     }
 }

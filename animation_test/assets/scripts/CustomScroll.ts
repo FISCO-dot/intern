@@ -1,8 +1,9 @@
 
 
-const {ccclass, property} = cc._decorator;
+const {ccclass, property,requireComponent} = cc._decorator;
 
 @ccclass
+// @requireComponent(cc.ScrollView)
 export default class CustomScroll extends cc.Component {
 
 
@@ -99,15 +100,8 @@ export default class CustomScroll extends cc.Component {
         //设置layout
         this._setLayout();
         //创建scrollbar
-        this._setBar();
-
-        
-
-        
+        this._setBar();  
         //direction
-
-        
-
 
     }
     
@@ -119,6 +113,8 @@ export default class CustomScroll extends cc.Component {
         this.createFromIndex = 0;
         this._createItem(this.createFromIndex);
         this.content.setPosition(this.content.width/2-this.viewWidth/2,-(this.content.height/2-this.viewHeight/2))
+
+
         //设置参考位置
         this.oriY = this.content.position.y
         this.oriX = this.content.position.x
@@ -148,27 +144,28 @@ export default class CustomScroll extends cc.Component {
         this.content.getComponent(cc.Layout).updateLayout()
         // cc.log(`width====${this.content.width}heigth===${this.content.height}`)
         this.createFromIndex += length; 
-        if(this.itemNumY > 1){//itemNumY =1 时不改变y的位置
-            this.content.y -= (Math.floor((startIndex + length+1) / this.itemNumX) - Math.floor((startIndex+1) / this.itemNumX)) *this.height / 2;
-            this.oriY = this.content.y
-        }
-
-        //先排x后排y，因此超过了itemx就不用更改x位置了
-        if(startIndex <= this.itemNumX -1){
-            if(startIndex + length < this.itemNumX -1){
-                cc.log(`index${this.index}lentth${length}itemX${this.itemNumX}`)
-                cc.log('11111')
-                this.content.x += length  *this.width / 2;
-                this.oriX = this.content.x
+        if(!(this.scrollVertical && this.scrollHorizontal))  {
+            if(this.itemNumY > 1){//itemNumY =1 时不改变y的位置
+                this.content.y -= (Math.floor((startIndex + length+1) / this.itemNumX) - Math.floor((startIndex+1) / this.itemNumX)) *this.height / 2;
+                this.oriY = this.content.y
             }
-            else{
-                cc.log('2222')
-                this.content.x += ((this.itemNumX) - startIndex)  *this.width/2;
-                this.oriX =  this.content.x
-                
+    
+            //先排x后排y，因此超过了itemx就不用更改x位置了
+            if(startIndex <= this.itemNumX -1){
+                if(startIndex + length < this.itemNumX -1){
+                    cc.log(`index${this.index}lentth${length}itemX${this.itemNumX}`)
+                    cc.log('11111')
+                    this.content.x += length  *this.width / 2;
+                    this.oriX = this.content.x
+                }
+                else{
+                    cc.log('2222')
+                    this.content.x += ((this.itemNumX) - startIndex)  *this.width/2;
+                    this.oriX =  this.content.x
+                    
+                }
             }
-        }
-        
+        }   
     }
     private _loadScrollRecord(){
         let scrollView = this.node.getComponent(cc.ScrollView)
@@ -254,7 +251,7 @@ export default class CustomScroll extends cc.Component {
     }
     private _setLayout(){
         let layout = this.content.addComponent(cc.Layout)
-        layout.resizeMode = 1;//children
+        layout.resizeMode = 1;//container
         layout.affectedByScale = true
         if(this.scrollVertical||this.scrollHorizontal){
             if(!this.scrollVertical) {
@@ -271,6 +268,7 @@ export default class CustomScroll extends cc.Component {
             }
             else{
                 layout.type = 3
+                layout.resizeMode =2 ;
                 layout.startAxis = 0//行多horizontal列多verticle  
                 layout.cellSize.height = this.height;
                 layout.cellSize.width = this.width;

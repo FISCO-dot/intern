@@ -310,15 +310,15 @@
       "__uuid__": "e7aba14b-f956-4480-b254-8d57832e273f"
     },
     "scrollVertical": true,
-    "scrollHorizontal": false,
+    "scrollHorizontal": true,
     "viewWidth": 300,
     "viewHeight": 300,
     "itemNumY": 100,
-    "itemNumX": 40,
+    "itemNumX": 50,
     "height": 80,
     "width": 80,
     "barWidth": 12,
-    "_id": "afYtwthplJVa+Ga8FR+0PP"
+    "_id": "ddKBd6CJdDNKgHV++1vVlX"
   },
   {
     "__type__": "cc.Canvas",

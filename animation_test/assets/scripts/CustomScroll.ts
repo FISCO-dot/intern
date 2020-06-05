@@ -4,7 +4,7 @@ const {ccclass, property,requireComponent} = cc._decorator;
 
 @ccclass
 // @requireComponent(cc.ScrollView)
-export default class CustomScroll extends cc.Component {
+export default class List extends cc.Component {
 
 
     @property(cc.Prefab)
@@ -85,7 +85,7 @@ export default class CustomScroll extends cc.Component {
     oriY : number = 0;
     oriX : number = 0;
     // LIFE-CYCLE CALLBACKS:
-    
+    public
 
     onLoad () {
         //setparams
@@ -104,8 +104,6 @@ export default class CustomScroll extends cc.Component {
         //direction
 
     }
-    
-
     start(){
         this.pageNumX = this.scrollHorizontal? Math.floor(this.view.width/this.width):1;
         this.pageNumY = this.scrollVertical? Math.floor(this.view.height/this.height):1;
@@ -113,21 +111,19 @@ export default class CustomScroll extends cc.Component {
         this.createFromIndex = 0;
         this._createItem(this.createFromIndex);
         this.content.setPosition(this.content.width/2-this.viewWidth/2,-(this.content.height/2-this.viewHeight/2))
-
-
         //设置参考位置
         this.oriY = this.content.position.y
         this.oriX = this.content.position.x
     }
     private _createItem(startIndex:number){
 
-        if(startIndex + (this.pageNumX * this.pageNumY) * 4> this.itemNumX * this.itemNumY)
+        if(startIndex + (this.pageNumX * this.pageNumY) * 3> this.itemNumX * this.itemNumY)
         {
             //超过数据范围的长度
             var length = this.itemNumX * this.itemNumY - startIndex;
         }
 
-        else var length = 4*(this.pageNumX * this.pageNumY)
+        else var length = 3 *(this.pageNumX * this.pageNumY)
         
         for(var i = 0;i<length;i++){
             var labelNode = new cc.Node();
@@ -138,16 +134,14 @@ export default class CustomScroll extends cc.Component {
             item.scaleX = this.width / item.width
             item.scaleY = this.height / item.height
             this.content.addChild(item)
-            
-            
         }
         this.content.getComponent(cc.Layout).updateLayout()
         // cc.log(`width====${this.content.width}heigth===${this.content.height}`)
         this.createFromIndex += length; 
         if(!(this.scrollVertical && this.scrollHorizontal))  {
             if(this.itemNumY > 1){//itemNumY =1 时不改变y的位置
-                this.content.y -= (Math.floor((startIndex + length+1) / this.itemNumX) - Math.floor((startIndex+1) / this.itemNumX)) *this.height / 2;
-                this.oriY = this.content.y
+                this.content.y -= ((Math.floor((startIndex + length+1) / this.itemNumX) - Math.floor((startIndex+1) / this.itemNumX)) *this.height / 2);
+                this.oriY -= ((Math.floor((startIndex + length+1) / this.itemNumX) - Math.floor((startIndex+1) / this.itemNumX)) *this.height / 2)
             }
     
             //先排x后排y，因此超过了itemx就不用更改x位置了
@@ -156,16 +150,17 @@ export default class CustomScroll extends cc.Component {
                     cc.log(`index${this.index}lentth${length}itemX${this.itemNumX}`)
                     cc.log('11111')
                     this.content.x += length  *this.width / 2;
-                    this.oriX = this.content.x
+                    this.oriX += length  *this.width / 2
                 }
                 else{
                     cc.log('2222')
                     this.content.x += ((this.itemNumX) - startIndex)  *this.width/2;
-                    this.oriX =  this.content.x
+                    this.oriX +=  ((this.itemNumX) - startIndex)  *this.width/2
                     
                 }
             }
-        }   
+        }  
+         
     }
     private _loadScrollRecord(){
         let scrollView = this.node.getComponent(cc.ScrollView)
@@ -178,7 +173,7 @@ export default class CustomScroll extends cc.Component {
         //向下加载数据
         //当开始位置比总的长度小则代表没加载完
          if(this.createFromIndex  < (this.itemNumX * this.itemNumY)    &&
-         (this.createFromIndex -1 - this.index <= 2*(this.itemNumX * this.pageNumY)) )//剩余item数量小于1个PAGE的数量且未显示完就继续加载，由于是按行加载，对列数多的缓冲效果没有对行多的好
+         (this.createFromIndex -1 - this.index <= 2*(this.pageNumX * this.pageNumY)) )//剩余item数量小于1个PAGE的数量且未显示完就继续加载，由于是按行加载，对列数多的缓冲效果没有对行多的好
         {
 
             this._createItem(this.createFromIndex);
@@ -204,7 +199,6 @@ export default class CustomScroll extends cc.Component {
             let barSprite = bar.addComponent(cc.Sprite)
             barSprite.spriteFrame = this.barBg;
             barComponent.handle = barSprite
-
             ScrollbarX.x = 0
             ScrollbarX.y = this.itemNumY>1? -this.view.height/2:(this.view.height-this.content.height)/2-this.height/2
             cc.log('viewheight'+this.view.height)

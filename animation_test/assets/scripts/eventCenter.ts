@@ -1,6 +1,6 @@
 
 
- export class eventCenter {
+ export class eventCenter extends cc.Component{
     bindFuncList = [];              // 以事件名称作为数组索引，二维数组保存回调函数
     emitList = [];                  // 当没有监听的时候保存事件及传入参数
     /**
@@ -30,7 +30,7 @@
     }
 
     // emit事件，发送消息
-    emit(key,...args){                      //key->监听的事件的名字   args->调用时传的参数
+    emit(key:string,...args){                      //key->监听的事件的名字   args->调用时传的参数
         var ary = this.bindFuncList[key];   //取得回调函数
         if(ary){// 如果已经注册了事件，就直接发送消息
             for (var i in ary) {

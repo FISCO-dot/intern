@@ -1,7 +1,9 @@
 
 
 const {ccclass, property,requireComponent} = cc._decorator;
-
+import * as EventCenter from './eventCenter'
+let eventCenter = new EventCenter.eventCenter
+export {eventCenter}
 @ccclass
 // @requireComponent(cc.ScrollView)
 export default class List extends cc.Component {
@@ -78,14 +80,48 @@ export default class List extends cc.Component {
 
     view:cc.Node = new cc.Node();
     content :cc.Node = new cc.Node();
-    index:number = 0;
+
     createFromIndex = 0;
     pageNumX = 0;
     pageNumY = 0;
     oriY : number = 0;
     oriX : number = 0;
-    // LIFE-CYCLE CALLBACKS:
-    public
+    //输入数据
+    private _data:string[] = [];
+    public loadData(data:any[] = [],transverse:boolean = false){
+        if(data.length == 0) cc.error('input is empty')
+        data.forEach(element => {
+            this._data.push(String(element))
+        });
+        if(transverse) this._data.reverse()
+        while(this._data.length < this.itemNumX*this.itemNumY){
+            this._data.push('')
+        } 
+    }
+    public deleteItem(node : cc.Node[] = []){
+        var length = node.length;
+        if(length == 0) return;
+        node.forEach(element => {
+            if(cc.isValid(element)){
+                element.removeFromParent();
+                element.destroy();
+                this._creatrSingleItem();
+            }
+        });
+        if(this.scrollVertical || this.scrollHorizontal){
+            if(!this.scrollVertical){
+                this.content.x -= length  *this.width/2;
+                this.oriX -=  length  *this.width/2;
+            }
+            else if(!this.scrollHorizontal){
+                this.content.y += length * this.height/2;
+                this.oriY += length * this.height/2;
+            }
+            else {}
+        }
+
+    
+    }
 
     onLoad () {
         //setparams
@@ -102,18 +138,41 @@ export default class List extends cc.Component {
         //创建scrollbar
         this._setBar();  
         //direction
-
+    
     }
     start(){
         this.pageNumX = this.scrollHorizontal? Math.floor(this.view.width/this.width):1;
         this.pageNumY = this.scrollVertical? Math.floor(this.view.height/this.height):1;
-        //初始化单元
-        this.createFromIndex = 0;
-        this._createItem(this.createFromIndex);
-        this.content.setPosition(this.content.width/2-this.viewWidth/2,-(this.content.height/2-this.viewHeight/2))
-        //设置参考位置
-        this.oriY = this.content.position.y
-        this.oriX = this.content.position.x
+        this._freshItem();
+    }
+    private _creatrSingleItem(){
+        var labelNode = new cc.Node();
+        var item = cc.instantiate(this.itemPrefab)
+        item.name = String(this.createFromIndex)
+        item.addChild(labelNode)
+        let itemLabel = labelNode.addComponent(cc.Label)
+        if(this.createFromIndex < this._data.length) itemLabel.string = this._data[this.createFromIndex]
+        else itemLabel.string = ''  //删除了之后可能会产生长度不够，用空补全
+        item.scaleX = this.width / item.width
+        item.scaleY = this.height / item.height
+        this.content.addChild(item)
+        item.on(cc.Node.EventType.TOUCH_END,function(event){
+                eventCenter.emit('select',event.target)
+        },this)
+
+        if(!(this.scrollVertical && this.scrollHorizontal))  {  //当为grid时kayout.typr = children，content的size已经被设定，不需要动态改变
+            if(this.itemNumY > 1){//itemNumY =1 时不改变y的位置
+                this.content.y -= this.height / 2;
+                this.oriY -= this.height / 2
+            }
+            //先排x后排y，因此超过了itemx就不用更改x位置了
+            if(this.createFromIndex < this.itemNumX ){
+                cc.log(`index${this._index}lentth${length}itemX${this.itemNumX}`)
+                this.content.x += this.width / 2;
+                this.oriX += this.width / 2
+            }
+        } 
+        this.createFromIndex++;
     }
     private _createItem(startIndex:number){
 
@@ -126,65 +185,54 @@ export default class List extends cc.Component {
         else var length = 3 *(this.pageNumX * this.pageNumY)
         
         for(var i = 0;i<length;i++){
-            var labelNode = new cc.Node();
-            var item = cc.instantiate(this.itemPrefab)
-            item.addChild(labelNode)
-            let itemLabel = labelNode.addComponent(cc.Label)
-            itemLabel.string = String(startIndex+i)
-            item.scaleX = this.width / item.width
-            item.scaleY = this.height / item.height
-            this.content.addChild(item)
+            this._creatrSingleItem();
         }
         this.content.getComponent(cc.Layout).updateLayout()
         // cc.log(`width====${this.content.width}heigth===${this.content.height}`)
-        this.createFromIndex += length; 
-        if(!(this.scrollVertical && this.scrollHorizontal))  {
-            if(this.itemNumY > 1){//itemNumY =1 时不改变y的位置
-                this.content.y -= ((Math.floor((startIndex + length+1) / this.itemNumX) - Math.floor((startIndex+1) / this.itemNumX)) *this.height / 2);
-                this.oriY -= ((Math.floor((startIndex + length+1) / this.itemNumX) - Math.floor((startIndex+1) / this.itemNumX)) *this.height / 2)
-            }
-    
-            //先排x后排y，因此超过了itemx就不用更改x位置了
-            if(startIndex <= this.itemNumX -1){
-                if(startIndex + length < this.itemNumX -1){
-                    cc.log(`index${this.index}lentth${length}itemX${this.itemNumX}`)
-                    cc.log('11111')
-                    this.content.x += length  *this.width / 2;
-                    this.oriX += length  *this.width / 2
-                }
-                else{
-                    cc.log('2222')
-                    this.content.x += ((this.itemNumX) - startIndex)  *this.width/2;
-                    this.oriX +=  ((this.itemNumX) - startIndex)  *this.width/2
-                    
-                }
-            }
-        }  
-         
+ 
+    }
+    private _index:number = 0;  //本list中item的代号
+    private _calculateIndex(x:number,y:number):number
+    {
+        return Math.floor((y - this.oriY) / this.height) * this.itemNumX + Math.floor((- x + this.oriX) / this.width)
     }
     private _loadScrollRecord(){
         let scrollView = this.node.getComponent(cc.ScrollView)
         cc.log(`content y===${this.content.y}oriY ====${this.oriY}`)
         cc.log(`contnt x===${this.content.x}oriX === ${this.oriX}`)
         
-        this.index = Math.floor((this.content.y - this.oriY) / this.height) * this.itemNumX + Math.floor((- this.content.x + this.oriX) / this.width) 
-        cc.log(this.index+'    '+this.createFromIndex)
-        this.node.emit(`roll schedule ${this.index}`)   //抛出滚动进度事件
+        this._index = this._calculateIndex(this.content.x,this.content.y)
+        // cc.log(this._index+'    '+this.createFromIndex)
+        this.node.emit(`roll schedule ${this._index}`)   //抛出滚动进度事件
         //向下加载数据
         //当开始位置比总的长度小则代表没加载完
          if(this.createFromIndex  < (this.itemNumX * this.itemNumY)    &&
-         (this.createFromIndex -1 - this.index <= 2*(this.pageNumX * this.pageNumY)) )//剩余item数量小于1个PAGE的数量且未显示完就继续加载，由于是按行加载，对列数多的缓冲效果没有对行多的好
+         (this.createFromIndex -1 - this._index <= 2*(this.pageNumX * this.pageNumY)) )//剩余item数量小于1个PAGE的数量且未显示完就继续加载，由于是按行加载，对列数多的缓冲效果没有对行多的好
         {
-
             this._createItem(this.createFromIndex);
             cc.log(`width${this.content.width}x${this.content.x}`)
-
         }
-        if(this.index <=0) scrollView.elastic = false;
-
+        
     }
 
+    private _freshItem(){
+        cc.log('fresh')
+        //初始化单元
+        this.content.destroyAllChildren();
+        this.createFromIndex = 0;
+        this._createItem(this.createFromIndex);
+        this.content.setPosition(this.content.width/2-this.viewWidth/2,-(this.content.height/2-this.viewHeight/2))
+        //设置参考位置
+        this.oriY = this.content.position.y
+        this.oriX = this.content.position.x
+    }
+    
 
+    update (dt) {
+        this._loadScrollRecord();
+        if((-this.content.x+this.oriX)+(-this.oriY+this.content.y) < -100) this._freshItem();
+        // cc.log('v2===='+(this.content.x-this.oriX)+(this.oriY-this.content.y))
+    }
     private _setBar(){
         //bar params
         if(this.itemNumX > 1)
@@ -223,11 +271,6 @@ export default class List extends cc.Component {
        }
 
     }
-
-    update (dt) {
-        this._loadScrollRecord();
-    }
-
     private _setScrollView(){
         let scrollView = this.node.addComponent(cc.ScrollView);
         scrollView.elastic =true
@@ -242,6 +285,7 @@ export default class List extends cc.Component {
         scrollView.content = this.content;
         scrollView.vertical = this.scrollVertical;
         scrollView.horizontal = this.scrollHorizontal;
+        scrollView.elastic = true;
     }
     private _setLayout(){
         let layout = this.content.addComponent(cc.Layout)
@@ -275,7 +319,7 @@ export default class List extends cc.Component {
                 layout.paddingBottom = 0;
                 this.content.width = this.width * this.itemNumX
                 this.content.height = this.height * this.itemNumY
-                cc.log(`JINLAIle--width====${this.content.width}heigth===${this.content.height}`)
+                // cc.log(`JINLAIle--width====${this.content.width}heigth===${this.content.height}`)
             }
         }
         else{

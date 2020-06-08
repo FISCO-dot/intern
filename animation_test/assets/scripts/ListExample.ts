@@ -15,7 +15,7 @@ export default class NewClass extends cc.Component {
         for(var i = 0;i < 10000 ;i++){
             this.data.push(i)
         }
-        this.list.loadData(this.data,true)
+        this.list.loadData(this.data,false)
         eventCenter.on('select',(node)=>{
             node.forEach(element => {
                 element.color = cc.Color.RED

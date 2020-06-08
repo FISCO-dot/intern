@@ -156,39 +156,26 @@ export default class List extends cc.Component {
         else itemLabel.string = ''  //删除了之后可能会产生长度不够，用空补全
         item.scaleX = this.width / item.width
         item.scaleY = this.height / item.height
-        this.content.addChild(item)
         item.on(cc.Node.EventType.TOUCH_END,function(event){
                 eventCenter.emit('select',event.target)
         },this)
-
-        if(!(this.scrollVertical && this.scrollHorizontal))  {  //当为grid时kayout.typr = children，content的size已经被设定，不需要动态改变
-            if(this.itemNumY > 1){//itemNumY =1 时不改变y的位置
-                this.content.y -= this.height / 2;
-                this.oriY -= this.height / 2
-            }
-            //先排x后排y，因此超过了itemx就不用更改x位置了
-            if(this.createFromIndex < this.itemNumX ){
-                cc.log(`index${this._index}lentth${length}itemX${this.itemNumX}`)
-                this.content.x += this.width / 2;
-                this.oriX += this.width / 2
-            }
-        } 
         this.createFromIndex++;
+        return item;
     }
     private _createItem(startIndex:number){
-
-        if(startIndex + (this.pageNumX * this.pageNumY) * 3> this.itemNumX * this.itemNumY)
+        var item = [];
+        if(startIndex + this._itemNumRenderByFrame > this.itemNumX * this.itemNumY)
         {
             //超过数据范围的长度
             var length = this.itemNumX * this.itemNumY - startIndex;
         }
 
-        else var length = 3 *(this.pageNumX * this.pageNumY)
+        else var length = this._itemNumRenderByFrame
         
         for(var i = 0;i<length;i++){
-            this._creatrSingleItem();
+            item.push(this._creatrSingleItem());
         }
-        this.content.getComponent(cc.Layout).updateLayout()
+        return item
         // cc.log(`width====${this.content.width}heigth===${this.content.height}`)
  
     }
@@ -198,21 +185,35 @@ export default class List extends cc.Component {
         return Math.floor((y - this.oriY) / this.height) * this.itemNumX + Math.floor((- x + this.oriX) / this.width)
     }
     private _loadScrollRecord(){
-        cc.log(`content y===${this.content.y}oriY ====${this.oriY}`)
-        cc.log(`contnt x===${this.content.x}oriX === ${this.oriX}`)
-        
         this._index = this._calculateIndex(this.content.x,this.content.y)
-        // cc.log(this._index+'    '+this.createFromIndex)
+        cc.log(this._index+'    '+this.createFromIndex)
         this.node.emit(`roll schedule ${this._index}`)   //抛出滚动进度事件
         //向下加载数据
         //当开始位置比总的长度小则代表没加载完
-         if(this.createFromIndex  < (this.itemNumX * this.itemNumY)    &&
-         (this.createFromIndex -1 - this._index <= 2*(this.pageNumX * this.pageNumY)) )//剩余item数量小于1个PAGE的数量且未显示完就继续加载，由于是按行加载，对列数多的缓冲效果没有对行多的好
+         while(this.createFromIndex  < (this.itemNumX * this.itemNumY) )//剩余item数量小于1个PAGE的数量且未显示完就继续加载，由于是按行加载，对列数多的缓冲效果没有对行多的好
         {
-            this._createItem(this.createFromIndex);
-            cc.log(`width${this.content.width}x${this.content.x}`)
+            if(this._pool.size()>0) var item = this._pool.get();
+            else{
+                var item = this._creatrSingleItem();
+            }
+            this.content.addChild(item)
+            if(!(this.scrollVertical && this.scrollHorizontal))  {  //当为grid时kayout.typr = children，content的size已经被设定，不需要动态改变
+                if(this.itemNumY > 1){//itemNumY =1 时不改变y的位置
+                    this.content.y -= this.height / 2;
+                    this.oriY -= this.height / 2
+                }
+                //先排x后排y，因此超过了itemx就不用更改x位置了
+                if(this.createFromIndex < this.itemNumX ){
+                    cc.log(`index${this._index}lentth${length}itemX${this.itemNumX}`)
+                    this.content.x += this.width / 2;
+                    this.oriX += this.width / 2
+                }
+            }
+
         }
-        
+        // this.content.getComponent(cc.Layout).updateLayout()
+        cc.log(`content y===${this.content.y}oriY ====${this.oriY}`)
+        cc.log(`contnt x===${this.content.x}oriX === ${this.oriX}`)
     }
 
     private _freshItem(){
@@ -220,8 +221,11 @@ export default class List extends cc.Component {
         //初始化单元
         this.content.destroyAllChildren();
         this.createFromIndex = 0;
-        this._createItem(this.createFromIndex);
-        this.content.setPosition(this.content.width/2-this.viewWidth/2,-(this.content.height/2-this.viewHeight/2))
+        if(!(this.scrollHorizontal && this.scrollVertical)){
+            this.content.width = 0;
+            this.content.height = 0;
+            this.content.setPosition(this.content.width/2-this.viewWidth/2+this.width/2,-(this.content.height/2-this.viewHeight/2)-this.height/2)
+        }
         //设置参考位置
         this.oriY = this.content.position.y
         this.oriX = this.content.position.x
@@ -229,10 +233,16 @@ export default class List extends cc.Component {
     
     private _itemNumRenderByFrame = 12;
     private _pool = new cc.NodePool();
+    private _itemIDPool = [];
     private _createDone : boolean = false;
-    update () {
+    update (dt) {
+        if(this.createFromIndex >= this.itemNumX*this.itemNumY - 1) this._createDone = true;
         if(!this._createDone) {
-            let item = cc.instantiate
+            let item = this._createItem(this.createFromIndex).reverse()
+            item.forEach(element => {
+                this._pool.put(element);
+                this._itemIDPool.push(element)
+            });
         }
         this._loadScrollRecord();
         if((-this.content.x+this.oriX)+(-this.oriY+this.content.y) < -100) this._freshItem();
@@ -324,6 +334,8 @@ export default class List extends cc.Component {
                 layout.paddingBottom = 0;
                 this.content.width = this.width * this.itemNumX
                 this.content.height = this.height * this.itemNumY
+                this.content.setPosition(this.content.width/2-this.viewWidth/2,-(this.content.height/2-this.viewHeight/2))
+
                 // cc.log(`JINLAIle--width====${this.content.width}heigth===${this.content.height}`)
             }
         }

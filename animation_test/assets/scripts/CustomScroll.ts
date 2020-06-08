@@ -86,6 +86,7 @@ export default class List extends cc.Component {
     pageNumY = 0;
     oriY : number = 0;
     oriX : number = 0;
+
     //输入数据
     private _data:string[] = [];
     public loadData(data:any[] = [],transverse:boolean = false){
@@ -197,7 +198,6 @@ export default class List extends cc.Component {
         return Math.floor((y - this.oriY) / this.height) * this.itemNumX + Math.floor((- x + this.oriX) / this.width)
     }
     private _loadScrollRecord(){
-        let scrollView = this.node.getComponent(cc.ScrollView)
         cc.log(`content y===${this.content.y}oriY ====${this.oriY}`)
         cc.log(`contnt x===${this.content.x}oriX === ${this.oriX}`)
         
@@ -227,8 +227,13 @@ export default class List extends cc.Component {
         this.oriX = this.content.position.x
     }
     
-
-    update (dt) {
+    private _itemNumRenderByFrame = 12;
+    private _pool = new cc.NodePool();
+    private _createDone : boolean = false;
+    update () {
+        if(!this._createDone) {
+            let item = cc.instantiate
+        }
         this._loadScrollRecord();
         if((-this.content.x+this.oriX)+(-this.oriY+this.content.y) < -100) this._freshItem();
         // cc.log('v2===='+(this.content.x-this.oriX)+(this.oriY-this.content.y))

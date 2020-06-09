@@ -197,18 +197,20 @@ export default class List extends cc.Component {
                 var item = this._creatrSingleItem();
             }
             this.content.addChild(item)
-            if(!(this.scrollVertical && this.scrollHorizontal))  {  //当为grid时kayout.typr = children，content的size已经被设定，不需要动态改变
-                if(this.itemNumY > 1){//itemNumY =1 时不改变y的位置
-                    this.content.y -= this.height / 2;
-                    this.oriY -= this.height / 2
+            
+
+                if(!(this.scrollVertical && this.scrollHorizontal))  {  //当为grid时kayout.typr = children，content的size已经被设定，不需要动态改变
+                    if(this.itemNumY > 1){//itemNumY =1 时不改变y的位置
+                        this.content.y -= this.height / 2;
+                        this.oriY -= this.height / 2
+                    }
+                    //先排x后排y，因此超过了itemx就不用更改x位置了
+                    if(this.createFromIndex < this.itemNumX ){
+                        cc.log(`index${this._index}lentth${length}itemX${this.itemNumX}`)
+                        this.content.x += this.width / 2;
+                        this.oriX += this.width / 2
+                    }
                 }
-                //先排x后排y，因此超过了itemx就不用更改x位置了
-                if(this.createFromIndex < this.itemNumX ){
-                    cc.log(`index${this._index}lentth${length}itemX${this.itemNumX}`)
-                    this.content.x += this.width / 2;
-                    this.oriX += this.width / 2
-                }
-            }
 
         }
         // this.content.getComponent(cc.Layout).updateLayout()
@@ -235,7 +237,9 @@ export default class List extends cc.Component {
     private _pool = new cc.NodePool();
     private _itemIDPool = [];
     private _createDone : boolean = false;
+    private  t = 0;
     update (dt) {
+        this.t += dt;
         if(this.createFromIndex >= this.itemNumX*this.itemNumY - 1) this._createDone = true;
         if(!this._createDone) {
             let item = this._createItem(this.createFromIndex).reverse()
@@ -245,6 +249,9 @@ export default class List extends cc.Component {
             });
         }
         this._loadScrollRecord();
+        // if(this.t > 5){
+        //     this._pool.put(this.content.children[0])
+        // }
         if((-this.content.x+this.oriX)+(-this.oriY+this.content.y) < -100) this._freshItem();
         // cc.log('v2===='+(this.content.x-this.oriX)+(this.oriY-this.content.y))
     }

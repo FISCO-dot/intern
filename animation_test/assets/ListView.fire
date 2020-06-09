@@ -261,8 +261,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 960,
-      "height": 640
+      "width": 200,
+      "height": 100
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -299,7 +299,7 @@
     "_id": "70v2JIq7pHsZ0yClbAcd7l"
   },
   {
-    "__type__": "e7d37P8VM9BQI2QTJqcTFKw",
+    "__type__": "870410wk/hHXaqFHtnWyBsy",
     "_name": "",
     "_objFlags": 0,
     "node": {
@@ -319,12 +319,12 @@
     "scrollHorizontal": true,
     "viewWidth": 300,
     "viewHeight": 300,
-    "itemNumY": 100,
-    "itemNumX": 100,
+    "itemNumY": 50,
+    "itemNumX": 50,
     "height": 80,
     "width": 80,
     "barWidth": 12,
-    "_id": "c1mj6ro1xEgIHpsGMi304T"
+    "_id": "ccLVyVKGVARKJccCPVf2S9"
   },
   {
     "__type__": "cc.Node",

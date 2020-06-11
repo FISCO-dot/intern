@@ -41,7 +41,7 @@
                         
                     }
                 }
-            }
+            }       
         }else {// 没有注册，先将要发送的消息保存，然后等待事件注册后，再一起emit
             if (this.emitList[key]){
                 this.emitList[key].push(args);

@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "view",
+    "_name": "item",
     "_objFlags": 0,
     "_parent": null,
     "_children": [],
@@ -29,9 +29,9 @@
     "_opacity": 255,
     "_color": {
       "__type__": "cc.Color",
-      "r": 166,
-      "g": 162,
-      "b": 128,
+      "r": 255,
+      "g": 255,
+      "b": 255,
       "a": 255
     },
     "_contentSize": {
@@ -111,9 +111,9 @@
       "__id__": 1
     },
     "asset": {
-      "__uuid__": "34d3d76f-69d5-4969-989f-e0addfa1f8fd"
+      "__uuid__": "745b21d1-c74c-47b6-aa48-7442c0b3a753"
     },
-    "fileId": "65z7tjdlVLFohZiSecr5be",
+    "fileId": "54LA8yxvlOfLPLLTWHCOzg",
     "sync": false
   }
 ]

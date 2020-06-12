@@ -15,16 +15,20 @@ export default class NewClass extends cc.Component {
             this.data.push(i)
         }
         this.list.loadData(this.data,false)
-        
     }
-    Clickdelete(){
+    clickdelete(){
         this.list.deleteItem();
-        
     }
-    updateClick(){
+    clickUpdate(){
         this.list.updateView();
     }
-
+    clickAddData(){
+        var data = ['a','b','c','d']
+        this.list.addData(data,0)
+    }
+    clickClear(){
+        this.list.clearData();
+    }
 
     // update (dt) {}
 }

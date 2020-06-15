@@ -186,7 +186,7 @@
       "array": [
         0,
         0,
-        342.1963192910864,
+        342.18828767032636,
         0,
         0,
         0,
@@ -324,8 +324,9 @@
     "barBg": {
       "__uuid__": "e7aba14b-f956-4480-b254-8d57832e273f"
     },
-    "pageMode": true,
-    "scrollVertical": true,
+    "pageMode": false,
+    "cycle": true,
+    "scrollVertical": false,
     "scrollHorizontal": true,
     "viewWidth": 300,
     "viewHeight": 300,

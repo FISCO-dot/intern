@@ -147,10 +147,30 @@ export default class List extends cc.Component {
             let name = this.pick[i];
             this._data.splice(Number(name),1)
             this._deleteList.push(this.pick[i]);
-            let pickIndex = this._findItemByname(this._itemDisplayingPool,this.pick[i])
-            if(pickIndex != null){
-                this._itemDisplayingPool[pickIndex].color = cc.Color.GRAY
-                this._pool.put(this._itemDisplayingPool[pickIndex])
+            if(this.cycle){
+                for(var j = 0; j< this._itemDisplayingPool.length;j++){
+                    if((Number(this._itemDisplayingPool[j].name)-this.pick[i])%this._data.length == 0) {
+                        if(this._itemDisplayingPool.length < this._data.length) {
+                            this._itemDisplayingPool[j].color =cc.Color.GRAY
+                            this._pool.put(this._itemDisplayingPool[j])
+                            break
+                        }
+                        else{
+                            while(j < this._itemDisplayingPool.length){
+                                this._itemDisplayingPool[j].color =cc.Color.GRAY
+                                this._pool.put(this._itemDisplayingPool[j])
+                                j += this._data.length
+                            }
+                        }
+                    }
+                }
+            }
+            else{
+                let pickIndex = this._findItemByname(this._itemDisplayingPool,this.pick[i])
+                if(pickIndex != null){
+                    this._itemDisplayingPool[pickIndex].color = cc.Color.GRAY
+                    this._pool.put(this._itemDisplayingPool[pickIndex])
+                }
             }
         };
         this.pick = []
@@ -212,14 +232,55 @@ export default class List extends cc.Component {
                     break;
                 }
                 if(!flag){
-                    element.color = cc.Color.BLUE;
-                    this.pick.splice(element.index,1)
-                    cc.log('unpick  '+element.name)
+                    if(this.cycle){
+                        if(this._itemDisplayingPool.length < this._data.length){
+                            element.color = cc.Color.BLUE
+                            this.pick.splice(element.index,1)
+                            cc.log('unpick  '+element.name)
+                        }
+                        else{
+                            for(var i=0;i < this._itemDisplayingPool.length;i++){
+                                if(this._itemDisplayingPool[i].name == element.name) break;
+                            }
+                            while(i < this._itemDisplayingPool.length){
+                                this._itemDisplayingPool[i].color = cc.Color.BLUE
+                                i += this._data.length
+                            }
+                            this.pick.splice(element.index,1)
+                            cc.log('unpick  '+element.name)
+                        }
+                    }
+                    else{
+                        element.color = cc.Color.BLUE;
+                        this.pick.splice(element.index,1)
+                        cc.log('unpick  '+element.name)
+                    }
+
                 }
                 else{
-                    element.color = cc.Color.RED
-                    this.pick.push(element.name)
-                    cc.log('pick'+element.name)
+                    if(this.cycle){
+                        if(this._itemDisplayingPool.length < this._data.length){
+                            element.color = cc.Color.RED
+                            this.pick.push(element.name)
+                            cc.log('pick  '+element.name)
+                        }
+                        else{
+                            for(var i=0;i < this._itemDisplayingPool.length;i++){
+                                if(this._itemDisplayingPool[i].name == element.name) break;
+                            }
+                            while(i < this._itemDisplayingPool.length){
+                                this._itemDisplayingPool[i].color = cc.Color.RED
+                                i += this._data.length
+                            }
+                            this.pick.push(element.name)
+                            cc.log('pick  '+element.name)
+                        }
+                    }
+                    else{
+                        element.color = cc.Color.RED
+                        this.pick.push(element.name)
+                        cc.log('pick'+element.name)
+                    }
                 }
             });
         })
@@ -450,16 +511,21 @@ export default class List extends cc.Component {
                 while(index < 0) index +=this._data.length
                 itemLabel.string = this._data[index]
             }
+            this.pick.forEach(element => {
+                cc.log('meiyouma='+item.name+' '+(Number(item.name)-Number(element))%this._data.length)
+               if((Number(item.name)-Number(element))%this._data.length == 0) item.color = cc.Color.RED
+            });
         }
         else{
             if(Number(item.name) < this._data.length) itemLabel.string = this._data[index]
             else{
                     itemLabel.string = ''
             } 
+            this.pick.forEach(element => {
+                if(element == item.name) {item.color = cc.Color.RED;}
+            });
         }
-        this.pick.forEach(element => {
-            if(element == item.name) {item.color = cc.Color.RED;}
-        });
+
         item.setPosition(position)
         if(flag) this._itemDisplayingPool.push(item)
         else this._itemDisplayingPool.unshift(item)

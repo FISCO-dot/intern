@@ -21,13 +21,26 @@ export default class List extends cc.Component {
     })
     pageMode = false
     @property({
-        displayName:'Vertical'
+        displayName:'cycle',
+        tooltip:'是否为循环列表'
     })
-    scrollVertical=true
+    cycle = false
     @property({
-        displayName:'Horizontal'
+        displayName:'Vertical',
+        visible(){
+            if(this.cycle&&this.scrollVertical) this.scrollHorizontal = false;
+            return !(this.cycle && this.scrollHorizontal)
+        }
     })
-    scrollHorizontal=false
+    scrollVertical = true
+    @property({
+        displayName:'Horizontal',
+        visible(){
+            if(this.cycle&&this.scrollHorizontal) this.scrollVertical = false;
+            return!(this.cycle && this.scrollVertical)
+        }
+    })
+    scrollHorizontal = false
     @property({
         type:cc.Integer,
         displayName:'View Width X',
@@ -47,7 +60,7 @@ export default class List extends cc.Component {
         displayName:'Item Numbers Y',
         tooltip:'Y方向单元个数',
         visible(){
-            return this.scrollVertical
+            return this.scrollVertical && !this.cycle
         }
     })
     itemNumY:number = 1;
@@ -57,7 +70,7 @@ export default class List extends cc.Component {
         displayName:'Item Numbers X',
         tooltip:'X方向单元个数',
         visible(){
-            return this.scrollHorizontal
+            return this.scrollHorizontal && !this.cycle
         }
     })
     itemNumX:number = 1;
@@ -96,6 +109,7 @@ export default class List extends cc.Component {
     //操作后都要update一下
     public loadData(data:any[] = [],transverse:boolean = false, autoFill:boolean = false){
         if(data.length == 0) cc.error('input is empty')
+        if(autoFill && this.cycle) cc.warn('there maybe an interput in cyclic mode and autoFill')
         data.forEach(element => {
             this._data.push(String(element))
         });
@@ -150,7 +164,7 @@ export default class List extends cc.Component {
         cc.log('zuixiaozhi'+min)
             for(var i = 0;i<this._itemDisplayingPool.length;i++){
                 if(min <= Number(this._itemDisplayingPool[i].name) ){
-                    cc.log('谁大了'+this._itemDisplayingPool[i].name)
+                    // cc.log('谁大了'+this._itemDisplayingPool[i].name)
                     if(this._data[Number(this._itemDisplayingPool[i].name)])
                         this._itemDisplayingPool[i].getComponentInChildren(cc.Label).string = this._data[Number(this._itemDisplayingPool[i].name)]
                     else
@@ -162,15 +176,20 @@ export default class List extends cc.Component {
     }
     onLoad () {
         //setparams
-        if(!this.scrollHorizontal) this.itemNumX = 1;
-        if(!this.scrollVertical) this.itemNumY =1;
+        if(!this.scrollHorizontal) {
+            this.itemNumX = 1;
+            if(this.cycle) this.itemNumY = this._data.length+1
+        }
+        if(!this.scrollVertical) {
+            this.itemNumY =1
+            if(this.cycle) this.itemNumX = this._data.length+1 
+        };
         let sprite = this.node.addComponent(cc.Sprite);
         sprite.spriteFrame = this.viewBg;
         this.node.width = 960;
         this.node.height = 640;
         //创建scroll view
         this._setScrollView();
-
         //创建scrollbar
         this._setBar();  
         //direction
@@ -233,15 +252,16 @@ export default class List extends cc.Component {
     }
     private onceControl = true;
     private _isViewFull(){ 
+
         if(!this.pageMode)
        { //-1:上边行不够   -2：下边行不够   -3：左边列不够    -4：右边列不够 
-            if((this.scrollHorizontal) &&  this._index >=0 &&(Number(this._itemDisplayingPool[0].name) % this.itemNumX) >0 && //不是第一列
+            if((this.scrollHorizontal) &&  (this._index >=0||this.cycle) &&(Number(this._itemDisplayingPool[0].name) % this.itemNumX>0||this.cycle) && //不是第一列
             this._findItemByname(this._itemDisplayingPool,String(this._index-1)) == null ) //需要显示的列序数小于已经加载的列序数
             {cc.log('-3');return -3;}
             else if((this.scrollHorizontal)&&this.itemNumX - 1 - this._index % this.itemNumX >= this.pageNumX &&  //不是最后几列
             Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name)%this.itemNumX - this._index%this.itemNumX  < this.pageNumX) //加载出来的item与现在的item列数之差过小
             {cc.log('-4');return -4;}
-            else if((this.scrollVertical)&& Number(this._itemDisplayingPool[0].name) >= this.itemNumX  && //不是第一行
+            else if((this.scrollVertical)&& (Number(this._itemDisplayingPool[0].name) >= this.itemNumX || this.cycle)  && //不是第一行
             Math.floor(this._index/this.itemNumX-Number(this._itemDisplayingPool[0].name)/this.itemNumX) < 0) //需要显示的行序数小于已经加载的行序数
                 {cc.log('-1==='+this._index);return -1;}   
             else if( (this.scrollVertical) && 
@@ -309,6 +329,10 @@ export default class List extends cc.Component {
                             this._poolPut(this._itemDisplayingPool.length-1)
                         }
                         this._poolGet(idStart-this.itemNumX+i,cc.v2(posX + i*this.width,posY + this.height),false)
+                        if(this.cycle){
+                            this.content.height += this.height*2
+                            this.itemNumY ++
+                        }
                     }  
                 }
                     if(flag == -2){
@@ -319,6 +343,10 @@ export default class List extends cc.Component {
                                 this._poolPut(0)
                             }
                             this._poolGet(idLast+this.itemNumX-i,cc.v2(posX-i*this.width,posY-this.height),true)
+                            if(this.cycle){
+                                this.content.height += this.height*2
+                                this.itemNumY ++
+                            }
                         }
                     }                
                     if(flag == -3){
@@ -327,10 +355,16 @@ export default class List extends cc.Component {
                         for(var i = columnNum;i >=0;i--){
                             this._poolGet(idStart-1+i*this.itemNumX,cc.v2(posX - this.width,posY - i * this.height),false)
                         }
+                        if(this.cycle){
+                            this.content.width += 2*this.width
+                            this.itemNumX++
+                            cc.log('jiale')
+                        }
                         if(columnNum > this.pageNumY || rowNum > this.pageNumX)
                         {
                             for(var i = 0;i < this._itemDisplayingPool.length;i++){
                             if(((Number(this._itemDisplayingPool[i].name) - idLast) % this.itemNumX) == 1 ){
+
                                 this._poolPut(i)
                                 i--;
                             }
@@ -342,9 +376,14 @@ export default class List extends cc.Component {
                         for(var i = columnNum;i>=0;i--){
                             this._poolGet(idLast+1-i*this.itemNumX,cc.v2(posX+this.width,posY+i*this.height),true)
                         }
+                        if(this.cycle) {
+                            this.content.width += 2*this.width
+                            this.itemNumX++
+                        }
                         if(columnNum > this.pageNumY || rowNum > this.pageNumX)
                         {for(var i = 0;i < this._itemDisplayingPool.length;i++){
                             if(((Number(this._itemDisplayingPool[i].name) - idStart) % this.itemNumX) == 0 ){
+
                                 this._poolPut(i);
                                 i--;
                             }
@@ -376,6 +415,7 @@ export default class List extends cc.Component {
         this._initializePage(0);
     }
     private _initializePage(num:number){ //输入要生成page的第一个item序号
+        
         for(var i = 0;i < this.pageNumX;i++){
             for(var j = 0; j < this.pageNumY;j++){
                 this._poolGet(num+i+j*this.itemNumX,
@@ -401,10 +441,22 @@ export default class List extends cc.Component {
         else{
             var item = this._creatrSingleItem();
         }
+        cc.log('index='+index)
         let itemLabel = item.getComponentInChildren(cc.Label)
         item.name = String(index)
-        if(Number(item.name) < this._data.length-1) itemLabel.string = this._data[index]
-        else itemLabel.string = ''
+        if(this.cycle){
+            if(index >= 0) itemLabel.string = this._data[index%this._data.length]
+            else {
+                while(index < 0) index +=this._data.length
+                itemLabel.string = this._data[index]
+            }
+        }
+        else{
+            if(Number(item.name) < this._data.length) itemLabel.string = this._data[index]
+            else{
+                    itemLabel.string = ''
+            } 
+        }
         this.pick.forEach(element => {
             if(element == item.name) {item.color = cc.Color.RED;}
         });
@@ -426,8 +478,9 @@ export default class List extends cc.Component {
                 this._pool.put(element);
             });
         }
+        // this._cyclicContrl();
         this._loadScrollRecord();
-        if(!this.pageMode){
+        if(!this.cycle){
             if((-this.content.x+this.oriX) < -50 ||(-this.oriY+this.content.y) < -50) this._freshItem(); //上拉或左拉刷新
         }
         // cc.log('v2===='+(this.content.x-this.oriX)+(this.oriY-this.content.y))
@@ -468,7 +521,6 @@ export default class List extends cc.Component {
             ScrollbarY.height = this.view.height
             ScrollbarY.width = this.barWidth
        }
-
     }
     private _setScrollView(){
         let scrollView = this.node.addComponent(cc.ScrollView);

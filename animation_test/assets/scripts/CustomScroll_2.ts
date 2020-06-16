@@ -1,16 +1,35 @@
-
-
 const {ccclass, property,requireComponent} = cc._decorator;
 import * as EventCenter from './eventCenter'
 let eventCenter = new EventCenter.eventCenter
 export {eventCenter}
+
+enum TemplateType {
+    NODE = 1,
+    PREFAB = 2,
+}
 @ccclass
 // @requireComponent(cc.ScrollView)
 export default class List extends cc.Component {
 
-
-    @property(cc.Prefab)
+    @property({
+        type:cc.Enum(TemplateType),
+        tooltip:"模板类型"
+    })
+    templateType = 2
+    @property({
+        type:cc.Prefab,
+        visible(){
+            return this.templateType == 2
+        }
+    })
     itemPrefab :cc.Prefab = null;
+    @property({
+        type:cc.Node,
+        visible(){
+            return this.templateType == 1
+        }
+    })
+    itemNode :cc.Node = null;
     @property(cc.SpriteFrame)
     viewBg :cc.SpriteFrame = null;
     @property(cc.SpriteFrame)
@@ -45,7 +64,6 @@ export default class List extends cc.Component {
         type:cc.Integer,
         displayName:'View Width X',
         tooltip:'X方向列表长度',
-
     })
     viewWidth:number = 100
     @property({
@@ -145,18 +163,19 @@ export default class List extends cc.Component {
         cc.log('pick =',this.pick)
         for(var i = 0;i < this.pick.length;i++) {
             let name = this.pick[i];
-            this._data.splice(Number(name),1)
-            this._deleteList.push(this.pick[i]);
             if(this.cycle){
                 for(var j = 0; j< this._itemDisplayingPool.length;j++){
-                    if((Number(this._itemDisplayingPool[j].name)-this.pick[i])%this._data.length == 0) {
+                    if((Number(this._itemDisplayingPool[j].name)-Number(this.pick[i]))%this._data.length == 0) {
                         if(this._itemDisplayingPool.length < this._data.length) {
+                            this._deleteList.push(this.pick[i]);
                             this._itemDisplayingPool[j].color =cc.Color.GRAY
                             this._pool.put(this._itemDisplayingPool[j])
+                            cc.log('meilema'+j)
                             break
                         }
                         else{
                             while(j < this._itemDisplayingPool.length){
+                                this._deleteList.push(this._itemDisplayingPool[j].name);
                                 this._itemDisplayingPool[j].color =cc.Color.GRAY
                                 this._pool.put(this._itemDisplayingPool[j])
                                 j += this._data.length
@@ -164,14 +183,25 @@ export default class List extends cc.Component {
                         }
                     }
                 }
+                
             }
             else{
+                this._deleteList.push(this.pick[i]);
                 let pickIndex = this._findItemByname(this._itemDisplayingPool,this.pick[i])
                 if(pickIndex != null){
                     this._itemDisplayingPool[pickIndex].color = cc.Color.GRAY
                     this._pool.put(this._itemDisplayingPool[pickIndex])
                 }
             }
+            if(this.cycle) {
+                var index = Number(name)
+                while(index >= this._data.length) index -= this._data.length
+                while(index < 0) index += this._data.length
+                cc.log('删除数据'+index)
+                this._data.splice(index,1)
+                this.updateView();
+            }
+            else this._data.splice(Number(name),1)
         };
         this.pick = []
     }
@@ -180,18 +210,31 @@ export default class List extends cc.Component {
         this.pick = [];
     }
     public updateView(){   //操作后更新视图
-        var min = this._deleteList.length > 0?Number(this._deleteList[this._deleteList.length-1]):0     
-        cc.log('zuixiaozhi'+min)
+        if(this.cycle) var min = Number(this._itemDisplayingPool[0].name)
+        else var min = this._deleteList.length > 0?Number(this._deleteList[this._deleteList.length-1]):0     
             for(var i = 0;i<this._itemDisplayingPool.length;i++){
                 if(min <= Number(this._itemDisplayingPool[i].name) ){
-                    // cc.log('谁大了'+this._itemDisplayingPool[i].name)
-                    if(this._data[Number(this._itemDisplayingPool[i].name)])
-                        this._itemDisplayingPool[i].getComponentInChildren(cc.Label).string = this._data[Number(this._itemDisplayingPool[i].name)]
-                    else
+                    cc.log('谁大了'+this._itemDisplayingPool[i].name)
+                    if(this.cycle){
+                        cc.log('how much ='+this._data)
+                        var index = Number(this._itemDisplayingPool[i].name)
+                        while(index >= this._data.length) index -= this._data.length
+                        while(index < 0) index += this._data.length
+                        cc.log('删除数据'+index)
+                        this._itemDisplayingPool[i].getComponentInChildren(cc.Label).string = this._data[index]
+                    }
+                    else{
+                        if(this._data[Number(this._itemDisplayingPool[i].name)])
+                            this._itemDisplayingPool[i].getComponentInChildren(cc.Label).string = this._data[Number(this._itemDisplayingPool[i].name)]
+                        else
                             this._itemDisplayingPool[i].getComponentInChildren(cc.Label).string = ''
+                    }
+
                 }
             }
-            for(var num = 0;num < this._deleteList.length;num++) this.content.addChild(this._pool.get())  
+            for(var num = 0;num < this._deleteList.length;num++) {
+                if(this._pool.size() > 0) this.content.addChild(this._pool.get())  
+            }
         this._deleteList = []
     }
     onLoad () {
@@ -227,32 +270,42 @@ export default class List extends cc.Component {
         eventCenter.on('select',(node)=>{
             node.forEach(element => {
                 var flag = true;
-                for(var i = 0;i < this.pick.length;i++){
-                    if(this.pick[i] == element.name) flag = false
-                    break;
+                if(this.cycle){
+                    for(var i = 0;i < this.pick.length;i++){
+                        if((Number(this.pick[i]) - Number(element.name))%this._data.length == 0) {flag = false
+                        break;}
+                    }
+                }
+                else{
+                    for(var i = 0;i < this.pick.length;i++){
+                        if(this.pick[i] == element.name) {flag = false
+                        break;}
+                    }
                 }
                 if(!flag){
                     if(this.cycle){
                         if(this._itemDisplayingPool.length < this._data.length){
                             element.color = cc.Color.BLUE
-                            this.pick.splice(element.index,1)
-                            cc.log('unpick  '+element.name)
+                            cc.log('unpick  '+this.pick[i])
+                            this.pick.splice(i,1)
+                            
                         }
                         else{
-                            for(var i=0;i < this._itemDisplayingPool.length;i++){
-                                if(this._itemDisplayingPool[i].name == element.name) break;
+                            for(var j=0;j < this._itemDisplayingPool.length;j++){
+                                if((Number(this._itemDisplayingPool[j].name) - Number(element.name))%this._data.length == 0) break;
                             }
-                            while(i < this._itemDisplayingPool.length){
-                                this._itemDisplayingPool[i].color = cc.Color.BLUE
-                                i += this._data.length
+                            while(j < this._itemDisplayingPool.length){
+                                this._itemDisplayingPool[j].color = cc.Color.BLUE
+                                j += this._data.length
                             }
-                            this.pick.splice(element.index,1)
-                            cc.log('unpick  '+element.name)
+                            cc.log('unpick  '+this.pick[i].name)
+                            this.pick.splice(i,1)
+                            
                         }
                     }
                     else{
                         element.color = cc.Color.BLUE;
-                        this.pick.splice(element.index,1)
+                        this.pick.splice(i,1)
                         cc.log('unpick  '+element.name)
                     }
 
@@ -261,19 +314,24 @@ export default class List extends cc.Component {
                     if(this.cycle){
                         if(this._itemDisplayingPool.length < this._data.length){
                             element.color = cc.Color.RED
-                            this.pick.push(element.name)
-                            cc.log('pick  '+element.name)
+                            let index = this._cycleIndexProcess(Number(element.name))
+                            cc.log('1='+index)
+                            this.pick.push(String(index))
+                            cc.log('pick '+index)
                         }
                         else{
+                            cc.log('2')
                             for(var i=0;i < this._itemDisplayingPool.length;i++){
-                                if(this._itemDisplayingPool[i].name == element.name) break;
+                                if((Number(this._itemDisplayingPool[i].name) - Number(element.name))%this._data.length == 0) break;
                             }
                             while(i < this._itemDisplayingPool.length){
                                 this._itemDisplayingPool[i].color = cc.Color.RED
                                 i += this._data.length
                             }
-                            this.pick.push(element.name)
-                            cc.log('pick  '+element.name)
+                            i -= this._data.length
+                            let index = this._cycleIndexProcess(Number(this._itemDisplayingPool[i].name))
+                            this.pick.push(String(index))
+                            cc.log('pick '+index)
                         }
                     }
                     else{
@@ -285,9 +343,14 @@ export default class List extends cc.Component {
             });
         })
     }
+    private _cycleIndexProcess(index:number){
+        while(index >= this._data.length) index -= this._data.length
+        while(index < 0) index += this._data.length
+        return index
+    }
     private _creatrSingleItem(){
         var labelNode = new cc.Node();
-        var item = cc.instantiate(this.itemPrefab)
+        var item = this.templateType == 2?cc.instantiate(this.itemPrefab):cc.instantiate(this.itemNode)
         item.color = cc.Color.GRAY
         item.addChild(labelNode)
         labelNode.addComponent(cc.Label)
@@ -316,9 +379,10 @@ export default class List extends cc.Component {
 
         if(!this.pageMode)
        { //-1:上边行不够   -2：下边行不够   -3：左边列不够    -4：右边列不够 
-            if((this.scrollHorizontal) &&  (this._index >=0||this.cycle) &&(Number(this._itemDisplayingPool[0].name) % this.itemNumX>0||this.cycle) && //不是第一列
+            
+            if((this.scrollHorizontal) &&  (this._index >=0 &&Number(this._itemDisplayingPool[0].name) % this.itemNumX>0||this.cycle) && //不是第一列
             this._findItemByname(this._itemDisplayingPool,String(this._index-1)) == null ) //需要显示的列序数小于已经加载的列序数
-            {cc.log('-3');return -3;}
+            {cc.log('-3 ');cc.log('index-1='+String(this._index-1));return -3;}
             else if((this.scrollHorizontal)&&this.itemNumX - 1 - this._index % this.itemNumX >= this.pageNumX &&  //不是最后几列
             Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name)%this.itemNumX - this._index%this.itemNumX  < this.pageNumX) //加载出来的item与现在的item列数之差过小
             {cc.log('-4');return -4;}
@@ -419,7 +483,6 @@ export default class List extends cc.Component {
                         if(this.cycle){
                             this.content.width += 2*this.width
                             this.itemNumX++
-                            cc.log('jiale')
                         }
                         if(columnNum > this.pageNumY || rowNum > this.pageNumX)
                         {
@@ -492,7 +555,7 @@ export default class List extends cc.Component {
         return null;
     }
     private _poolPut(index:number){
-        // cc.log("delete "+this._itemDisplayingPool[index].name)
+        cc.log("delete "+index)
         this._pool.put(this._itemDisplayingPool[index]);
         this._itemDisplayingPool.splice(index,1)
     }
@@ -512,8 +575,10 @@ export default class List extends cc.Component {
                 itemLabel.string = this._data[index]
             }
             this.pick.forEach(element => {
-                cc.log('meiyouma='+item.name+' '+(Number(item.name)-Number(element))%this._data.length)
-               if((Number(item.name)-Number(element))%this._data.length == 0) item.color = cc.Color.RED
+                cc.log('changered??'+item.name)
+               if((Number(item.name)-Number(element))%this._data.length == 0) {
+                    cc.log('changered=='+item.name)
+                   item.color = cc.Color.RED}
             });
         }
         else{

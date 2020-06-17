@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "item",
+    "_name": "ChatBubble",
     "_objFlags": 0,
     "_parent": null,
     "_children": [],
@@ -36,8 +36,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 200,
-      "height": 80
+      "width": 233.45999999999998,
+      "height": 50.4
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -48,8 +48,8 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        0,
-        0,
+        366.016,
+        266.193,
         0,
         0,
         0,
@@ -89,9 +89,9 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "f0048c10-f03e-4c97-b9d3-3506e1d58952"
+      "__uuid__": "eda1bccd-a6d5-47f3-9bd1-e9ec118114f4"
     },
-    "_type": 0,
+    "_type": 1,
     "_sizeMode": 0,
     "_fillType": 0,
     "_fillCenter": {
@@ -111,9 +111,9 @@
       "__id__": 1
     },
     "asset": {
-      "__uuid__": "86a6fd58-8b49-4990-a80c-8aa29e7ff873"
+      "__uuid__": "3887c679-8791-49e0-83eb-0d7ffc952967"
     },
-    "fileId": "54LA8yxvlOfLPLLTWHCOzg",
+    "fileId": "3aMmWtpb9O4oXNs0VjKRLz",
     "sync": false
   }
 ]

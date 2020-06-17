@@ -1,7 +1,7 @@
 
 
 const {ccclass, property,requireComponent} = cc._decorator;
-import * as EventCenter from './eventCenter'
+import * as EventCenter from '../EventCenter/eventCenter'
 let eventCenter = new EventCenter.eventCenter
 export {eventCenter}
 @ccclass

@@ -58,7 +58,7 @@
     "_groupIndex": 0,
     "groupIndex": 0,
     "autoReleaseAssets": false,
-    "_id": "c93500c2-2d4b-44ad-99ae-804b9ab38559"
+    "_id": "c5adadb0-ae96-4831-ae27-ac3653de8414"
   },
   {
     "__type__": "cc.Node",
@@ -308,16 +308,18 @@
     "_id": "70v2JIq7pHsZ0yClbAcd7l"
   },
   {
-    "__type__": "870410wk/hHXaqFHtnWyBsy",
+    "__type__": "a612csnxLNBk6wDPo/i5+eC",
     "_name": "",
     "_objFlags": 0,
     "node": {
       "__id__": 5
     },
     "_enabled": true,
+    "templateType": 2,
     "itemPrefab": {
-      "__uuid__": "745b21d1-c74c-47b6-aa48-7442c0b3a753"
+      "__uuid__": "86a6fd58-8b49-4990-a80c-8aa29e7ff873"
     },
+    "itemNode": null,
     "viewBg": {
       "__uuid__": "f0048c10-f03e-4c97-b9d3-3506e1d58952"
     },
@@ -325,17 +327,18 @@
       "__uuid__": "e7aba14b-f956-4480-b254-8d57832e273f"
     },
     "pageMode": false,
-    "cycle": true,
-    "scrollVertical": false,
-    "scrollHorizontal": true,
+    "cycle": false,
+    "scrollVertical": true,
+    "scrollHorizontal": false,
     "viewWidth": 300,
     "viewHeight": 300,
-    "itemNumY": 100,
-    "itemNumX": 50,
+    "itemNumY": 10,
+    "itemNumX": 1,
     "height": 80,
     "width": 80,
     "barWidth": 12,
-    "_id": "ccLVyVKGVARKJccCPVf2S9"
+    "adaptiveSize": false,
+    "_id": "22JWF9y7FM+7BG39Nb8Kxd"
   },
   {
     "__type__": "cc.Node",
@@ -717,7 +720,7 @@
       "__id__": 2
     },
     "component": "",
-    "_componentId": "e069f50vGhGVYTl8N/A0pQY",
+    "_componentId": "e6e8ccxDdxBIbeRX2ojOxjB",
     "handler": "clickdelete",
     "customEventData": ""
   },
@@ -1101,7 +1104,7 @@
       "__id__": 2
     },
     "component": "",
-    "_componentId": "e069f50vGhGVYTl8N/A0pQY",
+    "_componentId": "e6e8ccxDdxBIbeRX2ojOxjB",
     "handler": "clickUpdate",
     "customEventData": ""
   },
@@ -1485,7 +1488,7 @@
       "__id__": 2
     },
     "component": "",
-    "_componentId": "e069f50vGhGVYTl8N/A0pQY",
+    "_componentId": "e6e8ccxDdxBIbeRX2ojOxjB",
     "handler": "clickAddData",
     "customEventData": ""
   },
@@ -1869,7 +1872,7 @@
       "__id__": 2
     },
     "component": "",
-    "_componentId": "e069f50vGhGVYTl8N/A0pQY",
+    "_componentId": "e6e8ccxDdxBIbeRX2ojOxjB",
     "handler": "clickClear",
     "customEventData": ""
   },
@@ -1905,7 +1908,9 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_spriteFrame": null,
+    "_spriteFrame": {
+      "__uuid__": "f0048c10-f03e-4c97-b9d3-3506e1d58952"
+    },
     "_type": 0,
     "_sizeMode": 0,
     "_fillType": 0,
@@ -1921,7 +1926,7 @@
     "_id": "40I2x3Nc9IUZgpGTCiS1YX"
   },
   {
-    "__type__": "e069f50vGhGVYTl8N/A0pQY",
+    "__type__": "e6e8ccxDdxBIbeRX2ojOxjB",
     "_name": "",
     "_objFlags": 0,
     "node": {
@@ -1931,6 +1936,6 @@
     "list": {
       "__id__": 6
     },
-    "_id": "c70ZFJDklL+7wPlIzExRLd"
+    "_id": "c6bKnjtxhLyLkK/CWRiGCJ"
   }
 ]

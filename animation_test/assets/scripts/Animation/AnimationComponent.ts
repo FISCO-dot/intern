@@ -1,4 +1,4 @@
-import * as Ceve from './eventCenter'
+import * as Ceve from '../EventCenter/eventCenter'
 import CustomAnimation from './CustomAnimation'
 let eventCenter = new Ceve.eventCenter()
 export {eventCenter}

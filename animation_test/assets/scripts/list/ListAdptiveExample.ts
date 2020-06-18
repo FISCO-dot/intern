@@ -12,7 +12,7 @@ export default class NewClass extends cc.Component {
     // LIFE-CYCLE CALLBACKS:
 
     onLoad () {
-        let data = ['hello']
+        let data = ['hello','nothing to say ','blablabla ','oooooooooo']
         this.editbox.node.on('editing-return', this.sendInputMessage, this);
         this.editbox.node.on('editing-did-began', this.startInputMessage, this);
         this.list.loadData(data)

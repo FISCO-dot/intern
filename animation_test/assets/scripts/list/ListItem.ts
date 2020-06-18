@@ -19,12 +19,11 @@ export default class ListItem extends cc.Component {
         this.text.horizontalAlign = 0
         this.text.maxWidth = 200;
         this._loadText(this.text.string);
-        this.node.x = 150
+        this.node.x = 250
         this.textNode.x = this.textNode.width/2-this.node.width/2
     }
     private _loadText(text:string){
-        cc.log('文本长度='+text.length)
-        cc.log('parentname',this.node.name)
+        cc.log('parentname',this.node.parent.name)
         if(text.length == 0) {text = '';return}
         this.node.height = this.textNode.height
         this.node.width = this.textNode.width+40

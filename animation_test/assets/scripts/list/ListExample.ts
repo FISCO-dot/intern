@@ -1,7 +1,6 @@
 
 const {ccclass, property} = cc._decorator;
 import List from './CustomScroll_2'
-import {eventCenter} from './CustomScroll_2'
 @ccclass
 export default class NewClass extends cc.Component {
 
@@ -16,19 +15,19 @@ export default class NewClass extends cc.Component {
         }
         this.list.loadData(this.data,false)
     }
-    // clickdelete(){
-    //     this.list.deleteItem();
-    // }
-    // clickUpdate(){
-    //     this.list.updateView();
-    // }
-    // clickAddData(){
-    //     var data = ['a','b','c','d']
-    //     this.list.addData(data,0)
-    // }
-    // clickClear(){
-    //     this.list.clearData();
-    // }
+    clickdelete(){
+        this.list.deleteItem();
+    }
+    clickUpdate(){
+        this.list.updateView();
+    }
+    clickAddData(){
+        var data = ['a','b','c','d']
+        this.list.addData(data,0)
+    }
+    clickClear(){
+        this.list.clearData();
+    }
 
     // update (dt) {}
 }

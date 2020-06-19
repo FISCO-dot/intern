@@ -186,7 +186,7 @@
       "array": [
         0,
         0,
-        342.18828767032636,
+        350.1990226553324,
         0,
         0,
         0,
@@ -316,28 +316,33 @@
     },
     "_enabled": true,
     "templateType": 2,
-    "itemPrefab": {
-      "__uuid__": "86a6fd58-8b49-4990-a80c-8aa29e7ff873"
-    },
-    "itemNode": null,
+    "prefabSet": [
+      {
+        "__uuid__": "86a6fd58-8b49-4990-a80c-8aa29e7ff873"
+      }
+    ],
+    "nodeSet": [],
     "viewBg": {
       "__uuid__": "f0048c10-f03e-4c97-b9d3-3506e1d58952"
     },
     "barBg": {
       "__uuid__": "e7aba14b-f956-4480-b254-8d57832e273f"
     },
-    "pageMode": false,
+    "pageMode": true,
     "cycle": false,
     "scrollVertical": true,
-    "scrollHorizontal": false,
+    "scrollHorizontal": true,
     "viewWidth": 300,
     "viewHeight": 300,
-    "itemNumY": 10,
-    "itemNumX": 1,
+    "itemNumY": 100,
+    "itemNumX": 10,
     "height": 80,
     "width": 80,
+    "alignCenter": true,
+    "fontSize": 30,
     "barWidth": 12,
     "adaptiveSize": false,
+    "maxWidth": 200,
     "_id": "22JWF9y7FM+7BG39Nb8Kxd"
   },
   {

@@ -2,7 +2,6 @@ const {ccclass, property,requireComponent} = cc._decorator;
 import * as EventCenter from '../EventCenter/eventCenter'
 let eventCenter = new EventCenter.eventCenter
 export {eventCenter}
-
 enum TemplateType {
     NODE = 1,
     PREFAB = 2,
@@ -17,21 +16,21 @@ export default class List extends cc.Component {
     })
     templateType = 2
     @property({
-        type:cc.Prefab,
+        type : cc.Prefab,
+        tooltip:'要使用的所有预制资源',
         visible(){
             return this.templateType == 2
         }
     })
-    itemPrefab :cc.Prefab = null;
+    prefabSet : cc.Prefab[] = []
     @property({
         type:cc.Node,
+        tooltip:"要使用的所有节点资源",
         visible(){
             return this.templateType == 1
         }
     })
-    itemNode :cc.Node = null;
-    @property(cc.Prefab)
-    delMessage:cc.Prefab = null;
+    nodeSet : cc.Node[] = []
     @property(cc.SpriteFrame)
     viewBg :cc.SpriteFrame = null;
     @property(cc.SpriteFrame)
@@ -49,7 +48,7 @@ export default class List extends cc.Component {
     @property({
         displayName:'Vertical',
         visible(){
-            if(this.cycle&&this.scrollVertical) this.scrollHorizontal = false;
+            if((this.cycle&&this.scrollVertical)||this.adaptiveSize) this.scrollHorizontal = false;
             if(this.adaptiveSize) this.scrollVertical = true
             return !(this.cycle && this.scrollHorizontal)
         }
@@ -100,6 +99,9 @@ export default class List extends cc.Component {
         min: 0,
         displayName:'Item Height Y',
         tooltip:'单元Y方向高度',
+        visible(){
+            return !this.adaptiveSize
+        }
     })
     height:number = 80;
     @property({
@@ -107,9 +109,21 @@ export default class List extends cc.Component {
         min: 0,
         displayName:'Item Width X',
         tooltip:'单元X方向宽度',
+        visible(){
+            return !this.adaptiveSize
+        }
     })
     width:number = 80;
-
+    @property({
+        displayName:'Align Center',
+        tooltip:"是否居中显示",
+        visible(){
+            return !(this.scrollVertical && this.scrollHorizontal)
+        }
+    })
+    alignCenter : boolean = false
+    @property(cc.Integer)
+    fontSize : number = 30;
     @property({
         type:cc.Integer,
         displayName:'Bar Width'
@@ -120,7 +134,14 @@ export default class List extends cc.Component {
         tooltip:'item尺寸是否自适应'
     })
     adaptiveSize : boolean = false
-
+    @property({
+        displayName:'Max Width',
+        tooltip:'对话框的最大宽度',
+        visible(){
+            return this.adaptiveSize
+        }
+    })
+    maxWidth : number = 200
     view:cc.Node = new cc.Node('view');
     content :cc.Node = new cc.Node('content');
     pageNumX = 0;
@@ -133,7 +154,7 @@ export default class List extends cc.Component {
     private _data:string[] = [];
     //操作后都要update一下
     public loadData(data:any[] = [],transverse:boolean = false, autoFill:boolean = false){
-        if(data.length == 0) cc.error('input is empty')
+        if(data.length == 0) {cc.error('input is empty');return}
         if(autoFill && this.cycle) cc.warn('there maybe an interput in cyclic mode and autoFill')
         data.forEach(element => {
             this._data.push(String(element))
@@ -145,13 +166,14 @@ export default class List extends cc.Component {
             } 
         }
     }
-    public addData(data:any[] = [],position: number){ //在指定位置追加数据
+    public addData(data:any[] | any ,position?: number){ //在指定位置追加数据
         if(position < 0) {
             cc.error('your position is not available')
             return
         }
-        if(position >= this._data.length){
-            cc.warn('your position is too big')
+        if(position >= this._data.length || position == undefined){
+            cc.log('data = '+data)
+            if(position >=this._data.length) cc.warn('your position is too big')
             data.forEach(element => {
                 this._data.push(String(element))
             });
@@ -161,6 +183,7 @@ export default class List extends cc.Component {
                 this._data.splice(position+i,0,String(data[i]))
             }
         }
+        if(this.adaptiveSize) this._sendMessage()
     }
     private _deleteList = []
     public deleteItem(){
@@ -199,7 +222,6 @@ export default class List extends cc.Component {
                 let pickIndex = this._findItemByname(this._itemDisplayingPool,this.pick[i])
                 this._deleteList.push(this.pick[i]);
                 if(pickIndex != null){
-                    cc.log('???delete =',this._itemDisplayingPool[pickIndex].name)
                     this._itemDisplayingPool[pickIndex].color = cc.Color.GRAY
                     this._pool.put(this._itemDisplayingPool[pickIndex])
                 }
@@ -239,32 +261,33 @@ export default class List extends cc.Component {
             }
         this._deleteList = []
     }
-    public itenumYAdd(){  
+    private _sendMessage(){  
         if(this.itemNumY >= this._data.length) return
         this.itemNumY++;
-        this._poolGet(this._itemDisplayingPool.length,cc.v2(this._itemDisplayingPool[0].x,this._itemDisplayingPool[this._itemDisplayingPool.length-1].y-this._itemDisplayingPool[this._itemDisplayingPool.length-1].height/2),true)
+        this._poolGet(this._itemDisplayingPool.length,cc.v2(this._itemDisplayingPool[0].x,this._itemDisplayingPool[this._itemDisplayingPool.length-1].y-this._itemDisplayingPool[this._itemDisplayingPool.length-1].height/2+5),true)
         let lastItem = this._itemDisplayingPool[this._itemDisplayingPool.length-1]
-        this.content.height += lastItem.height+20
-        this.content.y -= lastItem.height/2+10
-        this.oriY -= lastItem.height/2+10
+        this.content.height += (lastItem.height+20)
+        cc.log('itemheight='+lastItem.height+'content height = '+this.content.height)
+        this.content.y -= (lastItem.height/2+10)
+        this.oriY -= (lastItem.height/2+10)
         for(var i = 0;i<this._itemDisplayingPool.length;i++){
-            this._itemDisplayingPool[i].y +=lastItem.height/2+10
+            this._itemDisplayingPool[i].y +=(lastItem.height/2+10)
         }
         lastItem.y = lastItem.y-lastItem.height/2-20
         if(lastItem.y -lastItem.height/2 < -this.viewHeight/2)
-            this.content.y += lastItem.height
+            this.scrollTo(this._itemDisplayingPool.length-1)
     }
     private _updateMessageView(){
-        let delMsg = cc.instantiate(this.delMessage)
+        let delMsg = cc.instantiate(this.prefabSet[1])
         delMsg.getComponent(cc.RichText).string = `you have delete a message`
-        delMsg.setPosition(this._itemDisplayingPool[Number(this.pick[0])].position)
+        delMsg.setPosition(0,this._itemDisplayingPool[Number(this.pick[0])].position.y)
         this._itemDisplayingPool[Number(this.pick[0])] = delMsg
         this.content.addChild(delMsg)
         for(var i = Number(this.pick[0]);i < this._itemDisplayingPool.length;i++){
             if(i == 0) this._itemDisplayingPool[i].y = this.content.height/2-this._itemDisplayingPool[0].height/2-20
             else this._itemDisplayingPool[i].y = this._itemDisplayingPool[i-1].y-this._itemDisplayingPool[i-1].height/2-this._itemDisplayingPool[i].height/2-20
         }
-        this.scrollTo(Number(this.pick[0]))
+        // this.scrollTo(Number(this.pick[0]))
     }
     public scrollTo(index : number){
         if(!this.adaptiveSize){
@@ -293,7 +316,7 @@ export default class List extends cc.Component {
             this.itemNumY =1
             if(this.cycle) this.itemNumX = this._data.length+1 
         };
-
+        if(this.scrollVertical && this.scrollHorizontal) this.alignCenter = false
         let sprite = this.node.addComponent(cc.Sprite);
         sprite.spriteFrame = this.viewBg;
         this.node.width = 960;
@@ -315,7 +338,7 @@ export default class List extends cc.Component {
     private _listen(){
         eventCenter.on('select',(node)=>{
             node.forEach(element => {
-                if(element.name == 'wtf') element = element.parent
+                if(element.name == 'label') element = element.parent
                 var flag = true;
                 if(this.cycle){
                     for(var i = 0;i < this.pick.length;i++){
@@ -404,22 +427,13 @@ export default class List extends cc.Component {
         return index
     }
     private _creatrSingleItem(){
-        var labelNode = new cc.Node('wtf');
-        var item = this.templateType == 2?cc.instantiate(this.itemPrefab):cc.instantiate(this.itemNode)
+        var labelNode = new cc.Node('label');
+        var item = this.templateType == 2?cc.instantiate(this.prefabSet[0]):cc.instantiate(this.nodeSet[0])
         item.color = cc.Color.GRAY
         item.addChild(labelNode)
         labelNode.addComponent(cc.RichText)
-        if(!this.adaptiveSize){
-            item.scaleX = this.width / item.width
-            item.scaleY = this.height / item.height
-        }
-        else{
-            item.addComponent('ListItem')
-        }
-        
-        item.on(cc.Node.EventType.TOUCH_END,function(event){
-                eventCenter.emit('select',event.target)
-        },this)
+        let itemCompo = item.addComponent('ListItem')
+        itemCompo.setFontSize(this.fontSize)
         return item;
     }
     private _createItem(){
@@ -487,7 +501,6 @@ export default class List extends cc.Component {
                 while(this._itemDisplayingPool.length !=0) this._poolPut(0)
                 this._itemDisplayingPool = []
                 if(flag == -4) {
-                    cc.log("index=="+index+'pagenumx='+this.pageNumX)
                     this._initializePage(index+this.pageNumX)
                 }
                 else if(flag == -3) this._initializePage(index-this.pageNumX)
@@ -592,10 +605,19 @@ export default class List extends cc.Component {
             this.content.height =this.viewHeight
             this.content.setPosition(0,0)
         }
+        else if(this.adaptiveSize) {
+            this.content.width =this.viewWidth
+            this.content.height = this.fontSize+20
+            this.content.setPosition(0,0)
+        }
         else {
             this.content.width = this.itemNumX*this.width
             this.content.height = this.itemNumY*this.height
-            this.content.setPosition(this.content.width/2-this.viewWidth/2,-(this.content.height/2-this.viewHeight/2))
+            if(this.alignCenter){
+                if(this.scrollVertical) this.content.setPosition(0,-(this.content.height/2-this.viewHeight/2))
+                else this.content.setPosition(this.content.width/2-this.viewWidth/2,0)
+            }
+            else this.content.setPosition(this.content.width/2-this.viewWidth/2,-(this.content.height/2-this.viewHeight/2))
         }        
         //设置参考位置
         this.oriX = this.content.x
@@ -605,9 +627,17 @@ export default class List extends cc.Component {
     private _initializePage(num:number){ //输入要生成page的第一个item序号
         for(var i = 0;i < Math.min(this.itemNumX,this.pageNumX);i++){
             for(var j = 0; j < Math.min(this.itemNumY,this.pageNumY);j++){
-                this._poolGet(num+i+j*this.itemNumX,
-                            cc.v2(-this.content.width/2+this.width/2+i*this.width,this.content.height/2-this.height/2-j*this.height),
-                            true)
+                if(!this.alignCenter) this._poolGet(num+i+j*this.itemNumX,
+                    cc.v2(-this.content.width/2+this.width/2+i*this.width,this.content.height/2-this.height/2-j*this.height),
+                    true)
+                else{
+                    if(this.scrollVertical) this._poolGet(num+i+j*this.itemNumX,
+                        cc.v2(0,this.content.height/2-this.height/2-j*this.height),
+                        true)
+                    if(this.scrollHorizontal) this._poolGet(num+i+j*this.itemNumX,
+                        cc.v2(-this.content.width/2+this.width/2+i*this.width,0),
+                        true)
+                }
             }
         }
     }
@@ -657,7 +687,6 @@ export default class List extends cc.Component {
         item.setPosition(position)
         if(flag) this._itemDisplayingPool.push(item)
         else this._itemDisplayingPool.unshift(item)
-        cc.log('height = '+this._itemDisplayingPool[this._itemDisplayingPool.length-1].height)
         // cc.log('create ====='+itemLabel.string)
         this.content.addChild(item);
     }

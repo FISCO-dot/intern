@@ -180,7 +180,7 @@
       "array": [
         0,
         0,
-        342.18828767032636,
+        350.1990226553324,
         0,
         0,
         0,
@@ -264,7 +264,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 97.87,
+      "width": 153.38,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -310,13 +310,15 @@
     },
     "_enabled": true,
     "templateType": 2,
-    "itemPrefab": {
-      "__uuid__": "3887c679-8791-49e0-83eb-0d7ffc952967"
-    },
-    "itemNode": null,
-    "delMessage": {
-      "__uuid__": "33e5cb9e-9752-4855-afae-018da8cf8bde"
-    },
+    "prefabSet": [
+      {
+        "__uuid__": "3887c679-8791-49e0-83eb-0d7ffc952967"
+      },
+      {
+        "__uuid__": "33e5cb9e-9752-4855-afae-018da8cf8bde"
+      }
+    ],
+    "nodeSet": [],
     "viewBg": {
       "__uuid__": "f0048c10-f03e-4c97-b9d3-3506e1d58952"
     },
@@ -326,15 +328,17 @@
     "pageMode": false,
     "cycle": false,
     "scrollVertical": true,
-    "scrollHorizontal": true,
+    "scrollHorizontal": false,
     "viewWidth": 500,
     "viewHeight": 300,
     "itemNumY": 1,
     "itemNumX": 1,
     "height": 80,
     "width": 80,
+    "fontSize": 30,
     "barWidth": 12,
     "adaptiveSize": true,
+    "maxWidth": 200,
     "_id": "76bLfu4E5K0KrftgEUlcoV"
   },
   {
@@ -403,7 +407,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "New EditBox",
+    "_name": "InputBox",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1
@@ -436,8 +440,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 160,
-      "height": 40
+      "width": 200,
+      "height": 50.4
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -448,8 +452,8 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        767.453,
-        90.65,
+        351.149,
+        96.057,
         0,
         0,
         0,
@@ -501,8 +505,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 160,
-      "height": 40
+      "width": 200,
+      "height": 50.4
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -625,7 +629,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 158,
+      "width": 198,
       "height": 40
     },
     "_anchorPoint": {
@@ -637,7 +641,7 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        -78,
+        -98,
         20,
         0,
         0,
@@ -670,13 +674,17 @@
       "__id__": 14
     },
     "_enabled": true,
-    "_materials": [],
+    "_materials": [
+      {
+        "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
+      }
+    ],
     "_useOriginalSize": true,
     "_string": "",
     "_N$string": "",
     "_fontSize": 20,
     "_lineHeight": 25,
-    "_enableWrapText": false,
+    "_enableWrapText": true,
     "_N$file": null,
     "_isSystemFontUsed": true,
     "_spacingX": 0,
@@ -743,8 +751,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 158,
-      "height": 40
+      "width": 198,
+      "height": 50.4
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -755,8 +763,8 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        -78,
-        20,
+        -98,
+        25.2,
         0,
         0,
         0,
@@ -794,8 +802,8 @@
       }
     ],
     "_useOriginalSize": true,
-    "_string": "Enter text here...",
-    "_N$string": "Enter text here...",
+    "_string": "press enter to send",
+    "_N$string": "press enter to send",
     "_fontSize": 20,
     "_lineHeight": 25,
     "_enableWrapText": false,
@@ -849,7 +857,7 @@
         "__id__": 21
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 26
@@ -878,8 +886,8 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        398.283,
-        91.911,
+        875.861,
+        425.315,
         0,
         0,
         0,
@@ -1262,8 +1270,8 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        578.501,
-        91.911,
+        634.368,
+        99.119,
         0,
         0,
         0,
@@ -1464,7 +1472,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "1a32fc76-f0bd-4f66-980f-56929c0ca0b3"
+      "__uuid__": "e7aba14b-f956-4480-b254-8d57832e273f"
     },
     "_type": 1,
     "_sizeMode": 0,
@@ -1573,7 +1581,7 @@
       "a": 200
     },
     "_N$normalSprite": {
-      "__uuid__": "1a32fc76-f0bd-4f66-980f-56929c0ca0b3"
+      "__uuid__": "e7aba14b-f956-4480-b254-8d57832e273f"
     },
     "_N$pressedSprite": {
       "__uuid__": "e9ec654c-97a2-4787-9325-e6a10375219a"

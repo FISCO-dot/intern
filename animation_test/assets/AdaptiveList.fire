@@ -180,7 +180,7 @@
       "array": [
         0,
         0,
-        350.1990226553324,
+        342.18828767032636,
         0,
         0,
         0,
@@ -302,7 +302,7 @@
     "_id": "d7c1rSjfBJya5uezyBMPb2"
   },
   {
-    "__type__": "a612csnxLNBk6wDPo/i5+eC",
+    "__type__": "870410wk/hHXaqFHtnWyBsy",
     "_name": "",
     "_objFlags": 0,
     "node": {
@@ -333,13 +333,15 @@
     "viewHeight": 300,
     "itemNumY": 1,
     "itemNumX": 1,
+    "adaptiveSize": true,
     "height": 80,
     "width": 80,
+    "alignCenter": false,
     "fontSize": 30,
     "barWidth": 12,
-    "adaptiveSize": true,
+    "messageMode": true,
     "maxWidth": 200,
-    "_id": "76bLfu4E5K0KrftgEUlcoV"
+    "_id": "cejsEUjsFDJ6JICrLkddQv"
   },
   {
     "__type__": "cc.Canvas",

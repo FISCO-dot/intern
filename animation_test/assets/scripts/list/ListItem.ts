@@ -27,16 +27,23 @@ export default class ListItem extends cc.Component {
         cc.log('parentname',this.node.parent.name)
         if(text.length == 0) {text = '';return}
         this.node.height = this.textNode.height
-        this.node.width = this.textNode.width+20
+        // this.node.width = this.textNode.width+20
+        this.node.width = text.length*this.fontsize
     }
     private _setItemSize(){
         let listNode = this.node.parent.parent.parent
         let scrollComponent = listNode.getComponent('CustomScroll_2')
         this.text.maxWidth = scrollComponent.maxWidth;
-        if(!scrollComponent.adaptiveSize){
-            this.node.scaleX = scrollComponent.width / this.node.width
-            this.node.scaleY = scrollComponent.height / this.node.height
-            this.text.horizontalAlign = 1
+        if(!scrollComponent.messageMode){
+            if(!scrollComponent.adaptiveSize){
+                this.node.scaleX = scrollComponent.width / this.node.width
+                this.node.scaleY = scrollComponent.height / this.node.height
+                this.text.horizontalAlign = 1
+            }
+            else{
+                this.text.horizontalAlign = 1
+                this._loadText(this.text.string)
+            }
         }
         else{
             this.text.horizontalAlign = 0

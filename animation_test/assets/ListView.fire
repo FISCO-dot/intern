@@ -186,7 +186,7 @@
       "array": [
         0,
         0,
-        350.1990226553324,
+        342.18828767032636,
         0,
         0,
         0,
@@ -270,8 +270,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 200,
-      "height": 100
+      "width": 153.38,
+      "height": 50.4
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -308,7 +308,7 @@
     "_id": "70v2JIq7pHsZ0yClbAcd7l"
   },
   {
-    "__type__": "a612csnxLNBk6wDPo/i5+eC",
+    "__type__": "870410wk/hHXaqFHtnWyBsy",
     "_name": "",
     "_objFlags": 0,
     "node": {
@@ -328,22 +328,23 @@
     "barBg": {
       "__uuid__": "e7aba14b-f956-4480-b254-8d57832e273f"
     },
-    "pageMode": true,
+    "pageMode": false,
     "cycle": false,
     "scrollVertical": true,
-    "scrollHorizontal": true,
+    "scrollHorizontal": false,
     "viewWidth": 300,
     "viewHeight": 300,
-    "itemNumY": 100,
-    "itemNumX": 10,
+    "itemNumY": 20,
+    "itemNumX": 50,
+    "adaptiveSize": true,
     "height": 80,
     "width": 80,
     "alignCenter": true,
     "fontSize": 30,
     "barWidth": 12,
-    "adaptiveSize": false,
+    "messageMode": false,
     "maxWidth": 200,
-    "_id": "22JWF9y7FM+7BG39Nb8Kxd"
+    "_id": "3eHWJbB/lK8aBithDgeaFd"
   },
   {
     "__type__": "cc.Node",
@@ -1941,6 +1942,6 @@
     "list": {
       "__id__": 6
     },
-    "_id": "c6bKnjtxhLyLkK/CWRiGCJ"
+    "_id": "fbaGbrbFFMJYTVdpUU+Ek5"
   }
 ]

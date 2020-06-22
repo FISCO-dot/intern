@@ -37,28 +37,34 @@ export default class List extends cc.Component {
     barBg :cc.SpriteFrame = null;
     @property({
         displayName:'Page',
-        tooltip:'翻页模式'
+        tooltip:'翻页模式',
+        visible(){
+            return !this.messageMode
+        }
     })
     pageMode = false
     @property({
         displayName:'cycle',
-        tooltip:'是否为循环列表'
+        tooltip:'是否为循环列表',
+        visible(){
+            return !this.messageMode
+        }
     })
     cycle = false
     @property({
         displayName:'Vertical',
         visible(){
-            if((this.cycle&&this.scrollVertical)||this.adaptiveSize) this.scrollHorizontal = false;
-            if(this.adaptiveSize) this.scrollVertical = true
-            return !(this.cycle && this.scrollHorizontal)
+            if(((this.cycle || this.adaptiveSize)&&this.scrollVertical)||this.messageMode) this.scrollHorizontal = false;
+            if(this.messageMode) this.scrollVertical = true
+            return !((this.cycle || this.adaptiveSize) && this.scrollHorizontal)
         }
     })
     scrollVertical = true
     @property({
         displayName:'Horizontal',
         visible(){
-            if(this.cycle&&this.scrollHorizontal) this.scrollVertical = false;
-            return !(this.cycle && this.scrollVertical) && !this.adaptiveSize
+            if((this.cycle || this.adaptiveSize)&&this.scrollHorizontal) this.scrollVertical = false;
+            return !((this.cycle || this.adaptiveSize) && this.scrollVertical) && !this.messageMode
         }
     })
     scrollHorizontal = false
@@ -80,7 +86,8 @@ export default class List extends cc.Component {
         displayName:'Item Numbers Y',
         tooltip:'Y方向单元个数',
         visible(){
-            return this.scrollVertical && !this.cycle && !this.adaptiveSize
+            if(this.messageMode) this.itemNumY = 1
+            return this.scrollVertical && !this.cycle && !this.messageMode
         }
     })
     itemNumY:number = 1;
@@ -90,10 +97,12 @@ export default class List extends cc.Component {
         displayName:'Item Numbers X',
         tooltip:'X方向单元个数',
         visible(){
-            return this.scrollHorizontal && !this.cycle && !this.adaptiveSize
+            return this.scrollHorizontal && !this.cycle && !this.messageMode 
         }
     })
     itemNumX:number = 1;
+    @property   //选中后只能选择行或列模式，并且可以选择message mode
+    adaptiveSize : boolean = false;
     @property({
         type:cc.Integer,
         min: 0,
@@ -118,7 +127,7 @@ export default class List extends cc.Component {
         displayName:'Align Center',
         tooltip:"是否居中显示",
         visible(){
-            return !(this.scrollVertical && this.scrollHorizontal)
+            return !(this.scrollVertical && this.scrollHorizontal) && !this.messageMode
         }
     })
     alignCenter : boolean = false
@@ -129,16 +138,20 @@ export default class List extends cc.Component {
         displayName:'Bar Width'
     })
     barWidth:number = 12
-    @property({
-        displayName:'AdaptiveSize',
-        tooltip:'item尺寸是否自适应'
+    @property({            //只能是vertical
+        displayName:'Message Mode',
+        visible(){
+            if(!this.adaptiveSize)  this.messageMode = false
+            return this.adaptiveSize
+        }
     })
-    adaptiveSize : boolean = false
+    messageMode : boolean = false
+
     @property({
         displayName:'Max Width',
         tooltip:'对话框的最大宽度',
         visible(){
-            return this.adaptiveSize
+            return this.messageMode
         }
     })
     maxWidth : number = 200
@@ -165,6 +178,7 @@ export default class List extends cc.Component {
                 this._data.push('')
             } 
         }
+        if(this.adaptiveSize) this._calculateAdaptivePosition();
     }
     public addData(data:any[] | any ,position?: number){ //在指定位置追加数据
         if(position < 0) {
@@ -174,16 +188,42 @@ export default class List extends cc.Component {
         if(position >= this._data.length || position == undefined){
             cc.log('data = '+data)
             if(position >=this._data.length) cc.warn('your position is too big')
-            data.forEach(element => {
-                this._data.push(String(element))
-            });
-        }
-        else{
-            for(var i = 0 ; i<data.length;i++){   
-                this._data.splice(position+i,0,String(data[i]))
+            if(typeof data == 'object'){
+                data.forEach(element => {
+                    this._data.push(String(element))
+                });
+            }
+            else{               
+                this._data.push(String(data))
             }
         }
-        if(this.adaptiveSize) this._sendMessage()
+        else{
+            if(typeof data == 'object'){
+                for(var i = 0 ; i<data.length;i++){   
+                    this._data.splice(position+i,0,String(data[i]))
+                }
+            }
+            else{
+                this._data.splice(position,0,String(data))
+                cc.log(this._data)            
+            }
+        }
+        if(this.messageMode) this._sendMessage()
+        if(this.adaptiveSize) this._calculateAdaptivePosition();
+    }
+    private _Shrinkanimation(ob:any,callback?:Function){
+        let scaleX = ob.scaleX
+        let scaleY = ob.scaleY
+        cc.tween(ob)
+            .to(.3, {scaleX: .1,scaleY:.1})      
+            .call(() => {                     
+                ob.color = cc.Color.GRAY
+                this._pool.put(ob) 
+                ob.scaleX = scaleX
+                ob.scaleY = scaleY
+                if(callback != undefined) callback()
+            })    
+            .start()
     }
     private _deleteList = []
     public deleteItem(){
@@ -196,19 +236,18 @@ export default class List extends cc.Component {
             if(this.cycle){
                 for(var j = 0; j< this._itemDisplayingPool.length;j++){
                     if((Number(this._itemDisplayingPool[j].name)-Number(this.pick[i]))%this._data.length == 0) {
-                        if(this._itemDisplayingPool.length < this._data.length) {
-                            this._deleteList.push(this.pick[i]);
-                            this._itemDisplayingPool[j].color =cc.Color.GRAY
-                            this._pool.put(this._itemDisplayingPool[j])
-                            cc.log('meilema'+j)
+                        if(this._itemDisplayingPool.length < this._data.length) {                          
+                            this._Shrinkanimation(this._itemDisplayingPool[j],()=>{
+                                this._deleteList.push(this.pick[i]);
+                            })
                             break
                         }
                         else{
                             while(j < this._itemDisplayingPool.length){
-                                this._deleteList.push(this._itemDisplayingPool[j].name);
-                                this._itemDisplayingPool[j].color =cc.Color.GRAY
-                                this._pool.put(this._itemDisplayingPool[j])
-                                j += this._data.length
+                                this._Shrinkanimation(this._itemDisplayingPool[j],()=>{
+                                    this._deleteList.push(this._itemDisplayingPool[j].name);
+                                    j += this._data.length
+                                })
                             }
                         }
                     }
@@ -222,14 +261,14 @@ export default class List extends cc.Component {
                 let pickIndex = this._findItemByname(this._itemDisplayingPool,this.pick[i])
                 this._deleteList.push(this.pick[i]);
                 if(pickIndex != null){
-                    this._itemDisplayingPool[pickIndex].color = cc.Color.GRAY
-                    this._pool.put(this._itemDisplayingPool[pickIndex])
+                    this._Shrinkanimation(this._itemDisplayingPool[pickIndex])
                 }
                 this._data.splice(Number(name),1)
-                if(this.adaptiveSize) this._updateMessageView()
+                if(this.messageMode) this._updateMessageView()
             }
         };
         this.pick = []
+        
     }
     public clearData(){  //清空数据
         this._data = [];
@@ -290,7 +329,7 @@ export default class List extends cc.Component {
         // this.scrollTo(Number(this.pick[0]))
     }
     public scrollTo(index : number){
-        if(!this.adaptiveSize){
+        if(!this.messageMode){
             let column = index / this.itemNumX
             let row = index % this.itemNumX
             this.content.setPosition(this.oriX+row*this.width-this.width/2,this.oriY-column*this.height+this.height/2)
@@ -323,8 +362,7 @@ export default class List extends cc.Component {
         this.node.height = 640;
         //创建scroll view
         this._setScrollView();
-        //创建scrollbar
-        this._setBar();  
+ 
         //direction
     }
     start(){
@@ -332,6 +370,8 @@ export default class List extends cc.Component {
         this.pageNumY = this.scrollVertical? Math.floor(this.view.height/this.height):1;
         this.pageNum = this.pageNumX*this.pageNumY;
         this._freshItem();
+        //创建scrollbar
+        this._setBar(); 
         this._listen();
     }
     public pick = [];  //用于储存选中的item的 name
@@ -402,7 +442,7 @@ export default class List extends cc.Component {
                         }
                     }
                     else{
-                        if(this.adaptiveSize){            
+                        if(this.messageMode){            
                             element.color = cc.Color.RED
                             if(this.pick.length == 0) this.pick.push(element.name)
                             else{
@@ -447,28 +487,54 @@ export default class List extends cc.Component {
     private _index:number = 0;  //本list中item的代号
     private _calculateIndex(x:number,y:number):number
     {
+        if(this.adaptiveSize){
+            let i = 0
+            cc.log('???'+this.pos[i].x+this.content.width/2);
+            ------if(this.scrollHorizontal) while(this.oriX-x > this.pos[i].x+this.content.width/2){i++}
+            else while(y-this.oriY>this.content.height/2-this.pos[i].y) i++
+            cc.log('i='+i)
+            return i-1 
+        }
         return Math.floor((y - this.oriY) / this.height) * this.itemNumX + Math.floor((- x + this.oriX) / this.width)
+    }
+    private pos : cc.Vec2[] = []
+    private _calculateAdaptivePosition(){   //自动对中
+        let positionX : number
+        let positionY : number
+        for(var i = 0;i < this._data.length;i++){
+            if(this.scrollVertical){
+                positionX = 0
+                if(i == 0) {cc.log('viewheight='+this.view.height);positionY = this.itemNumY*this.height/2-Math.ceil(this._data[i].length*this.fontSize/2/this.maxWidth) * this.fontSize/2}
+                else positionY -= Math.ceil(this._data[i].length*this.fontSize/2/this.maxWidth) * this.fontSize+Math.ceil(this._data[i-1].length*this.fontSize/2/this.maxWidth) * this.fontSize
+            }
+            else{
+                positionY = 0
+                if(i == 0) positionX = -this.itemNumX*this.width/2 + this.width/2
+                positionX += this.width
+            }
+            this.pos.push(cc.v2(positionX,positionY))
+        }
     }
     private onceControl = true;
     private _isViewFull(){ 
         if(!this.pageMode)
        { //-1:上边行不够   -2：下边行不够   -3：左边列不够    -4：右边列不够 
 
-            if((this.scrollHorizontal) &&  (this._index >=0 &&Number(this._itemDisplayingPool[0].name) % this.itemNumX>0||this.cycle) && //不是第一列
+            if((this.scrollHorizontal) &&  this._index >=0 &&Number(this._itemDisplayingPool[0].name) % this.itemNumX>0||this.cycle && //不是第一列
             this._findItemByname(this._itemDisplayingPool,String(this._index-1)) == null ) //需要显示的列序数小于已经加载的列序数
             {cc.log('-3 ');cc.log('index-1='+String(this._index-1));return -3;}
             else if((this.scrollHorizontal)&&this.itemNumX - 1 - this._index % this.itemNumX >= this.pageNumX &&  //不是最后几列
             Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name)%this.itemNumX - this._index%this.itemNumX  < Math.min(this.itemNumX,this.pageNumX)) //加载出来的item与现在的item列数之差过小
             {cc.log('-4');return -4;}
-            else if((this.scrollVertical)&& (Number(this._itemDisplayingPool[0].name) >= this.itemNumX || this.cycle)  && //不是第一行
+            else if((this.scrollVertical)&& Number(this._itemDisplayingPool[0].name) >= this.itemNumX   && //不是第一行
             Math.floor(this._index/this.itemNumX-Number(this._itemDisplayingPool[0].name)/this.itemNumX) < 0) //需要显示的行序数小于已经加载的行序数
                 {cc.log('-1==='+this._index);return -1;}   
             else if( (this.scrollVertical) && 
-            (((this.itemNumY*this.itemNumX - 1-this._index)/this.itemNumX >= this.pageNumY)||this.adaptiveSize)  //不是最后几行
+            ((this.itemNumY*this.itemNumX - 1-this._index)/this.itemNumX >= this.pageNumY)  //不是最后几行
             && Math.floor(Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name)/this.itemNumX-this._index / this.itemNumX) < Math.min(this.itemNumY,this.pageNumY)) //加载出来的item与现在显示的item行数之差国小
             {cc.log('-2==',this.content.x,'==',this.oriX,'==',this.content.y,'==',this.oriY);return -2}
             else {
-                cc.log('?----',Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name)/this.itemNumX-this._index / this.itemNumX);return 1;
+                return 1;
             }
         }
         else{ //-4：往左滑 -3：往右滑 -2：往上滑 -1：往下滑
@@ -527,7 +593,10 @@ export default class List extends cc.Component {
                         if(columnNum > this.pageNumY && rowNum >this.pageNumX ){
                             this._poolPut(this._itemDisplayingPool.length-1)
                         }
-                        this._poolGet(idStart-this.itemNumX+i,cc.v2(posX + i*this.width,posY + this.height),false)
+                        if(!this.adaptiveSize)  this._poolGet(idStart-this.itemNumX+i,cc.v2(posX + i*this.width,posY + this.height),false)
+                        else {
+                            this._poolGet(idStart-this.itemNumX+i,this.pos[Number(idStart-this.itemNumX+i)],false)
+                        }
                         if(this.cycle){
                             this.content.height += this.height*2
                             this.itemNumY ++
@@ -541,7 +610,8 @@ export default class List extends cc.Component {
                             if(columnNum > this.pageNumY && rowNum >this.pageNumX ){
                                 this._poolPut(0)
                             }
-                            this._poolGet(idLast+this.itemNumX-i,cc.v2(posX-i*this.width,posY-this.height),true)
+                            if(!this.adaptiveSize) this._poolGet(idLast+this.itemNumX-i,cc.v2(posX-i*this.width,posY-this.height),true)
+                            else {cc.log('index='+(idLast+this.itemNumX-i)+' array ='+this.pos);this._poolGet(idLast+this.itemNumX-i,this.pos[idLast+this.itemNumX-i],true)}
                             if(this.cycle){
                                 this.content.height += this.height*2
                                 this.itemNumY ++
@@ -562,7 +632,6 @@ export default class List extends cc.Component {
                         {
                             for(var i = 0;i < this._itemDisplayingPool.length;i++){
                             if(((Number(this._itemDisplayingPool[i].name) - idLast) % this.itemNumX) == 1 ){
-
                                 this._poolPut(i)
                                 i--;
                             }
@@ -581,7 +650,6 @@ export default class List extends cc.Component {
                         if(columnNum > this.pageNumY || rowNum > this.pageNumX)
                         {for(var i = 0;i < this._itemDisplayingPool.length;i++){
                             if(((Number(this._itemDisplayingPool[i].name) - idStart) % this.itemNumX) == 0 ){
-
                                 this._poolPut(i);
                                 i--;
                             }
@@ -605,10 +673,24 @@ export default class List extends cc.Component {
             this.content.height =this.viewHeight
             this.content.setPosition(0,0)
         }
-        else if(this.adaptiveSize) {
-            this.content.width =this.viewWidth
-            this.content.height = this.fontSize+20
-            this.content.setPosition(0,0)
+        else if(this.messageMode) {
+
+                this.content.width =this.viewWidth
+                this.content.height = this.fontSize+20
+                this.content.setPosition(0,0)
+
+            // else{
+            //     if(this.scrollHorizontal){
+            //         this.content.width = this.itemNumX*this.width
+            //         this.content.height = this.viewHeight
+            //         this.content.setPosition(this.content.width/2-this.viewWidth/2,0)
+            //     }
+            //     else{
+            //         this.content.width = this.viewWidth
+            //         this.content.height = this.pos[this.pos.length-1].y-Math.ceil(this._data[this._data.length-1].length*this.fontSize/2/this.maxWidth)*this.fontSize*2
+            //         this.content.setPosition(0,-(this.content.height/2-this.viewHeight/2))
+            //     }
+            // }
         }
         else {
             this.content.width = this.itemNumX*this.width
@@ -631,9 +713,11 @@ export default class List extends cc.Component {
                     cc.v2(-this.content.width/2+this.width/2+i*this.width,this.content.height/2-this.height/2-j*this.height),
                     true)
                 else{
-                    if(this.scrollVertical) this._poolGet(num+i+j*this.itemNumX,
-                        cc.v2(0,this.content.height/2-this.height/2-j*this.height),
-                        true)
+                    if(this.scrollVertical) {if(!this.adaptiveSize) this._poolGet(num+i+j*this.itemNumX,
+                        cc.v2(0,this.content.height/2-this.height/2-j*this.height),true);
+                        else this._poolGet(num+i+j*this.itemNumX,
+                            cc.v2(this.pos[num+i+j*this.itemNumX]),true);
+                    }
                     if(this.scrollHorizontal) this._poolGet(num+i+j*this.itemNumX,
                         cc.v2(-this.content.width/2+this.width/2+i*this.width,0),
                         true)
@@ -703,8 +787,8 @@ export default class List extends cc.Component {
             });
         }
         // this._cyclicContrl();
-        if(!this.adaptiveSize) this._loadScrollRecord();
-        if(!this.cycle && !this.adaptiveSize){
+        if(!this.messageMode) this._loadScrollRecord();
+        if(!this.cycle && !this.messageMode){
             if((-this.content.x+this.oriX) < -50 ||(-this.oriY+this.content.y) < -50) this._freshItem(); //上拉或左拉刷新
         }
         // cc.log('v2===='+(this.content.x-this.oriX)+(this.oriY-this.content.y))
@@ -724,7 +808,7 @@ export default class List extends cc.Component {
             barSprite.spriteFrame = this.barBg;
             barComponent.handle = barSprite
             ScrollbarX.x = 0
-            ScrollbarX.y = this.itemNumY>1? -this.view.height/2:this.view.height/2-this.height
+            ScrollbarX.y = this.itemNumY>1? -this.view.height/2:this.content.y-this.height/2
             cc.log('viewheight'+this.view.height)
             ScrollbarX.height = this.barWidth
             ScrollbarX.width = this.view.width;
@@ -740,7 +824,7 @@ export default class List extends cc.Component {
             let barSprite = bar.addComponent(cc.Sprite)
             barSprite.spriteFrame = this.barBg;
             barComponent.handle = barSprite
-            ScrollbarY.x = this.itemNumX>1? this.view.width/2:-this.viewWidth/2+this.width
+            ScrollbarY.x = this.itemNumX>1? this.view.width/2:this.content.x+this.width/2
             ScrollbarY.y = 0
             ScrollbarY.height = this.view.height
             ScrollbarY.width = this.barWidth

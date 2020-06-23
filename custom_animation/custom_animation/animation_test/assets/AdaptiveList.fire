@@ -180,7 +180,7 @@
       "array": [
         0,
         0,
-        310.17338291426523,
+        342.24241425806287,
         0,
         0,
         0,
@@ -265,7 +265,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 153.38,
-      "height": 50.4
+      "height": 43
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -337,7 +337,7 @@
     "height": 80,
     "width": 80,
     "alignCenter": true,
-    "interval": 0,
+    "interval": 20,
     "fontSize": 30,
     "barWidth": 12,
     "messageMode": true,

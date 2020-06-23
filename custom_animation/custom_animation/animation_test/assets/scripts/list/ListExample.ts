@@ -10,7 +10,7 @@ export default class NewClass extends cc.Component {
     // LIFE-CYCLE CALLBACKS:
     data = []
     onLoad () {
-        for(var i = 0;i < 10 ;i++){
+        for(var i = 0;i < 100 ;i++){
             this.data.push(i)
         }
         this.list.loadData(this.data,false)

@@ -1,5 +1,5 @@
 
-const {ccclass, property} = cc._decorator;
+const {ccclass, executionOrder} = cc._decorator;
 import {eventCenter} from './CustomScroll_2'
 @ccclass
 export default class ListItem extends cc.Component {
@@ -11,7 +11,7 @@ export default class ListItem extends cc.Component {
     textNode :cc.Node = null
     // LIFE-CYCLE CALLBACKS:
     
-    onLoad(){
+    itemOnLoad(){
         this.textNode = this.node.children[0]
         this.text = this.node.getComponentInChildren(cc.RichText)
         this.text.fontSize = this.fontsize
@@ -20,8 +20,6 @@ export default class ListItem extends cc.Component {
         this.node.on(cc.Node.EventType.TOUCH_END,function(event){
             eventCenter.emit('select',event.target)
         },this)
-
-
     }
     private _loadText(text:string){
         cc.log('parentname',this.node.parent.name)
@@ -50,7 +48,6 @@ export default class ListItem extends cc.Component {
                     this.text.horizontalAlign = 0
                     this.text.maxWidth = scrollComponent.maxWidth;
                     this._loadText(this.text.string)
-                    this.node.x = this.node.parent.width/2-this.textNode.width/2 - 50
                 }
                 else{
                     this.text.horizontalAlign = 1

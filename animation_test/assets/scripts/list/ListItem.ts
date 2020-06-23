@@ -1,5 +1,5 @@
 
-const {ccclass, property} = cc._decorator;
+const {ccclass, executionOrder} = cc._decorator;
 import {eventCenter} from './CustomScroll_2'
 @ccclass
 export default class ListItem extends cc.Component {
@@ -11,7 +11,7 @@ export default class ListItem extends cc.Component {
     textNode :cc.Node = null
     // LIFE-CYCLE CALLBACKS:
     
-    onLoad(){
+    itemOnLoad(){
         this.textNode = this.node.children[0]
         this.text = this.node.getComponentInChildren(cc.RichText)
         this.text.fontSize = this.fontsize
@@ -20,35 +20,42 @@ export default class ListItem extends cc.Component {
         this.node.on(cc.Node.EventType.TOUCH_END,function(event){
             eventCenter.emit('select',event.target)
         },this)
-
-
     }
     private _loadText(text:string){
         cc.log('parentname',this.node.parent.name)
         if(text.length == 0) {text = '';return}
         this.node.height = this.textNode.height
-        // this.node.width = this.textNode.width+20
-        this.node.width = text.length*this.fontsize
+        this.node.width = this.textNode.width+20
     }
     private _setItemSize(){
         let listNode = this.node.parent.parent.parent
         let scrollComponent = listNode.getComponent('CustomScroll_2')
-        this.text.maxWidth = scrollComponent.maxWidth;
-        if(!scrollComponent.messageMode){
-            if(!scrollComponent.adaptiveSize){
-                this.node.scaleX = scrollComponent.width / this.node.width
-                this.node.scaleY = scrollComponent.height / this.node.height
-                this.text.horizontalAlign = 1
-            }
-            else{
-                this.text.horizontalAlign = 1
-                this._loadText(this.text.string)
-            }
+        
+        if(!scrollComponent.adaptiveSize){
+            this.node.scaleX = scrollComponent.width / this.node.width
+            this.node.scaleY = scrollComponent.height / this.node.height
+            this.text.horizontalAlign = 1
         }
         else{
-            this.text.horizontalAlign = 0
-            this._loadText(this.text.string)
-            this.node.x = this.node.parent.width/2-this.textNode.width/2 - 50
+            if(scrollComponent.scrollHorizontal){
+                this.text.horizontalAlign = 1
+                this.text.maxWidth = 0
+                this._loadText(this.text.string)
+            }
+
+            else{
+                if(scrollComponent.messageMode){
+                    this.text.horizontalAlign = 0
+                    this.text.maxWidth = scrollComponent.maxWidth;
+                    this._loadText(this.text.string)
+                }
+                else{
+                    this.text.horizontalAlign = 1
+                    this.text.maxWidth = scrollComponent.maxWidth;
+                    this.node.width = scrollComponent.maxWidth
+                    this.node.height = this.textNode.height
+                }
+            }
         }
     }
     public setFontSize(fontSize:number){

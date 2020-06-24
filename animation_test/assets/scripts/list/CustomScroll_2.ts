@@ -31,6 +31,8 @@ export default class List extends cc.Component {
         }
     })
     nodeSet : cc.Node[] = []
+    @property
+    singlePick : boolean = true
     @property(cc.SpriteFrame)
     viewBg :cc.SpriteFrame = null;
     @property(cc.SpriteFrame)
@@ -75,13 +77,13 @@ export default class List extends cc.Component {
         displayName:'View Width X',
         tooltip:'X方向列表长度',
     })
-    viewWidth:number = 100
+    viewWidth:number = 300
     @property({
         type:cc.Integer,
         displayName:'View Height Y',
         tooltip:'Y方向列表长度',
     })
-    viewHeight:number = 0
+    viewHeight:number = 300
     @property({
         type:cc.Integer,
         min: 0,
@@ -145,6 +147,7 @@ export default class List extends cc.Component {
     @property({
         displayName:'messageMode',
         visible(){
+            if(this.messageMode) this.singlePick = true
             if(!this.adaptiveSize) this.messageMode = false
             return this.adaptiveSize
         }
@@ -184,9 +187,10 @@ export default class List extends cc.Component {
         }
     }
     public addData(data:any[] | any ,position?: number){ //在指定位置追加数据
+        let index = []
         if(position < 0) {
             cc.error('your position is not available')
-            return
+            return index
         }
         if(position >= this._data.length || position == undefined){
             cc.log('data = '+data)
@@ -194,16 +198,45 @@ export default class List extends cc.Component {
             if(typeof data == 'object'){
                 data.forEach(element => {
                     this._data.push(String(element))
+                    index.push(this._data.length-1)
                 });
             }
-            else this._data.push(String(data))
+            else {this._data.push(String(data));index.push(this._data.length - 1) }
         }
         else{
-            for(var i = 0 ; i<data.length;i++){   
-                this._data.splice(position+i,0,String(data[i]))
+            if(typeof data == 'object'){
+                for(var i = 0 ; i<data.length;i++){   
+                    this._data.splice(position+i,0,String(data[i]))
+                    index.push(position+i)
+                }
+            }
+            else{
+                this._data.splice(position,0,String(data))
+                index.push(position)
             }
         }
         if(this.messageMode) this._sendMessage()
+        return index
+    }
+    public showDetail(index:number,transverse:boolean){
+        let i = this._findItemByname(this._itemDisplayingPool,String(index))
+        if(transverse == false){
+            this._itemDisplayingPool[i].height  += 20;
+            this._itemDisplayingPool[i].setSiblingIndex(1000)
+            for(var j = 0 ;j < this._itemPosition.length;j++){
+                if(j<i) this._itemPosition[String(j)].y += 10
+                if(j>i) this._itemPosition[String(j)].y -= 10
+            }
+        }
+        else{
+            this._itemDisplayingPool[i].height -=20
+
+            for(var j = 0 ;j < this._itemPosition.length;j++){
+                if(j<i) this._itemPosition[String(j)].y -= 10
+                if(j>i) this._itemPosition[String(j)].y += 10
+            }
+        }
+        this.updateView()
     }
     private _Shrinkanimation(ob:any,callback?:Function){
         let scaleX = ob.scaleX
@@ -296,14 +329,21 @@ export default class List extends cc.Component {
             }
         this._deleteList = []
     }
+    public returnPick(){
+        let itemList = []
+        for(var i = 0;i < this.pick.length;i++){
+            itemList.push(this._itemDisplayingPool[this._findItemByname(this._itemDisplayingPool,this.pick[i])])
+        }
+        return itemList
+    }
     private _sendMessage(){  
         if(this.itemNumY >= this._data.length) return
         this.itemNumY++;
         this._poolGet(this._itemDisplayingPool.length,true)
         this.updateView()
         let lastItem = this._itemDisplayingPool[this._itemDisplayingPool.length-1]
-        // if(lastItem.y -lastItem.height/2 < -this.viewHeight/2)
-        //     this.content.y += 
+        // if(-this._itemPosition[String(this._itemDisplayingPool.length-1)].y-(this.content.y-this.viewHeight/2) > this.viewWidth)
+        //     this.scrollTo(this._itemDisplayingPool.length-1)
     }
     private _updateMessageView(){
         let delMsg = cc.instantiate(this.prefabSet[1])
@@ -318,7 +358,7 @@ export default class List extends cc.Component {
 
     }
     public scrollTo(index : number){
-        if(!this.messageMode){
+        if(!this.adaptiveSize){
             let column = index / this.itemNumX
             let row = index % this.itemNumX
             this.content.setPosition(this.oriX+row*this.width-this.width/2,this.oriY-column*this.height+this.height/2)
@@ -331,6 +371,7 @@ export default class List extends cc.Component {
                 for(index = index -1;index >=0;index --){
                     this.content.y += this._itemDisplayingPool[index].height+20
                 }
+                cc.log('content y = '+ this.content.y)
             }
         }
     }
@@ -346,13 +387,11 @@ export default class List extends cc.Component {
         };
         if(this.scrollVertical && this.scrollHorizontal) this.alignCenter = false
         let sprite = this.node.addComponent(cc.Sprite);
-        sprite.spriteFrame = this.viewBg;
-        this.node.width = 960;
-        this.node.height = 640;
+        // sprite.spriteFrame = this.viewBg;
+
         //创建scroll view
         this._setScrollView();
-        //创建scrollbar
-        this._setBar();  
+
         //direction
     }
     start(){
@@ -360,13 +399,22 @@ export default class List extends cc.Component {
         this.pageNumY = this.scrollVertical? Math.floor(this.view.height/this.height):1;
         this.pageNum = this.pageNumX*this.pageNumY;
         this._freshItem();
+        //创建scrollbar
+        this._setBar();  
         this._listen();
     }
     public pick = [];  //用于储存选中的item的 name
+    public listen(callback:Function){
+        eventCenter.on('select'+this.node.name,(node)=>{
+            callback(node)
+        })
+    }
     private _listen(){
-        eventCenter.on('select',(node)=>{
+        eventCenter.on('select'+this.node.name,(node)=>{
             node.forEach(element => {
                 if(element.name == 'label') element = element.parent
+                cc.log('jiaoyan  ' + this.node.name)
+                // if(this.node != element.parent.parent.parent) return
                 cc.log(element.position)
                 var flag = true;
                 if(this.cycle){
@@ -381,7 +429,7 @@ export default class List extends cc.Component {
                         break;}
                     }
                 }
-                if(!flag){
+                if(!flag){   //反选
                     if(this.cycle){
                         if(this._itemDisplayingPool.length < this._data.length){
                             element.color = cc.Color.BLUE
@@ -406,7 +454,7 @@ export default class List extends cc.Component {
                         cc.log('unpick  '+element.name)
                     }
                 }
-                else{
+                else{   //正选
                     if(this.cycle){
                         if(this._itemDisplayingPool.length < this._data.length){
                             element.color = cc.Color.RED
@@ -431,7 +479,7 @@ export default class List extends cc.Component {
                         }
                     }
                     else{
-                        if(this.messageMode){            
+                        if(this.singlePick){            
                             element.color = cc.Color.RED
                             if(this.pick.length == 0) this.pick.push(element.name)
                             else{
@@ -700,7 +748,7 @@ export default class List extends cc.Component {
         this._pool.clear();
         this._itemDisplayingPool = [];
         this.pick = [];
-
+        this._itemPosition = []
         if(this.pageMode) {
             this.content.width = this.viewWidth
             this.content.height =this.viewHeight
@@ -769,7 +817,7 @@ export default class List extends cc.Component {
             if(index >= 0) itemLabel.string = this._data[index%this._data.length]
             else {
                 while(index < 0) index +=this._data.length
-                itemLabel.string = this._data[index]
+                itemLabel.string = this._data[index] + '<on click="handler"> click me! </on>'
             }
             this.pick.forEach(element => {
                if((Number(item.name)-Number(element))%this._data.length == 0) {
@@ -809,7 +857,7 @@ export default class List extends cc.Component {
         if(!this.cycle && !this.messageMode){
             if((-this.content.x+this.oriX) < -50 ||(-this.oriY+this.content.y) < -50) this._freshItem(); //上拉或左拉刷新
         }
-        cc.log('index===='+this._index)
+        // cc.log('content='+this.view.width+'content='+this.view.height)
     }
     private _setBar(){
         //bar params
@@ -826,7 +874,7 @@ export default class List extends cc.Component {
             barSprite.spriteFrame = this.barBg;
             barComponent.handle = barSprite
             ScrollbarX.x = 0
-            ScrollbarX.y = this.itemNumY>1? -this.view.height/2:this.view.height/2-this.height
+            ScrollbarX.y = this.itemNumY>1? -this.view.height/2:this.content.y - this._itemDisplayingPool[0].height/2
             cc.log('viewheight'+this.view.height)
             ScrollbarX.height = this.barWidth
             ScrollbarX.width = this.view.width;
@@ -842,7 +890,7 @@ export default class List extends cc.Component {
             let barSprite = bar.addComponent(cc.Sprite)
             barSprite.spriteFrame = this.barBg;
             barComponent.handle = barSprite
-            ScrollbarY.x = this.itemNumX>1? this.view.width/2:-this.viewWidth/2+this.width
+            ScrollbarY.x = this.itemNumX>1? this.view.width/2:this.content.x+this._itemDisplayingPool[0].width/2
             ScrollbarY.y = 0
             ScrollbarY.height = this.view.height
             ScrollbarY.width = this.barWidth

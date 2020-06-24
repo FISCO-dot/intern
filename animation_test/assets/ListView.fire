@@ -103,9 +103,9 @@
     "_opacity": 255,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
+      "r": 75,
+      "g": 138,
+      "b": 95,
       "a": 255
     },
     "_contentSize": {
@@ -186,7 +186,7 @@
       "array": [
         0,
         0,
-        342.24241425806287,
+        342.18828767032636,
         0,
         0,
         0,
@@ -322,6 +322,7 @@
       }
     ],
     "nodeSet": [],
+    "singlePick": true,
     "viewBg": {
       "__uuid__": "f0048c10-f03e-4c97-b9d3-3506e1d58952"
     },
@@ -330,13 +331,13 @@
     },
     "pageMode": false,
     "cycle": false,
-    "scrollVertical": false,
-    "scrollHorizontal": true,
+    "scrollVertical": true,
+    "scrollHorizontal": false,
     "viewWidth": 300,
     "viewHeight": 300,
-    "itemNumY": 50,
+    "itemNumY": 10,
     "itemNumX": 20,
-    "adaptiveSize": true,
+    "adaptiveSize": false,
     "height": 80,
     "width": 80,
     "alignCenter": true,
@@ -1916,7 +1917,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "f0048c10-f03e-4c97-b9d3-3506e1d58952"
+      "__uuid__": "5c3bb932-6c3c-468f-88a9-c8c61d458641"
     },
     "_type": 0,
     "_sizeMode": 0,
@@ -1942,6 +1943,9 @@
     "_enabled": true,
     "list": {
       "__id__": 6
+    },
+    "dropListPrefab": {
+      "__uuid__": "9b616961-e00b-44e3-ba38-982c91ee2925"
     },
     "_id": "c6bKnjtxhLyLkK/CWRiGCJ"
   }

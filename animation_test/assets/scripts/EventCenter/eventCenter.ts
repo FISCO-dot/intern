@@ -17,8 +17,8 @@ enum Direction {
     /**
      * emitList结构如下：
      * [
-     * 'event1':[args1,args2],
-     * 'event2':[args3,args4];
+     * 'event1':[[args1,node1],[args2,node2]],
+     * 'event2':[[args3,node3],[args4,node4]];
      * ]
      */
     
@@ -34,7 +34,6 @@ enum Direction {
             ary.push([cbFunc,node]);
             this.bindFuncList[key] = ary;
         }
-        cc.log('func name = ' + this.bindFuncList[key].length)
     }
 
     // emit事件，发送消息
@@ -49,44 +48,39 @@ enum Direction {
                 }
             }       
         }else {// 没有注册，先将要发送的消息保存，然后等待事件注册后，再一起emit
-            cc.log('jinlail')
             if (this.emitList[key]){
-                this.emitList[key].push(args);
+                this.emitList[key].push([args,undefined]);
             }else {
                 ary = [];         //取得传入参数
-                ary.push(args);
+                ary.push([args,undefined]);
                 this.emitList[key] = ary;
             }
         }
     }
     dispatch(key:string,node:any,direction:Direction,stopPropagation:boolean = false,...args){
-        var ary = this.bindFuncList[key];   //取得回调函数
-        if(ary){// 如果已经注册了事件，就直接发送消息
+        var ary = direction != 1 ? this.bindFuncList[key]:this.bindFuncList[key].reverse();   //取得回调函数
+        let stopFlag : any
+        if(ary){// 如果已经注册了事件，就直接发送消息    
             for (var i in ary) {
-                if(direction != 1 &&this.isChildOf(ary[i][1],node)){
+                if((direction != 1 &&this.isChildOf(ary[i][1],node)) || direction !=2 && this.isChildOf(node,ary[i][1])){//向上传递
                     if (ary[i][0]) {
+                        if(stopFlag == undefined) stopFlag = ary[i][1]
+                        if(stopFlag != ary[i][1] && stopPropagation) break;
                         try {
+                                   
                             ary[i][0].call(this,args);
-                            if(stopPropagation) break;
-                        } catch (error) {}
-                    }
-                }
-                else if(direction !=0 && this.isChildOf(node,ary[i][1])){
-                    if (ary[i][0]) {
-                        try {
-                            ary[i][0].call(this,args);
-                            if(stopPropagation) break;
                         } catch (error) {}
                     }
                 }
                 else continue
             }       
         }else {// 没有注册，先将要发送的消息保存，然后等待事件注册后，再一起emit
+            cc.log('eventcenterjinlaile = ',key) 
             if (this.emitList[key]){
-                this.emitList[key].push(args);
+                this.emitList[key].push([args,node]);
             }else {
                 ary = [];         //取得传入参数
-                ary.push(args);
+                ary.push([args,node]);
                 this.emitList[key] = ary;
             }
         }
@@ -98,11 +92,11 @@ enum Direction {
                 var emitAry = this.emitList[key];
                 for (var j in emitAry) {
                     if (emitAry[j] ){
-                        var args = emitAry[j];// 去除参数
+                        var args = emitAry[j][0];// 去除参数
                         var ary = this.bindFuncList[key];// 去除监听的方法
                         // 开始执行事件
                         for (var iterator in ary) {
-                            if (ary[iterator]) {
+                            if (ary[iterator][0]) {
                                 try {
                                     ary[iterator][0].call(this,args);
                                 } catch (error) {
@@ -117,7 +111,7 @@ enum Direction {
         }
         this.emitList = [];
     }
-    
+
     // 清空全部的事件监听
     popAll(){
         this.bindFuncList = [];

@@ -218,7 +218,7 @@ export default class List extends cc.Component {
         if(this.messageMode) this._sendMessage()
         return index
     }
-    private _showDetail(index:number,transverse:boolean,extent:number=20){
+    public onSizeChange(index:number,transverse:boolean,extent:number=20){ //当又item的size变化时重新计算各项位置
         let i = this._findItemByname(this._itemDisplayingPool,String(index))
         if(transverse == false){
             this._itemDisplayingPool[i].height  += extent;
@@ -304,11 +304,11 @@ export default class List extends cc.Component {
         else var min = this._deleteList.length > 0?Number(this._deleteList[this._deleteList.length-1]):0     
             for(var i = 0;i<this._itemDisplayingPool.length;i++){
                 if(min <= Number(this._itemDisplayingPool[i].name) ){
-                    cc.log('谁大了'+this._itemDisplayingPool[i].name)
+                    // cc.log('谁大了'+this._itemDisplayingPool[i].name)
                     if(this.cycle){
-                        cc.log('how much ='+this._data)
+                        // cc.log('how much ='+this._data)
                         let index = this._cycleIndexProcess(Number(this._itemDisplayingPool[i].name))
-                        cc.log('删除数据'+index)
+                        // cc.log('删除数据'+index)
                         this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = this._data[index]
                         this._itemDisplayingPool[i].setPosition(this._calculatePosition(this._itemDisplayingPool[i]))
                     }
@@ -444,12 +444,14 @@ export default class List extends cc.Component {
                             cc.log('unpick  '+this.pick[i].name)
                             this.pick.splice(i,1)
                         }
+                        eventCenter.dispatch('unpick',element,0,false)
                     }
                     else{
                         element.color = cc.Color.BLUE;
                         this.pick.splice(i,1)
-                        this._showDetail(Number(element.name),true)
+                        this.onSizeChange(Number(element.name),true)
                         cc.log('unpick  '+element.name)
+                        eventCenter.dispatch('unpick',element,0,false,element)
                     }
                 }
                 else{   //正选
@@ -474,7 +476,7 @@ export default class List extends cc.Component {
                             this.pick.push(String(index))
                             cc.log('pick '+index)
                         }
-                        
+                        eventCenter.dispatch('pick',element,0,false,element)
                     }
                     else{
                         if(this.singlePick){            
@@ -484,15 +486,18 @@ export default class List extends cc.Component {
                             }
                             else{
                                 this._itemDisplayingPool[Number(this.pick[0])].color = cc.Color.GRAY
-                                this._showDetail(Number(this.pick[0]),true)
+                                eventCenter.dispatch('unpick',this._itemDisplayingPool[Number(this.pick[0])],0,false,this._itemDisplayingPool[Number(this.pick[0])])
+                                this.onSizeChange(Number(this.pick[0]),true)
                                 this.pick[0] = element.name
                             }
+                            
                         }
                         else{
                             element.color = cc.Color.RED
                             this.pick.push(element.name)
                         }
-                        this._showDetail(Number(element.name),false)
+                        eventCenter.dispatch('pick',element,0,false,element)
+                        this.onSizeChange(Number(element.name),false)
                         cc.log('pick'+element.name)
                     }
                 }

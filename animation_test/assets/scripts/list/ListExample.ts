@@ -1,6 +1,7 @@
 
 const {ccclass, property} = cc._decorator;
 import List from './CustomScroll_2'
+import { eventCenter } from '../Animation/AnimationComponent';
 @ccclass
 export default class NewClass extends cc.Component {
 
@@ -41,9 +42,15 @@ export default class NewClass extends cc.Component {
         let droplist = this.dropListNode.getComponent('CustomScroll_2')
         this.dropListNode.removeFromParent()
         if(node[0].name == 'label') node[0] = node[0].parent
-        cc.log('node0 = '+node[0].name+'pick = '+this.list.returnPick()[0].name)
-        if(this.list.returnPick()[0] == node[0]){
-            cc.log('jinlaile')
+        
+        // eventCenter.on('pick',(node)=>{
+        //     this.list.onSizeChange(Number(node.name),false)
+        // },this.list.node)
+        // eventCenter.on('unpick',(node)=>{
+        //     this.list.onSizeChange(Number(node.name),true)
+        // },this.list.node)
+        // eventCenter.emitAll()
+        if(this.list.returnPick()[0] == node[0]){            
             node.forEach(element => {
                 this.dropListNode.width = 50
                 this.dropListNode.height = 210

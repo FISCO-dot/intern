@@ -7,6 +7,8 @@ enum TemplateType {
     PREFAB = 2,
 }
 @ccclass
+@executionOrder(0)
+
 // @requireComponent(cc.ScrollView)
 export default class List extends cc.Component {
 
@@ -219,6 +221,7 @@ export default class List extends cc.Component {
         return index
     }
     public onSizeChange(index:number,transverse:boolean,extent:number=20){ //当又item的size变化时重新计算各项位置
+        cc.log('index = '+index)
         let i = this._findItemByname(this._itemDisplayingPool,String(index))
         if(transverse == false){
             this._itemDisplayingPool[i].height  += extent;
@@ -449,7 +452,7 @@ export default class List extends cc.Component {
                     else{
                         element.color = cc.Color.BLUE;
                         this.pick.splice(i,1)
-                        this.onSizeChange(Number(element.name),true)
+                        // this.onSizeChange(Number(element.name),true)
                         cc.log('unpick  '+element.name)
                         eventCenter.dispatch('unpick',element,0,false,element)
                     }
@@ -487,7 +490,7 @@ export default class List extends cc.Component {
                             else{
                                 this._itemDisplayingPool[Number(this.pick[0])].color = cc.Color.GRAY
                                 eventCenter.dispatch('unpick',this._itemDisplayingPool[Number(this.pick[0])],0,false,this._itemDisplayingPool[Number(this.pick[0])])
-                                this.onSizeChange(Number(this.pick[0]),true)
+                                // this.onSizeChange(Number(this.pick[0]),true)
                                 this.pick[0] = element.name
                             }
                             
@@ -497,7 +500,7 @@ export default class List extends cc.Component {
                             this.pick.push(element.name)
                         }
                         eventCenter.dispatch('pick',element,0,false,element)
-                        this.onSizeChange(Number(element.name),false)
+                        // this.onSizeChange(Number(element.name),false)
                         cc.log('pick'+element.name)
                     }
                 }

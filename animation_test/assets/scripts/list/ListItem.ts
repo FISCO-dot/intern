@@ -2,6 +2,7 @@
 const {ccclass, executionOrder} = cc._decorator;
 import {eventCenter} from './CustomScroll_2'
 @ccclass
+@executionOrder(-3000)
 export default class ListItem extends cc.Component {
 
     

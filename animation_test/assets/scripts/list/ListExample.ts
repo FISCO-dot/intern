@@ -38,26 +38,21 @@ export default class NewClass extends cc.Component {
     }
 
     displayDroplist(node:any){
-        cc.log('jinlaile')
         let droplist = this.dropListNode.getComponent('CustomScroll_2')
-        if(this.list.returnPick()[0] != node[0]){
+        this.dropListNode.removeFromParent()
+        if(node[0].name == 'label') node[0] = node[0].parent
+        cc.log('node0 = '+node[0].name+'pick = '+this.list.returnPick()[0].name)
+        if(this.list.returnPick()[0] == node[0]){
+            cc.log('jinlaile')
             node.forEach(element => {
-                this.dropListNode.removeFromParent()
-                this.dropListNode.width = 40
-                this.dropListNode.height = 200
+                this.dropListNode.width = 50
+                this.dropListNode.height = 210
                 droplist._freshItem()
                 droplist.loadData(this.dropListData)
                 element.addChild(this.dropListNode)
-                cc.log('============'+droplist.content.height+'========'+droplist.content.width)
-                this.dropListNode.setPosition(150,0)
-                this.list.showDetail(Number(element.name),false)
-            });
+                this.dropListNode.setPosition(100,0)
+            }); 
         }
-        else{
-            this.dropListNode.removeFromParent()
-            this.list.showDetail(Number(node[0].name),true)
-        }
-
     }
     // update (dt) {}
 }

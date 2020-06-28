@@ -18,7 +18,7 @@ export default class ListItem extends cc.Component {
         this.text.lineHeight = this.fontsize
         this._setItemSize()
         this.node.on(cc.Node.EventType.TOUCH_END,function(event){
-            cc.log('eventtarget='+event.target.name+'thisnode'+this.node.name)
+            cc.log('eventtarget = '+event.target.name+' this node'+this.node.name)
             if(event.target == this.node || event.target.parent == this.node){
                 eventCenter.emit('select'+this.node.parent.parent.parent.name,event.target)
             }
@@ -35,8 +35,10 @@ export default class ListItem extends cc.Component {
         let scrollComponent = listNode.getComponent('CustomScroll_2')
         
         if(!scrollComponent.adaptiveSize){
-            this.node.scaleX = scrollComponent.width / this.node.width
-            this.node.scaleY = scrollComponent.height / this.node.height
+            // this.node.scaleX = scrollComponent.width / this.node.width
+            // this.node.scaleY = scrollComponent.height / this.node.height
+            this.node.width = scrollComponent.width
+            this.node.height = scrollComponent.height
             this.text.horizontalAlign = 1
         }
         else{

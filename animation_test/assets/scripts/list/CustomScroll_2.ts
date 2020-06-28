@@ -218,22 +218,21 @@ export default class List extends cc.Component {
         if(this.messageMode) this._sendMessage()
         return index
     }
-    public showDetail(index:number,transverse:boolean){
+    private _showDetail(index:number,transverse:boolean,extent:number=20){
         let i = this._findItemByname(this._itemDisplayingPool,String(index))
         if(transverse == false){
-            this._itemDisplayingPool[i].height  += 20;
+            this._itemDisplayingPool[i].height  += extent;
             this._itemDisplayingPool[i].setSiblingIndex(1000)
             for(var j = 0 ;j < this._itemPosition.length;j++){
-                if(j<i) this._itemPosition[String(j)].y += 10
-                if(j>i) this._itemPosition[String(j)].y -= 10
+                if(j<i) this._itemPosition[String(j)].y += extent/2
+                if(j>i) this._itemPosition[String(j)].y -= extent/2
             }
         }
         else{
-            this._itemDisplayingPool[i].height -=20
-
+            this._itemDisplayingPool[i].height -=extent
             for(var j = 0 ;j < this._itemPosition.length;j++){
-                if(j<i) this._itemPosition[String(j)].y -= 10
-                if(j>i) this._itemPosition[String(j)].y += 10
+                if(j<i) this._itemPosition[String(j)].y -= extent/2
+                if(j>i) this._itemPosition[String(j)].y += extent/2
             }
         }
         this.updateView()
@@ -386,8 +385,6 @@ export default class List extends cc.Component {
             if(this.cycle) this.itemNumX = this._data.length+1 
         };
         if(this.scrollVertical && this.scrollHorizontal) this.alignCenter = false
-        let sprite = this.node.addComponent(cc.Sprite);
-        // sprite.spriteFrame = this.viewBg;
 
         //创建scroll view
         this._setScrollView();
@@ -407,7 +404,7 @@ export default class List extends cc.Component {
     public listen(callback:Function){
         eventCenter.on('select'+this.node.name,(node)=>{
             callback(node)
-        })
+        },this.node)
     }
     private _listen(){
         eventCenter.on('select'+this.node.name,(node)=>{
@@ -451,6 +448,7 @@ export default class List extends cc.Component {
                     else{
                         element.color = cc.Color.BLUE;
                         this.pick.splice(i,1)
+                        this._showDetail(Number(element.name),true)
                         cc.log('unpick  '+element.name)
                     }
                 }
@@ -459,7 +457,6 @@ export default class List extends cc.Component {
                         if(this._itemDisplayingPool.length < this._data.length){
                             element.color = cc.Color.RED
                             let index = this._cycleIndexProcess(Number(element.name))
-                            cc.log('1='+index)
                             this.pick.push(String(index))
                             cc.log('pick '+index)
                         }
@@ -477,26 +474,30 @@ export default class List extends cc.Component {
                             this.pick.push(String(index))
                             cc.log('pick '+index)
                         }
+                        
                     }
                     else{
                         if(this.singlePick){            
                             element.color = cc.Color.RED
-                            if(this.pick.length == 0) this.pick.push(element.name)
+                            if(this.pick.length == 0) {
+                                this.pick.push(element.name)
+                            }
                             else{
                                 this._itemDisplayingPool[Number(this.pick[0])].color = cc.Color.GRAY
+                                this._showDetail(Number(this.pick[0]),true)
                                 this.pick[0] = element.name
                             }
-                            cc.log('???pick'+element.name)
                         }
                         else{
                             element.color = cc.Color.RED
                             this.pick.push(element.name)
-                            cc.log('pick'+element.name)
                         }
+                        this._showDetail(Number(element.name),false)
+                        cc.log('pick'+element.name)
                     }
                 }
             });
-        })
+        },this.node)
     }
     private _cycleIndexProcess(index:number){
         while(index >= this._data.length) index -= this._data.length
@@ -666,6 +667,7 @@ export default class List extends cc.Component {
         else{
             while(flag < 0  )//
             {
+                
                 this._itemDisplayingPool.sort((a,b)=>{
                     return Number(a.name) - Number(b.name)
                 })

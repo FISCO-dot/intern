@@ -1,4 +1,8 @@
-
+enum Direction {
+    UP = 2,
+    DOWM = 1,
+    BOTH = 0,
+}
 
  export class eventCenter extends cc.Component{
     bindFuncList = [];              // 以事件名称作为数组索引，二维数组保存回调函数
@@ -6,8 +10,8 @@
     /**
      * bindFuncList结构如下：
      * [
-     * 'event1':[func1,func2],
-     * 'event2':[func3,func4]
+     * 'event1':[[func1,node1],[func2,node2]],
+     * 'event2':[[func3,node3],[func4,node4]]
      * ]
      */
     /**
@@ -19,14 +23,18 @@
      */
     
     // 设置事件监听
-    on(key,cbFunc){                     //key -> 监听的事件的名字  cbFunc -> 监听的回调方法
+    on(key,cbFunc,node?:any){                     //key -> 监听的事件的名字  cbFunc -> 监听的回调方法
         if (this.bindFuncList[key]){
-            this.bindFuncList[key].push(cbFunc);
+            this.bindFuncList[key].push([cbFunc,node]);
+            this.bindFuncList[key].sort((a,b)=>{
+                return this.isChildOf(a[1],b[1])  //子节点在前，父节点在后
+            })
         }else {
             var ary = new Array();
-            ary.push(cbFunc);
+            ary.push([cbFunc,node]);
             this.bindFuncList[key] = ary;
         }
+        cc.log('func name = ' + this.bindFuncList[key].length)
     }
 
     // emit事件，发送消息
@@ -34,13 +42,44 @@
         var ary = this.bindFuncList[key];   //取得回调函数
         if(ary){// 如果已经注册了事件，就直接发送消息
             for (var i in ary) {
-                if (ary[i]) {
+                if (ary[i][0]) {
                     try {
-                        ary[i].call(this,args);
-                    } catch (error) {
-                        
+                        ary[i][0].call(this,args);
+                    } catch (error) {}
+                }
+            }       
+        }else {// 没有注册，先将要发送的消息保存，然后等待事件注册后，再一起emit
+            cc.log('jinlail')
+            if (this.emitList[key]){
+                this.emitList[key].push(args);
+            }else {
+                ary = [];         //取得传入参数
+                ary.push(args);
+                this.emitList[key] = ary;
+            }
+        }
+    }
+    dispatch(key:string,node:any,direction:Direction,stopPropagation:boolean = false,...args){
+        var ary = this.bindFuncList[key];   //取得回调函数
+        if(ary){// 如果已经注册了事件，就直接发送消息
+            for (var i in ary) {
+                if(direction != 1 &&this.isChildOf(ary[i][1],node)){
+                    if (ary[i][0]) {
+                        try {
+                            ary[i][0].call(this,args);
+                            if(stopPropagation) break;
+                        } catch (error) {}
                     }
                 }
+                else if(direction !=0 && this.isChildOf(node,ary[i][1])){
+                    if (ary[i][0]) {
+                        try {
+                            ary[i][0].call(this,args);
+                            if(stopPropagation) break;
+                        } catch (error) {}
+                    }
+                }
+                else continue
             }       
         }else {// 没有注册，先将要发送的消息保存，然后等待事件注册后，再一起emit
             if (this.emitList[key]){
@@ -65,7 +104,7 @@
                         for (var iterator in ary) {
                             if (ary[iterator]) {
                                 try {
-                                    ary[iterator].call(this,args);
+                                    ary[iterator][0].call(this,args);
                                 } catch (error) {
     
                                 }
@@ -82,6 +121,16 @@
     // 清空全部的事件监听
     popAll(){
         this.bindFuncList = [];
+    }
+    private isChildOf(a,b){
+        var children = a.children
+        children.forEach(element => {
+            if(element == b) return 1
+            else{
+                if(this.isChildOf(element,b)) return 1
+            }
+        });
+        return -1
     }
 }
     

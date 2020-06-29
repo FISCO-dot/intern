@@ -141,6 +141,10 @@ export default class List extends cc.Component {
     interval:number = 0
     @property(cc.Integer)
     fontSize : number = 30;
+    @property(cc.Integer)
+    topWidget : number = 0
+    @property(cc.Integer)
+    leftWidget: number = 0
     @property({
         type:cc.Integer,
         displayName:'Bar Width'
@@ -220,25 +224,8 @@ export default class List extends cc.Component {
         if(this.messageMode) this._sendMessage()
         return index
     }
-    public onSizeChange(index:number,transverse:boolean,extent:number=20){ //当又item的size变化时重新计算各项位置
-        cc.log('index = '+index)
-        let i = this._findItemByname(this._itemDisplayingPool,String(index))
-        if(transverse == false){
-            this._itemDisplayingPool[i].height  += extent;
-            this._itemDisplayingPool[i].setSiblingIndex(1000)
-            for(var j = 0 ;j < this._itemPosition.length;j++){
-                if(j<i) this._itemPosition[String(j)].y += extent/2
-                if(j>i) this._itemPosition[String(j)].y -= extent/2
-            }
-        }
-        else{
-            this._itemDisplayingPool[i].height -=extent
-            for(var j = 0 ;j < this._itemPosition.length;j++){
-                if(j<i) this._itemPosition[String(j)].y -= extent/2
-                if(j>i) this._itemPosition[String(j)].y += extent/2
-            }
-        }
-        this.updateView()
+    public getItemByIndex(index:number){
+        return this._itemDisplayingPool[this._findItemByname(this._itemDisplayingPool,String(index))]
     }
     private _Shrinkanimation(ob:any,callback?:Function){
         let scaleX = ob.scaleX
@@ -343,9 +330,12 @@ export default class List extends cc.Component {
         this.itemNumY++;
         this._poolGet(this._itemDisplayingPool.length,true)
         this.updateView()
-        let lastItem = this._itemDisplayingPool[this._itemDisplayingPool.length-1]
-        // if(-this._itemPosition[String(this._itemDisplayingPool.length-1)].y-(this.content.y-this.viewHeight/2) > this.viewWidth)
-        //     this.scrollTo(this._itemDisplayingPool.length-1)
+        
+        let lastItemPos = this._itemPosition[this._itemDisplayingPool[this._itemDisplayingPool.length-1].name]
+        cc.log('lastitempos = ',this.content.convertToWorldSpaceAR(lastItemPos).sub(cc.v2(0,320)))
+        if(this.content.convertToWorldSpaceAR(lastItemPos).sub(cc.v2(0,320)).y < -this.viewHeight/2){
+            this.content.y += this.viewHeight - this._itemDisplayingPool[this._itemDisplayingPool.length-1].height
+        }
     }
     private _updateMessageView(){
         let delMsg = cc.instantiate(this.prefabSet[1])
@@ -404,11 +394,6 @@ export default class List extends cc.Component {
         this._listen();
     }
     public pick = [];  //用于储存选中的item的 name
-    public listen(callback:Function){
-        eventCenter.on('select'+this.node.name,(node)=>{
-            callback(node)
-        },this.node)
-    }
     private _listen(){
         eventCenter.on('select'+this.node.name,(node)=>{
             node.forEach(element => {
@@ -452,7 +437,6 @@ export default class List extends cc.Component {
                     else{
                         element.color = cc.Color.BLUE;
                         this.pick.splice(i,1)
-                        // this.onSizeChange(Number(element.name),true)
                         cc.log('unpick  '+element.name)
                         eventCenter.dispatch('unpick',element,0,false,element)
                     }
@@ -490,17 +474,14 @@ export default class List extends cc.Component {
                             else{
                                 this._itemDisplayingPool[Number(this.pick[0])].color = cc.Color.GRAY
                                 eventCenter.dispatch('unpick',this._itemDisplayingPool[Number(this.pick[0])],0,false,this._itemDisplayingPool[Number(this.pick[0])])
-                                // this.onSizeChange(Number(this.pick[0]),true)
                                 this.pick[0] = element.name
-                            }
-                            
+                            }                            
                         }
                         else{
                             element.color = cc.Color.RED
                             this.pick.push(element.name)
                         }
                         eventCenter.dispatch('pick',element,0,false,element)
-                        // this.onSizeChange(Number(element.name),false)
                         cc.log('pick'+element.name)
                     }
                 }
@@ -539,7 +520,7 @@ export default class List extends cc.Component {
     ** ]
     **
     */
-    private _calculatePosition(item:any){
+    private _calculatePosition(item:any){  //计算过直接返回，没计算过时：adapt模式下位置是item下边框位置，正常模式下是中心位置
         if(this._itemPosition[item.name]){
             if(!this.adaptiveSize) return this._itemPosition[item.name]
             else{
@@ -551,7 +532,7 @@ export default class List extends cc.Component {
             if(!this.adaptiveSize){
                 let column = Math.floor(Number(item.name) / this.itemNumX)
                 let row = Number(item.name) % this.itemNumX
-                this._itemPosition[item.name] = cc.v2(-this.content.width/2 +this.width/2+row*(this.width+this.interval),this.content.height/2-(this.height/2+column*(this.height+this.interval)))
+                this._itemPosition[item.name] = cc.v2(-this.content.width/2 +this.width/2+this.leftWidget+row*(this.width+this.interval),this.content.height/2-this.topWidget-(this.height/2+column*(this.height+this.interval)))
                 return this._itemPosition[item.name]
             }
             else{

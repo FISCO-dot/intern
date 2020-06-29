@@ -343,6 +343,8 @@
     "alignCenter": true,
     "interval": 0,
     "fontSize": 30,
+    "topWidget": 0,
+    "leftWidget": 0,
     "barWidth": 12,
     "messageMode": false,
     "maxWidth": 200,
@@ -360,7 +362,7 @@
         "__id__": 8
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 13
@@ -744,7 +746,7 @@
         "__id__": 16
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 21
@@ -1128,7 +1130,7 @@
         "__id__": 24
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 29
@@ -1512,7 +1514,7 @@
         "__id__": 32
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 37

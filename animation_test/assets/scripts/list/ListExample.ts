@@ -24,12 +24,13 @@ export default class NewClass extends cc.Component {
             this.dropListData.push(i)
         }
         eventCenter.on('pick',(node)=>{
-            this.list.onSizeChange(Number(node[0].name),false)
+            this.onSizeChange(Number(node[0].name),false)
+            this.displayDroplist(node)
         },this.list.node)
         eventCenter.on('unpick',(node)=>{
-            this.list.onSizeChange(Number(node[0].name),true)
+            this.onSizeChange(Number(node[0].name),true)
+            this.dropListNode.removeFromParent()
         },this.list.node)
-        this.list.listen(this.displayDroplist.bind(this))
     }
     clickdelete(){
         this.list.deleteItem();
@@ -44,21 +45,32 @@ export default class NewClass extends cc.Component {
     clickClear(){
         this.list.clearData();
     }
-
     displayDroplist(node:any){
         let droplist = this.dropListNode.getComponent('CustomScroll_2')
         this.dropListNode.removeFromParent()
         if(node[0].name == 'label') node[0] = node[0].parent
-        if(this.list.returnPick()[0] == node[0]){            
-            node.forEach(element => {
+        node.forEach(element => {
                 this.dropListNode.width = 50
                 this.dropListNode.height = 210
                 droplist._freshItem()
                 droplist.loadData(this.dropListData)
                 element.addChild(this.dropListNode)
                 this.dropListNode.setPosition(100,0)
-            }); 
+        })
+    }
+    onSizeChange(index : number,transverse: boolean ,extent : number = 20){
+        let item = this.list.getItemByIndex(index)
+        if(!transverse){
+            item.height += extent
+            item.setSiblingIndex(1000)           
+            for(var i = 0;this.list.getItemByIndex(i) != null;i++){
+                if(i < index) this.list.getItemByIndex(i).y += extent/2
+                else if(i > index) this.list.getItemByIndex(i).y -= extent/2                
+            }
+        }
+        else{
+            item.height -= extent
+            this.list.updateView()
         }
     }
-    // update (dt) {}
 }

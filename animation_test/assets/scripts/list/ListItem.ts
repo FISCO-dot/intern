@@ -19,7 +19,7 @@ export default class ListItem extends cc.Component {
         this.text.lineHeight = this.fontsize
         this._setItemSize()
         this.node.on(cc.Node.EventType.TOUCH_END,function(event){
-            eventCenter.dispatch('select'+this.node.parent.parent.parent.name,event.target,2,true,event.target)            
+            eventCenter.dispatch('select'+this.node.parent.parent.parent.name,event.target,2,false,event.target)            
         },this)
     }
     private _loadText(text:string){

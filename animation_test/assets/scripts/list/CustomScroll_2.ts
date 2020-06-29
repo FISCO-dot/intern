@@ -420,7 +420,7 @@ export default class List extends cc.Component {
             node.forEach(element => {
                 if(element.name == 'label') element = element.parent
                 cc.log('jiaoyan  ' + this.node.name)
-                // if(this.node != element.parent.parent.parent) return
+                if(this.node != element.parent.parent.parent) return
                 cc.log(element.position)
                 var flag = true;
                 if(this.cycle){
@@ -453,13 +453,13 @@ export default class List extends cc.Component {
                             cc.log('unpick  '+this.pick[i].name)
                             this.pick.splice(i,1)
                         }
-                        eventCenter.dispatch('unpick',element,0,false)
+                        eventCenter.dispatch('unpick'+this.node.name,element,0,false)
                     }
                     else{
                         element.color = cc.Color.BLUE;
                         this.pick.splice(i,1)
                         cc.log('unpick  '+element.name)
-                        eventCenter.dispatch('unpick',element,0,false,element)
+                        eventCenter.dispatch('unpick'+this.node.name,element,0,false,element)
                     }
                 }
                 else{   //正选
@@ -484,7 +484,7 @@ export default class List extends cc.Component {
                             this.pick.push(String(index))
                             cc.log('pick '+index)
                         }
-                        eventCenter.dispatch('pick',element,0,false,element)
+                        eventCenter.dispatch('pick'+this.node.name,element,0,false,element)
                     }
                     else{
                         if(this.singlePick){            
@@ -494,7 +494,7 @@ export default class List extends cc.Component {
                             }
                             else{
                                 this._itemDisplayingPool[Number(this.pick[0])].color = cc.Color.GRAY
-                                eventCenter.dispatch('unpick',this._itemDisplayingPool[Number(this.pick[0])],0,false,this._itemDisplayingPool[Number(this.pick[0])])
+                                eventCenter.dispatch('unpick'+this.node.name,this._itemDisplayingPool[Number(this.pick[0])],0,false,this._itemDisplayingPool[Number(this.pick[0])])
                                 this.pick[0] = element.name
                             }                            
                         }
@@ -502,7 +502,7 @@ export default class List extends cc.Component {
                             element.color = cc.Color.RED
                             this.pick.push(element.name)
                         }
-                        eventCenter.dispatch('pick',element,0,false,element)
+                        eventCenter.dispatch('pick'+this.node.name,element,2,true,element)
                         cc.log('pick'+element.name)
                     }
                 }

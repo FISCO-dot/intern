@@ -23,11 +23,13 @@ export default class NewClass extends cc.Component {
         for(var i = 0; i < 5 ;i++ ){
             this.dropListData.push(i)
         }
-        eventCenter.on('pick',(node)=>{
+        eventCenter.on('pick'+this.list.node.name,(node)=>{
+            cc.log('jinlail====' + this.list.node.name)
             this.onSizeChange(Number(node[0].name),false)
             this.displayDroplist(node)
+
         },this.list.node)
-        eventCenter.on('unpick',(node)=>{
+        eventCenter.on('unpick'+this.list.node.name,(node)=>{
             this.onSizeChange(Number(node[0].name),true)
             this.dropListNode.removeFromParent()
         },this.list.node)

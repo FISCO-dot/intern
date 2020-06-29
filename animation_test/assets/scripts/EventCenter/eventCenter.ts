@@ -17,8 +17,8 @@ enum Direction {
     /**
      * emitList结构如下：
      * [
-     * 'event1':[[args1,node1],[args2,node2]],
-     * 'event2':[[args3,node3],[args4,node4]];
+     * 'event1':[args1,args2],
+     * 'event2':[args3,args4];
      * ]
      */
     
@@ -49,10 +49,10 @@ enum Direction {
             }       
         }else {// 没有注册，先将要发送的消息保存，然后等待事件注册后，再一起emit
             if (this.emitList[key]){
-                this.emitList[key].push([args,undefined]);
+                this.emitList[key].push(args);
             }else {
                 ary = [];         //取得传入参数
-                ary.push([args,undefined]);
+                ary.push(args);
                 this.emitList[key] = ary;
             }
         }
@@ -75,33 +75,31 @@ enum Direction {
                 else continue
             }       
         }else {// 没有注册，先将要发送的消息保存，然后等待事件注册后，再一起emit
-            cc.log('eventcenterjinlaile = ',key) 
+            cc.warn('your message has not been listened,some params will be ignored')
             if (this.emitList[key]){
-                this.emitList[key].push([args,node]);
+                this.emitList[key].push([args]);
             }else {
                 ary = [];         //取得传入参数
-                ary.push([args,node]);
+                ary.push([args]);
                 this.emitList[key] = ary;
             }
         }
     }
     // emitAll，将所有消息都emit
-    emitAll(){
+    emitAll(){  
         for (var key in this.emitList) {
             if (this.emitList[key]) {
                 var emitAry = this.emitList[key];
                 for (var j in emitAry) {
                     if (emitAry[j] ){
-                        var args = emitAry[j][0];// 去除参数
+                        var args = emitAry[j];// 去除参数
                         var ary = this.bindFuncList[key];// 去除监听的方法
                         // 开始执行事件
                         for (var iterator in ary) {
                             if (ary[iterator][0]) {
                                 try {
                                     ary[iterator][0].call(this,args);
-                                } catch (error) {
-    
-                                }
+                                } catch (error) {                               }
                             }
                         }
                         
@@ -111,7 +109,9 @@ enum Direction {
         }
         this.emitList = [];
     }
+    dispatchAll(){
 
+    }
     // 清空全部的事件监听
     popAll(){
         this.bindFuncList = [];

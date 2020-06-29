@@ -227,6 +227,27 @@ export default class List extends cc.Component {
     public getItemByIndex(index:number){
         return this._itemDisplayingPool[this._findItemByname(this._itemDisplayingPool,String(index))]
     }
+    public getItem(){
+        return this._itemDisplayingPool
+    }
+    public getItempositionByIndex(index : number){
+        if(!this.adaptiveSize) return this._itemPosition[String(index)]
+        else{
+            if(this.scrollHorizontal) return cc.v2(this._itemPosition[String(index)].x-this._itemDisplayingPool[this._findItemByname(this._itemDisplayingPool,String(index))].width/2,this._itemPosition[String(index)].y)
+            else return cc.v2(this._itemPosition[String(index)].x,this._itemPosition[String(index)].y + this._itemDisplayingPool[this._findItemByname(this._itemDisplayingPool,String(index))].height/2)
+        }
+    }
+    public getItemposition(){  //改变后要updateview
+        if(!this.adaptiveSize) return this._itemPosition
+        else{
+            let itempos = this._itemPosition
+            for(var i in itempos){
+                if(this.scrollHorizontal) itempos[i].x -= this._itemDisplayingPool[this._findItemByname(this._itemDisplayingPool,i)].width/2
+                else itempos[i].y += this._itemDisplayingPool[this._findItemByname(this._itemDisplayingPool,i)].height/2
+            }
+            return itempos
+        }
+    }
     private _Shrinkanimation(ob:any,callback?:Function){
         let scaleX = ob.scaleX
         let scaleY = ob.scaleY

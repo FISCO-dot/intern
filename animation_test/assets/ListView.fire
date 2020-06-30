@@ -362,7 +362,7 @@
         "__id__": 8
       }
     ],
-    "_active": false,
+    "_active": true,
     "_components": [
       {
         "__id__": 13
@@ -746,7 +746,7 @@
         "__id__": 16
       }
     ],
-    "_active": false,
+    "_active": true,
     "_components": [
       {
         "__id__": 21
@@ -1130,7 +1130,7 @@
         "__id__": 24
       }
     ],
-    "_active": false,
+    "_active": true,
     "_components": [
       {
         "__id__": 29
@@ -1514,7 +1514,7 @@
         "__id__": 32
       }
     ],
-    "_active": false,
+    "_active": true,
     "_components": [
       {
         "__id__": 37
@@ -1945,9 +1945,6 @@
     "_enabled": true,
     "list": {
       "__id__": 6
-    },
-    "dropListPrefab": {
-      "__uuid__": "9b616961-e00b-44e3-ba38-982c91ee2925"
     },
     "_id": "c6bKnjtxhLyLkK/CWRiGCJ"
   }

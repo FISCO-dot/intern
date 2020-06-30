@@ -254,7 +254,7 @@ export default class List extends cc.Component {
         cc.tween(ob)
             .to(.3, {scaleX: .1,scaleY:.1})      
             .call(() => {                     
-                ob.color = cc.Color.GRAY
+                ob.color = cc.Color.BLACK
                 this._pool.put(ob) 
                 ob.scaleX = scaleX
                 ob.scaleY = scaleY
@@ -490,7 +490,7 @@ export default class List extends cc.Component {
                                 this.pick.push(element.name)
                             }
                             else{
-                                this._itemDisplayingPool[Number(this.pick[0])].color = cc.Color.GRAY
+                                this._itemDisplayingPool[Number(this.pick[0])].color = cc.Color.BLACK
                                 eventCenter.dispatch('unpick'+this.node.name,this._itemDisplayingPool[Number(this.pick[0])],0,this._itemDisplayingPool[Number(this.pick[0])])
                                 this.pick[0] = element.name
                             }                            
@@ -514,7 +514,7 @@ export default class List extends cc.Component {
     private _creatrSingleItem(){
         var labelNode = new cc.Node('label');
         var item = this.templateType == 2?cc.instantiate(this.prefabSet[0]):cc.instantiate(this.nodeSet[0])
-        item.color = cc.Color.GRAY
+        item.color = cc.Color.BLACK
         item.addChild(labelNode)
         labelNode.addComponent(cc.RichText)
         let itemCompo = item.addComponent('ListItem')
@@ -813,7 +813,7 @@ export default class List extends cc.Component {
     }
     private _poolGet(index:number,flag:boolean){
         if(this._findItemByname(this._itemDisplayingPool,String(index))!=null) return;
-        if(this._pool.size()>0) {var item = this._pool.get();item.color = cc.Color.GRAY}
+        if(this._pool.size()>0) {var item = this._pool.get();item.color = cc.Color.BLACK}
         else{
             var item = this._creatrSingleItem();
         }

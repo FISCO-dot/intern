@@ -58,22 +58,20 @@ enum Direction {
             }
         }
     }
-    dispatch(key:string,node:any,direction:Direction,stopPropagation:boolean = false,...args){//取得回调函数
+    dispatch(key:string,node:any,direction:Direction,...args){//取得回调函数
         var ary = direction != 1 ? this.bindFuncList[key]:this.bindFuncList[key].reverse();   
-        let stopFlag : any
         if(ary){// 如果已经注册了事件，就直接发送消息    
             for (var i in ary) {
-                if((direction != 1 &&this.isChildOf(ary[i][1],node)) || direction !=2 && this.isChildOf(node,ary[i][1])){//向上传递
+                // cc.log('panduan  = ',this.isChildOf(ary[i][1],node))
+                if((direction != 1 &&this.isChildOf(ary[i][1],node)) || (direction !=2 && this.isChildOf(node,ary[i][1]))){//向上传递
+                    cc.log('first')
                     if (ary[i][0]) {
-                        if(stopFlag == undefined) stopFlag = ary[i][1]
-                        if(stopFlag != ary[i][1] && stopPropagation) break;
-                        try {
-                                   
+                        try {                                   
                             ary[i][0].call(this,args);
                         } catch (error) {}
                     }
                 }
-                else continue
+                else {cc.log('second');continue}
             }       
         }else {// 没有注册，先将要发送的消息保存，然后等待事件注册后，再一起emit
             // cc.warn('your message has not been listened,some params will be ignored')
@@ -110,22 +108,20 @@ enum Direction {
         }
         this.emitList = [];
     }
-    dispatchAll(){
 
-    }
     // 清空全部的事件监听
     popAll(){
         this.bindFuncList = [];
     }
     private isChildOf(a,b){
         var children = a.children
-        children.forEach(element => {
-            if(element == b) return 1
+        for(var i = 0 ; i < children.length; i++ ) {
+            if(children[i] == b) {return true}
             else{
-                if(this.isChildOf(element,b)) return 1
+                if(this.isChildOf(children[i],b)) {return true}
             }
-        });
-        return -1
+        }
+        return false
     }
 }
     

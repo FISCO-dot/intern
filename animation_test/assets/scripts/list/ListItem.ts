@@ -18,8 +18,9 @@ export default class ListItem extends cc.Component {
         this.text.fontSize = this.fontsize
         this.text.lineHeight = this.fontsize
         this._setItemSize()
-        this.node.on(cc.Node.EventType.TOUCH_END,function(event){
-            eventCenter.dispatch('select'+this.node.parent.parent.parent.name,event.target,2,false,event.target)            
+        this.node.on(cc.Node.EventType.TOUCH_END,function(event){    
+            if(event.target.name == 'label') event.target = event.target.parent
+            eventCenter.dispatch('select'+this.node.parent.parent.parent.name,event.target,2,event.target)            
         },this)
     }
     private _loadText(text:string){
@@ -69,4 +70,6 @@ export default class ListItem extends cc.Component {
         this.fontsize = fontSize
 
     }
+
+
 }

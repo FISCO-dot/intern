@@ -24,16 +24,15 @@ export default class NewClass extends cc.Component {
             this.dropListData.push(i)
         }
         eventCenter.on('pick'+this.list.node.name,(node)=>{
-            cc.log('jinlail====' + this.list.node.name)
             this.onSizeChange(Number(node[0].name),false)
             this.displayDroplist(node)
-
         },this.list.node)
         eventCenter.on('unpick'+this.list.node.name,(node)=>{
             this.onSizeChange(Number(node[0].name),true)
             this.dropListNode.removeFromParent()
         },this.list.node)
     }
+
     clickdelete(){
         this.list.deleteItem();
     }
@@ -49,6 +48,7 @@ export default class NewClass extends cc.Component {
     }
     displayDroplist(node:any){
         let droplist = this.dropListNode.getComponent('CustomScroll_2')
+        this.dropListNode.addComponent(cc.BlockInputEvents)
         this.dropListNode.removeFromParent()
         if(node[0].name == 'label') node[0] = node[0].parent
         node.forEach(element => {
@@ -75,4 +75,6 @@ export default class NewClass extends cc.Component {
             this.list.updateView()
         }
     }
+
+
 }

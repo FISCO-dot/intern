@@ -24,7 +24,7 @@ enum Direction {
     
     // 设置事件监听
     on(key,cbFunc,node:any){                     //key -> 监听的事件的名字  cbFunc -> 监听的回调方法
-
+        cc.log('key = ',key)
         if (this.bindFuncList[key]){
             this.bindFuncList[key].push([cbFunc,node]);
             this.bindFuncList[key].sort((a,b)=>{
@@ -59,10 +59,11 @@ enum Direction {
         }
     }
     dispatch(key:string,node:any,direction:Direction,...args){//取得回调函数
+        cc.log('dispatch le = ',this.bindFuncList)
         var ary = direction != 1 ? this.bindFuncList[key]:this.bindFuncList[key].reverse();   
         if(ary){// 如果已经注册了事件，就直接发送消息    
             for (var i in ary) {
-                // cc.log('panduan  = ',this.isChildOf(ary[i][1],node))
+                cc.log('panduan  = ',ary[i][1].name)
                 if((direction != 1 &&this.isChildOf(ary[i][1],node)) || (direction !=2 && this.isChildOf(node,ary[i][1]))){//向上传递
                     cc.log('first')
                     if (ary[i][0]) {

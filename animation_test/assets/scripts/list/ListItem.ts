@@ -10,10 +10,12 @@ export default class ListItem extends cc.Component {
 
     text: cc.RichText = null
     textNode :cc.Node = null
+    
     // LIFE-CYCLE CALLBACKS:
     
     itemOnLoad(){
-        this.textNode = this.node.children[0]
+        this.textNode = this.node.getChildByName('label')
+
         this.text = this.node.getComponentInChildren(cc.RichText)
         this.text.fontSize = this.fontsize
         this.text.lineHeight = this.fontsize
@@ -49,7 +51,8 @@ export default class ListItem extends cc.Component {
 
             else{
                 if(scrollComponent.messageMode){
-                    this.text.horizontalAlign = 0
+                    if(this.node.getChildByName('headPic').x > this.textNode.x) this.text.horizontalAlign = 0
+                    else this.text.horizontalAlign = 2
                     this.text.maxWidth = scrollComponent.maxWidth;
                     this._loadText(this.text.string)
                 }

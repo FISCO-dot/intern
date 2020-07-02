@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "chat_bubble_bg_3",
+    "_name": "ChatBubble_2",
     "_objFlags": 0,
     "_parent": null,
     "_children": [
@@ -24,11 +24,11 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 5
+        "__id__": 6
       }
     ],
     "_prefab": {
-      "__id__": 6
+      "__id__": 7
     },
     "_opacity": 255,
     "_color": {
@@ -40,8 +40,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 81,
-      "height": 40
+      "width": 153.38,
+      "height": 50.4
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -89,10 +89,13 @@
     "_components": [
       {
         "__id__": 3
+      },
+      {
+        "__id__": 4
       }
     ],
     "_prefab": {
-      "__id__": 4
+      "__id__": 5
     },
     "_opacity": 255,
     "_color": {
@@ -105,7 +108,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 40,
-      "height": 40
+      "height": 36
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -116,8 +119,8 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        -79,
-        0,
+        -140,
+        5.199999999999999,
         0,
         0,
         0,
@@ -174,6 +177,33 @@
     "_id": ""
   },
   {
+    "__type__": "cc.Widget",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 2
+    },
+    "_enabled": true,
+    "alignMode": 1,
+    "_target": null,
+    "_alignFlags": 1,
+    "_left": 0,
+    "_right": 0,
+    "_top": 2,
+    "_bottom": 0,
+    "_verticalCenter": 0,
+    "_horizontalCenter": 0,
+    "_isAbsLeft": true,
+    "_isAbsRight": true,
+    "_isAbsTop": true,
+    "_isAbsBottom": true,
+    "_isAbsHorizontalCenter": true,
+    "_isAbsVerticalCenter": true,
+    "_originalWidth": 0,
+    "_originalHeight": 0,
+    "_id": ""
+  },
+  {
     "__type__": "cc.PrefabInfo",
     "root": {
       "__id__": 1
@@ -202,7 +232,7 @@
     "_spriteFrame": {
       "__uuid__": "8c1e90d4-3407-49cc-a969-be2b4d38737b"
     },
-    "_type": 0,
+    "_type": 1,
     "_sizeMode": 0,
     "_fillType": 0,
     "_fillCenter": {

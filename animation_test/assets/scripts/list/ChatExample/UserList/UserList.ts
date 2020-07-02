@@ -1,8 +1,9 @@
-import List from './CustomScroll_2'
+import List from '../../CustomScroll_2'
+
 const {ccclass, property} = cc._decorator;
 
 @ccclass
-export default class NewClass extends cc.Component {
+export default class UserList extends cc.Component {
 
     @property(List)
     userList:List = null
@@ -11,6 +12,8 @@ export default class NewClass extends cc.Component {
     onLoad () {
         this.userList.loadData(this.user,false)
         this.userList.setItemColor(cc.color(93,143,221,255))
+        this.userList.node.opacity = 170
+
     }
 
     start () {

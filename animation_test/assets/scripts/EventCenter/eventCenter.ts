@@ -59,16 +59,17 @@ enum Direction {
         }
     }
     dispatch(key:string,node:any,direction:Direction,...args){//取得回调函数
-        cc.log('dispatch le = ',this.bindFuncList)
         var ary = direction != 1 ? this.bindFuncList[key]:this.bindFuncList[key].reverse();   
         if(ary){// 如果已经注册了事件，就直接发送消息    
+            
             for (var i in ary) {
-                cc.log('panduan  = ',ary[i][1].name)
+                cc.log('first')
                 if((direction != 1 &&this.isChildOf(ary[i][1],node)) || (direction !=2 && this.isChildOf(node,ary[i][1]))){//向上传递
-                    cc.log('first')
+                    
                     if (ary[i][0]) {
                         try {                                   
                             ary[i][0].call(this,args);
+                            
                         } catch (error) {}
                     }
                 }

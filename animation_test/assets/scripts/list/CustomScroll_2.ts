@@ -360,6 +360,7 @@ export default class List extends cc.Component {
         if(this.content.convertToWorldSpaceAR(lastItemPos).sub(cc.v2(0,320)).y < -this.viewHeight/2){
             this.content.y += this.viewHeight - this._itemDisplayingPool[this._itemDisplayingPool.length-1].height
         }
+        return String(this.itemNumY-1)
     }
 
     public scrollTo(index : number){
@@ -380,6 +381,8 @@ export default class List extends cc.Component {
             }
         }
     }
+    itemTemplate : cc.Node = null
+
     onLoad () {
         //setparams
         if(!this.scrollHorizontal) {
@@ -391,11 +394,12 @@ export default class List extends cc.Component {
             if(this.cycle) this.itemNumX = this._data.length+1 
         };
         if(this.scrollVertical && this.scrollHorizontal) this.alignCenter = false
-
+        if(this.messageMode) this.itemNumY = 0
         //创建scroll view
         this._setScrollView();
-
-        //direction
+        //
+        this.itemTemplate = this.templateType == 2?cc.instantiate(this.prefabSet[0]):cc.instantiate(this.nodeSet[0])
+        cc.log('template name = ',this.itemTemplate.name)
     }
     start(){
         this.pageNumX = this.scrollHorizontal? Math.floor(this.view.width/this.width):1;
@@ -476,6 +480,7 @@ export default class List extends cc.Component {
                         eventCenter.dispatch('pick'+this.node.name,element,0,element)
                     }
                     else{
+                        
                         if(this.singlePick){            
                             element.color = cc.Color.RED
                             if(this.pick.length == 0) {
@@ -483,8 +488,10 @@ export default class List extends cc.Component {
                             }
                             else{
                                 this._itemDisplayingPool[Number(this.pick[0])].color = this.itemColor
-                                eventCenter.dispatch('unpick'+this.node.name,this._itemDisplayingPool[Number(this.pick[0])],0,this._itemDisplayingPool[Number(this.pick[0])])
+                                eventCenter.dispatch('unpick'+this.node.name,this._itemDisplayingPool[Number(this.pick[0])],2,this._itemDisplayingPool[Number(this.pick[0])])
+                                cc.log('unpick'+this.node.name)
                                 this.pick[0] = element.name
+                                
                             }                            
                         }
                         else{
@@ -492,7 +499,7 @@ export default class List extends cc.Component {
                             this.pick.push(element.name)
                         }
                         eventCenter.dispatch('pick'+this.node.name,element,2,element)
-                        cc.log('pick'+element.name)
+
                     }
                 }
             });
@@ -503,9 +510,19 @@ export default class List extends cc.Component {
         while(index < 0) index += this._data.length
         return index
     }
+    public SetItemTemplate(index:number){
+        if(this.templateType == 2) {
+            this.itemTemplate = cc.instantiate(this.prefabSet[index]);
+            return this.itemTemplate
+        }
+        else {
+            this.itemTemplate = cc.instantiate(this.nodeSet[index])
+            return this.itemTemplate
+        }
+    }
     private _creatrSingleItem(){
         var labelNode = new cc.Node('label');
-        var item = this.templateType == 2?cc.instantiate(this.prefabSet[0]):cc.instantiate(this.nodeSet[0])
+        var item = cc.instantiate(this.itemTemplate)
         item.color = this.itemColor
         item.addChild(labelNode)
         labelNode.addComponent(cc.RichText)
@@ -847,14 +864,16 @@ export default class List extends cc.Component {
     private _itemDisplayingPool = [];
     private _createDone : boolean = false;
     update (dt) {
-        // if(this._pool.size() >= this.pageNumX*this.pageNumY*3) this._createDone = true;
-        // if(!this._createDone) {
-        //     let item = this._createItem().reverse()
-        //     item.forEach(element => {
-        //         this._pool.put(element);
-        //     });
-        // }
-        if(!this.messageMode) this._loadScrollRecord();
+        if(!this.messageMode){
+            if(this._pool.size() >= this.pageNumX*this.pageNumY*3) this._createDone = true;
+            if(!this._createDone) {
+                let item = this._createItem().reverse()
+                item.forEach(element => {
+                    this._pool.put(element);
+                });
+            }
+            this._loadScrollRecord();
+        }
         if(!this.cycle && !this.messageMode){
             if((-this.content.x+this.oriX) < -50 ||(-this.oriY+this.content.y) < -50) this._freshItem(); //上拉或左拉刷新
         }

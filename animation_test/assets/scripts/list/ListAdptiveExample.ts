@@ -12,9 +12,7 @@ export default class NewClass extends cc.Component {
     // LIFE-CYCLE CALLBACKS:
 
     onLoad () {
-        let data = ['hello']
         this.editbox.node.on('editing-return', this.sendInputMessage, this);
-        this.list.loadData(data)
         eventCenter.on('delete',(node)=>{
             let delMsg = cc.instantiate(this.list.prefabSet[1])
             delMsg.getComponentInChildren(cc.RichText).string = `you have delete a message`

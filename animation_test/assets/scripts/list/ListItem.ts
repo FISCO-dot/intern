@@ -15,8 +15,10 @@ export default class ListItem extends cc.Component {
     
     itemOnLoad(){
         this.textNode = this.node.getChildByName('label')
-
         this.text = this.node.getComponentInChildren(cc.RichText)
+        cc.loader.loadRes('ChatExample/EmojiPic/faceAll',cc.SpriteAtlas,(err,asset)=>{
+            this.text.imageAtlas = asset
+        })
         this.text.fontSize = this.fontsize
         this.text.lineHeight = this.fontsize
         this._setItemSize()
@@ -34,7 +36,6 @@ export default class ListItem extends cc.Component {
     private _setItemSize(){
         let listNode = this.node.parent.parent.parent
         let scrollComponent = listNode.getComponent('CustomScroll_2')
-        
         if(!scrollComponent.adaptiveSize){
             // this.node.scaleX = scrollComponent.width / this.node.width
             // this.node.scaleY = scrollComponent.height / this.node.height
@@ -48,10 +49,10 @@ export default class ListItem extends cc.Component {
                 this.text.maxWidth = 0
                 this._loadText(this.text.string)
             }
-
             else{
                 if(scrollComponent.messageMode){
-                    if(this.node.getChildByName('headPic').x > this.textNode.x) this.text.horizontalAlign = 0
+                    if(this.node.getChildByName('headPic') == null) this.text.horizontalAlign = 1
+                    else if(this.node.getChildByName('headPic').x > this.textNode.x) this.text.horizontalAlign = 0
                     else this.text.horizontalAlign = 2
                     this.text.maxWidth = scrollComponent.maxWidth;
                     this._loadText(this.text.string)

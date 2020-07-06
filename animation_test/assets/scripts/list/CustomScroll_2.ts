@@ -175,9 +175,10 @@ export default class List extends cc.Component {
     pageNum = 0;
     oriY : number = 0;
     oriX : number = 0;
-    itemColor :cc.Color = cc.Color.BLACK;
+    itemColor :cc.Color = cc.color(255,255,255,255);
     //输入数据
     private _data:string[] = [];
+    private _imgData:cc.SpriteFrame[] = [];
     //操作后都要update一下
     public setItemColor(color:cc.Color){
         this.itemColor = color
@@ -225,6 +226,12 @@ export default class List extends cc.Component {
             }
         }
         return index
+    }
+    public loadItemBackground(data : cc.SpriteFrame[] ){
+        if(data.length == 0) return
+        data.forEach(element => {
+            this._imgData.push(element)
+        });
     }
     public getItemByIndex(index:number){
         return this._itemDisplayingPool[this._findItemByname(this._itemDisplayingPool,String(index))]
@@ -499,7 +506,7 @@ export default class List extends cc.Component {
                             this.pick.push(element.name)
                         }
                         eventCenter.dispatch('pick'+this.node.name,element,2,element)
-
+                        cc.log(`pick${this.node.name}`)
                     }
                 }
             });
@@ -510,7 +517,8 @@ export default class List extends cc.Component {
         while(index < 0) index += this._data.length
         return index
     }
-    public SetItemTemplate(index:number){
+    public SetItemTemplate(index?:number){
+        if(index == undefined) return this.itemTemplate
         if(this.templateType == 2) {
             this.itemTemplate = cc.instantiate(this.prefabSet[index]);
             return this.itemTemplate
@@ -523,6 +531,7 @@ export default class List extends cc.Component {
     private _creatrSingleItem(){
         var labelNode = new cc.Node('label');
         var item = cc.instantiate(this.itemTemplate)
+        if(item.getComponent(cc.Sprite) == null && this._imgData.length != 0) item.addComponent(cc.Sprite) 
         item.color = this.itemColor
         item.addChild(labelNode)
         labelNode.addComponent(cc.RichText)
@@ -843,9 +852,13 @@ export default class List extends cc.Component {
             });
         }
         else{
-            if(Number(item.name) < this._data.length) itemLabel.string = this._data[index]
+            if(index < this._data.length) {
+                itemLabel.string = this._data[index]
+                if(this._imgData[index]) {item.getComponent(cc.Sprite).spriteFrame = this._imgData[index];cc.log('jinlaile = '+item.getComponent(cc.Sprite).spriteFrame.name);}
+            }
             else{
                     itemLabel.string = ''
+                    if(this._imgData[index]) item.getComponent(cc.Sprite).spriteFrame = this._imgData[index]
             } 
             this.pick.forEach(element => {
                 if(element == item.name) {item.color = cc.Color.RED;}

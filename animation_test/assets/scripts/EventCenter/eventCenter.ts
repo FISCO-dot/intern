@@ -24,7 +24,7 @@ enum Direction {
     
     // 设置事件监听
     on(key,cbFunc,node:any){                     //key -> 监听的事件的名字  cbFunc -> 监听的回调方法
-        cc.log('key = ',key)
+        // cc.log('key = ',key)
         if (this.bindFuncList[key]){
             this.bindFuncList[key].push([cbFunc,node]);
             this.bindFuncList[key].sort((a,b)=>{
@@ -36,7 +36,9 @@ enum Direction {
             this.bindFuncList[key] = ary;
         }
     }
-
+    off(key){
+        if(this.bindFuncList[key]) this.bindFuncList[key] = []
+    }
     // emit事件，发送消息
     emit(key:string,...args){                      //key->监听的事件的名字   args->调用时传的参数
         var ary = this.bindFuncList[key];   //取得回调函数
@@ -61,11 +63,10 @@ enum Direction {
     dispatch(key:string,node:any,direction:Direction,...args){//取得回调函数
         var ary = direction != 1 ? this.bindFuncList[key]:this.bindFuncList[key].reverse();   
         if(ary){// 如果已经注册了事件，就直接发送消息    
-            
             for (var i in ary) {
-                cc.log('first')
+                
                 if((direction != 1 &&this.isChildOf(ary[i][1],node)) || (direction !=2 && this.isChildOf(node,ary[i][1]))){//向上传递
-                    
+                    cc.log('first')
                     if (ary[i][0]) {
                         try {                                   
                             ary[i][0].call(this,args);
@@ -73,7 +74,7 @@ enum Direction {
                         } catch (error) {}
                     }
                 }
-                else {cc.log('second');continue}
+                else {cc.log('second '+key);continue}
             }       
         }else {// 没有注册，先将要发送的消息保存，然后等待事件注册后，再一起emit
             // cc.warn('your message has not been listened,some params will be ignored')

@@ -15,7 +15,7 @@ export default class NewClass extends cc.Component {
         this.editbox.node.on('editing-return', this.sendInputMessage, this);
         eventCenter.on('delete',(node)=>{
             let delMsg = cc.instantiate(this.list.prefabSet[1])
-            delMsg.getComponentInChildren(cc.RichText).string = `you have delete a message`
+            delMsg.addComponent(cc.RichText).string = `you have delete a message`
             delMsg.setPosition(0,node[0].position.y)
             delMsg.name = node[0].name
             let item = this.list.getItem()

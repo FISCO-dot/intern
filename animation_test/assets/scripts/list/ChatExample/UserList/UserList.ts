@@ -22,5 +22,4 @@ export default class UserList extends cc.Component {
     clickShowUsers(){
         this.userList.node.active = !this.userList.node.active
     }
-    // update (dt) {}
 }

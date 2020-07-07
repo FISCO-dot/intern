@@ -404,11 +404,9 @@ export default class List extends cc.Component {
         if(this.messageMode) this.itemNumY = 0
         //创建scroll view
         this._setScrollView();
-        //
-        this.itemTemplate = this.templateType == 2?cc.instantiate(this.prefabSet[0]):cc.instantiate(this.nodeSet[0])
-        cc.log('template name = ',this.itemTemplate.name)
     }
     start(){
+        this.itemTemplate = this.templateType == 2?cc.instantiate(this.prefabSet[0]):cc.instantiate(this.nodeSet[0])
         this.pageNumX = this.scrollHorizontal? Math.floor(this.view.width/this.width):1;
         this.pageNumY = this.scrollVertical? Math.floor(this.view.height/this.height):1;
         this.pageNum = this.pageNumX*this.pageNumY;

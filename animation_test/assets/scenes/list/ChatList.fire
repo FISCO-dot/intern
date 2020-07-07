@@ -914,8 +914,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 110.05,
-      "height": 50.4
+      "width": 130,
+      "height": 25.2
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -926,8 +926,8 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        -7.519,
-        -284.023,
+        -7.099,
+        -278.33,
         0,
         0,
         0,
@@ -977,7 +977,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 110.05,
-      "height": 50.4
+      "height": 25.2
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -988,8 +988,8 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        -55.025,
-        -25.2,
+        -65,
+        -12.6,
         0,
         0,
         0,
@@ -1012,7 +1012,7 @@
     "_groupIndex": 0,
     "groupIndex": 0,
     "showInEditor": false,
-    "_id": "8fdTK6hu5DnotMpyvsaHmP"
+    "_id": "1egaRUtHVODKXkf5k253DZ"
   },
   {
     "__type__": "cc.Label",
@@ -1031,7 +1031,7 @@
     "_string": "click to input",
     "_N$string": "click to input",
     "_fontSize": 20,
-    "_lineHeight": 40,
+    "_lineHeight": 20,
     "_enableWrapText": true,
     "_N$file": null,
     "_isSystemFontUsed": true,
@@ -1042,7 +1042,7 @@
     "_N$fontFamily": "Arial",
     "_N$overflow": 0,
     "_N$cacheMode": 0,
-    "_id": "11etZ2jftA0LgQencP0Jtm"
+    "_id": "c9kFZBJudJp7uB+LObH/ae"
   },
   {
     "__type__": "cc.Node",
@@ -1070,7 +1070,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 140,
-      "height": 30
+      "height": 40
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -1609,8 +1609,8 @@
     "_N$horizontalAlign": 0,
     "_N$fontSize": 20,
     "_N$font": null,
-    "_N$maxWidth": 0,
-    "_N$lineHeight": 40,
+    "_N$maxWidth": 130,
+    "_N$lineHeight": 20,
     "_N$imageAtlas": {
       "__uuid__": "f201e7e1-31a3-4948-bd78-ea0595c0cb44"
     },
@@ -1625,6 +1625,9 @@
       "__id__": 18
     },
     "_enabled": true,
+    "cursor": {
+      "__uuid__": "375d4ff4-4510-4c31-8760-1690f463cfbc"
+    },
     "_id": "5buGT6d0tFapSl4CkZHxB7"
   },
   {

@@ -1,8 +1,9 @@
 import List from '../../CustomScroll_2'
 import { eventCenter } from '../../CustomScroll_2'
-const {ccclass, property} = cc._decorator;
+const {ccclass, property,executionOrder} = cc._decorator;
 
 @ccclass
+
 export default class MessageList extends cc.Component {
     @property(List)
     messageList : List = null
@@ -28,15 +29,26 @@ export default class MessageList extends cc.Component {
             cc.log('pick channel '+this.channel)
         },this.node)
         eventCenter.on('unpickMessageList',(node)=>{
+            node[0].zIndex --
             node[0].color = this.color[this.listInfo[node[0].name]]
-            cc.log('color change = ' + node[0].color)
+            node[0].getChildByName('DropList').removeFromParent()
         },this.node)
         eventCenter.on('pickMessageList',(node)=>{
             if(this.listInfo[node[0].name] == 2){
                 node[0].color = cc.color(255,255,255,150)
                 this.messageList.returnPick().length = 0
+                cc.log('pick = ',this.messageList.returnPick().length)
             }
-            else{
+            else{                
+                cc.loader.loadRes('Prefab/item',cc.Prefab,(err,prefab)=>{
+                    let dropListNode = new cc.Node('DropList')
+                    let dropList = dropListNode.addComponent('CustomScroll_2')
+                    dropListNode.addComponent('SecondaryList')
+                    dropList.prefabSet.push(prefab)
+                    node[0].addChild(dropListNode)
+                    node[0].zIndex ++
+                })
+
                 //创建子菜单
             }
         },this.node)
@@ -52,6 +64,7 @@ export default class MessageList extends cc.Component {
                 this.showTimeTip()
             }
             this.sendInputMessage()
+            this.editbox.node.getChildByName('cursor').setPosition(-65,0) 
         }
         // cc.log('time = '+this.date.getMinutes())
     }
@@ -65,7 +78,7 @@ export default class MessageList extends cc.Component {
         this.listInfo[index]= this.channel
         this.editbox.string = ''
         this.editbox.node.getComponent('InputBox').input = ''
-
+        this.editbox.node.getComponent('InputBox').lineNumChange()
     }
     showTimeTip(){
         this.messageList.SetItemTemplate(2)

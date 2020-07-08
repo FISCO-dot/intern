@@ -177,17 +177,19 @@ export default class List extends cc.Component {
     oriX : number = 0;
     itemColor :cc.Color = cc.color(255,255,255,255);
     //输入数据
-    private _data:string[] = [];
-    private _imgData:cc.SpriteFrame[] = [];
+    private _data:any[] = [];
+    private _imgBg:cc.SpriteFrame[] = [];
     //操作后都要update一下
     public setItemColor(color:cc.Color){
         this.itemColor = color
     }
     public loadData(data:any[] = [],transverse:boolean = false, autoFill:boolean = false){
         if(data.length == 0) {cc.error('input is empty');return}
+        
         if(autoFill && this.cycle) cc.warn('there maybe an interput in cyclic mode and autoFill')
         data.forEach(element => {
-            this._data.push(String(element))
+            if(element instanceof cc.SpriteFrame) this._data.push(element)
+            else this._data.push(String(element))
         });
         if(transverse) this._data.reverse()
         if(autoFill){
@@ -230,7 +232,7 @@ export default class List extends cc.Component {
     public loadItemBackground(data : cc.SpriteFrame[] ){
         if(data.length == 0) return
         data.forEach(element => {
-            this._imgData.push(element)
+            this._imgBg.push(element)
         });
     }
     public getItemByIndex(index:number){
@@ -357,19 +359,18 @@ export default class List extends cc.Component {
         }
         return itemList
     }
+    public 
     public sendMessage(){  
         if(this.itemNumY >= this._data.length) return
         this.itemNumY++;
         this._poolGet(this._itemDisplayingPool.length,true)
         this.updateView()
         let lastItemPos = this._itemPosition[this._itemDisplayingPool[this._itemDisplayingPool.length-1].name]
-        cc.log('lastitempos = ',this.content.convertToWorldSpaceAR(lastItemPos).sub(cc.v2(0,320)))
         if(this.content.convertToWorldSpaceAR(lastItemPos).sub(cc.v2(0,320)).y < -this.viewHeight/2){
             this.content.y += this.viewHeight - this._itemDisplayingPool[this._itemDisplayingPool.length-1].height
         }
         return String(this.itemNumY-1)
     }
-
     public scrollTo(index : number){
         if(!this.adaptiveSize){
             let column = index / this.itemNumX
@@ -504,7 +505,7 @@ export default class List extends cc.Component {
                             this.pick.push(element.name)
                         }
                         eventCenter.dispatch('pick'+this.node.name,element,2,element)
-                        cc.log(`pick${this.node.name}`)
+                        cc.log(`pick${this.node.name}--${element.name}`)
                     }
                 }
             });
@@ -529,7 +530,7 @@ export default class List extends cc.Component {
     private _creatrSingleItem(){
         var labelNode = new cc.Node('label');
         var item = cc.instantiate(this.itemTemplate)
-        if(item.getComponent(cc.Sprite) == null && this._imgData.length != 0) item.addComponent(cc.Sprite) 
+        if(item.getComponent(cc.Sprite) == null && this._imgBg.length != 0) item.addComponent(cc.Sprite) 
         item.color = this.itemColor
         item.addChild(labelNode)
         labelNode.addComponent(cc.RichText)
@@ -842,7 +843,7 @@ export default class List extends cc.Component {
             if(index >= 0) itemLabel.string = this._data[index%this._data.length]
             else {
                 while(index < 0) index +=this._data.length
-                itemLabel.string = this._data[index] + '<on click="handler"> click me! </on>'
+                itemLabel.string = this._data[index] 
             }
             this.pick.forEach(element => {
                if((Number(item.name)-Number(element))%this._data.length == 0) {
@@ -852,12 +853,11 @@ export default class List extends cc.Component {
         else{
             if(index < this._data.length) {
                 itemLabel.string = this._data[index]
-                if(this._imgData[index]) {item.getComponent(cc.Sprite).spriteFrame = this._imgData[index];cc.log('jinlaile = '+item.getComponent(cc.Sprite).spriteFrame.name);}
             }
             else{
                     itemLabel.string = ''
-                    if(this._imgData[index]) item.getComponent(cc.Sprite).spriteFrame = this._imgData[index]
-            } 
+            }
+            if(this._imgBg[index]) item.getComponent(cc.Sprite).spriteFrame = this._imgBg[index]
             this.pick.forEach(element => {
                 if(element == item.name) {item.color = cc.Color.RED;}
             });

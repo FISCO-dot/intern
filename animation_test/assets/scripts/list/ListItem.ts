@@ -28,9 +28,9 @@ export default class ListItem extends cc.Component {
         },this)
     }
     private _loadText(text:string){
-        cc.log('parentname',this.node.parent.name)
         if(text.length == 0) {text = '';return}
         this.node.height = this.textNode.height
+        cc.log('node name = '+this.node.parent.parent.parent.name+' text Node hegiht = '+this.textNode.height)
         this.node.width = this.textNode.width+20
     }
     private _setItemSize(){

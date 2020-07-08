@@ -35,14 +35,16 @@ export default class InputRichText extends cc.Component {
         
         if(event.keyCode > 47 && event.keyCode < 91) {
             this.input += String.fromCharCode(event.keyCode);
-            this.cursorNode.x += 11
+            if(event.keyCode < 57) this.cursorNode.x += 11
+            else this.cursorNode.x += 14
             
         }
         if(event.keyCode == cc.macro.KEY.backspace){
             if(this.input.length > 0){
                 if(this.input[this.input.length-1] != '>') {
+                    if(this.input[this.input.length-1] <= '9' && this.input[this.input.length-1] >= '0') this.cursorNode.x -= 11
+                    else this.cursorNode.x -= 14
                     this.input = this.input.substring(0,this.input.length-1)
-                    this.cursorNode.x -= 11
                 }
                 else {
                     let index = this.input.lastIndexOf('<')
@@ -56,21 +58,21 @@ export default class InputRichText extends cc.Component {
         
     }
     lineNumChange(){
-        if(this.lineNum < Math.floor(this.node.height/this.lineHeight)){
+        if(this.lineNum < Math.floor(this.node.height/this.lineHeight)){//下移一行
             this.node.y += this.lineHeight/2
             this.node.getChildByName('Ground').height += this.lineHeight
             this.node.getChildByName('EmojiButt').y -= this.lineHeight/2
             this.cursorNode.y -= this.lineHeight/2
-            this.cursorNode.x = -55.5
+            if(this.input[this.input.length-1] >= '0' && this.input[this.input.length-1] <= '9') this.cursorNode.x = -55
+            else this.cursorNode.x = -52
             this.lineNum ++
         }
-        else if(this.lineNum > Math.floor(this.node.height/this.lineHeight)){
+        else if(this.lineNum > Math.floor(this.node.height/this.lineHeight)){//上移一行
             this.node.y -= this.lineHeight/2*(this.lineNum-Math.floor(this.node.height/this.lineHeight))
             this.node.getChildByName('Ground').height -= this.lineHeight*(this.lineNum-Math.floor(this.node.height/this.lineHeight))
             this.node.getChildByName('EmojiButt').y += this.lineHeight/2*(this.lineNum-Math.floor(this.node.height/this.lineHeight))
             this.cursorNode.y += this.lineHeight/2
-            this.cursorNode.x = 60
-            
+            this.cursorNode.x = 60            
             this.lineNum -= (this.lineNum-Math.floor(this.node.height/this.lineHeight))
         }
     }

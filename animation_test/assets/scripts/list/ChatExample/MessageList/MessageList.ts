@@ -17,6 +17,7 @@ export default class MessageList extends cc.Component {
     private listInfo = []
     private date = new Date()
     private currentTime : number
+    private copyMessage : string
     onLoad () {
         cc.loader.loadResDir('ChatExample/HeadPic',cc.SpriteFrame,(err,assets)=>{
             assets.forEach(element => {
@@ -48,10 +49,29 @@ export default class MessageList extends cc.Component {
                     node[0].addChild(dropListNode)
                     node[0].zIndex ++
                 })
-
-                //创建子菜单
             }
         },this.node)
+        eventCenter.on('pickDropList',(node)=>{
+            let event = node[0].getComponentInChildren(cc.RichText).string
+            switch (event) {
+                case 'delete':
+                    this.messageList.deleteItem()
+                    break;
+                case 'copy':
+                    this.copyMessage = this.messageList.returnPick()[0].getComponentInChildren(cc.RichText).string
+                    break;
+                case 'paste':
+                    if(this.copyMessage == undefined) break;
+                    else this.messageList.returnPick()[0].getComponentInChildren(cc.RichText).string = this.copyMessage
+                default:
+                    break;
+            }
+            
+            cc.log('ndeo name = ',node[0].parent.parent.parent.parent.name)
+            eventCenter.emit('selectMessageList',node[0].parent.parent.parent.parent)
+            node[0].parent.parent.parent.removeFromParent()
+        },this.node)
+        
     }
     onEnterDown(event){
         if(this.channel == undefined) return
@@ -66,7 +86,6 @@ export default class MessageList extends cc.Component {
             this.sendInputMessage()
             this.editbox.node.getChildByName('cursor').setPosition(-65,0) 
         }
-        // cc.log('time = '+this.date.getMinutes())
     }
     sendInputMessage(){
         let template = this.messageList.SetItemTemplate(this.channel)
@@ -94,6 +113,5 @@ export default class MessageList extends cc.Component {
         cc.log('index = '+item.name)
         this.listInfo[index]= 2
     }
-    update () {
-    }
+    
 }

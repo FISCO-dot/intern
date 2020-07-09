@@ -17,7 +17,6 @@ export default class MessageList extends cc.Component {
     private listInfo = []
     private date = new Date()
     private currentTime : number
-    private copyMessage : string
     onLoad () {
         cc.loader.loadResDir('ChatExample/HeadPic',cc.SpriteFrame,(err,assets)=>{
             assets.forEach(element => {
@@ -48,35 +47,17 @@ export default class MessageList extends cc.Component {
                     dropList.prefabSet.push(prefab)
                     node[0].addChild(dropListNode)
                     node[0].zIndex ++
+                    dropListNode.setPosition(50,-150)
+
                 })
             }
         },this.node)
-        eventCenter.on('pickDropList',(node)=>{
-            let event = node[0].getComponentInChildren(cc.RichText).string
-            switch (event) {
-                case 'delete':
-                    this.messageList.deleteItem()
-                    break;
-                case 'copy':
-                    this.copyMessage = this.messageList.returnPick()[0].getComponentInChildren(cc.RichText).string
-                    break;
-                case 'paste':
-                    if(this.copyMessage == undefined) break;
-                    else this.messageList.returnPick()[0].getComponentInChildren(cc.RichText).string = this.copyMessage
-                default:
-                    break;
-            }
-            
-            cc.log('ndeo name = ',node[0].parent.parent.parent.parent.name)
-            eventCenter.emit('selectMessageList',node[0].parent.parent.parent.parent)
-            node[0].parent.parent.parent.removeFromParent()
-        },this.node)
+
         
     }
     onEnterDown(event){
         if(this.channel == undefined) return
         if(event.keyCode == cc.macro.KEY.enter){
-            cc.log('current time = '+this.currentTime+'system time = '+this.date.getSeconds())
             if(this.editbox.string == '') return
             this.date = new Date()
             if(this.currentTime == undefined || this.date.getMinutes()-this.currentTime >= 5){
@@ -88,12 +69,18 @@ export default class MessageList extends cc.Component {
         }
     }
     sendInputMessage(){
+
         let template = this.messageList.SetItemTemplate(this.channel)
+        if(this.channel == 0) this.messageList.contentOffset = 10
+        else this.messageList.contentOffset = 0
         template.getChildByName('headPic').getComponent(cc.Sprite).spriteFrame = this.headPics[this.channel]
         this.messageList.setItemColor(this.color[this.channel])
         this.messageList.addData(this.editbox.string)
         cc.log('???= '+this.editbox.string)
+        this.messageList.fontSize = 30
+        this.messageList.maxWidth = 200
         let index = this.messageList.sendMessage()
+
         this.listInfo[index]= this.channel
         this.editbox.string = ''
         this.editbox.node.getComponent('InputBox').input = ''
@@ -102,12 +89,12 @@ export default class MessageList extends cc.Component {
     showTimeTip(){
         this.messageList.SetItemTemplate(2)
         this.messageList.addData(this.date.toLocaleString())
+        this.messageList.fontSize = 10
+        this.messageList.maxWidth = 0
         let index = this.messageList.sendMessage()
         let item = this.messageList.getItemByIndex(Number(index))
         let tipText = item.getComponentInChildren(cc.RichText)
-        tipText.fontSize = 10
-        tipText.maxWidth = 0
-        tipText.lineHeight = 10
+
         item.height = tipText.node.height +10
         item.width = tipText.node.width + 10
         cc.log('index = '+item.name)

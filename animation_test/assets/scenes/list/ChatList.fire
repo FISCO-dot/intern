@@ -189,7 +189,7 @@
       "array": [
         0,
         0,
-        350.1990226553324,
+        337.85805806002304,
         0,
         0,
         0,
@@ -760,6 +760,7 @@
     "alignCenter": true,
     "interval": 0,
     "fontSize": 10,
+    "contentOffset": 0,
     "topWidget": 0,
     "leftWidget": 0,
     "barWidth": 10,
@@ -869,6 +870,7 @@
     "alignCenter": true,
     "interval": 20,
     "fontSize": 30,
+    "contentOffset": 0,
     "topWidget": 0,
     "leftWidget": 0,
     "barWidth": 12,
@@ -1012,7 +1014,7 @@
     "_groupIndex": 0,
     "groupIndex": 0,
     "showInEditor": false,
-    "_id": "db+BLjaUtAWoXnjo7CpmGa"
+    "_id": "4ajBB5DI5N4pKJ7oOuYDNj"
   },
   {
     "__type__": "cc.Label",
@@ -1042,7 +1044,7 @@
     "_N$fontFamily": "Arial",
     "_N$overflow": 0,
     "_N$cacheMode": 0,
-    "_id": "50mRZ1tAhESI0bmqBFhaM2"
+    "_id": "95R/nqZOBLBZnJuc0poNCq"
   },
   {
     "__type__": "cc.Node",
@@ -1306,6 +1308,7 @@
     "alignCenter": true,
     "interval": 0,
     "fontSize": 30,
+    "contentOffset": 0,
     "topWidget": 0,
     "leftWidget": 0,
     "barWidth": 12,

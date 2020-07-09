@@ -142,6 +142,8 @@ export default class List extends cc.Component {
     @property(cc.Integer)
     fontSize : number = 30;
     @property(cc.Integer)
+    contentOffset : number = 0
+    @property(cc.Integer)
     topWidget : number = 0
     @property(cc.Integer)
     leftWidget: number = 0
@@ -209,21 +211,29 @@ export default class List extends cc.Component {
             if(position >=this._data.length) cc.warn('your position is too big')
             if(typeof data == 'object'){
                 data.forEach(element => {
-                    this._data.push(String(element))
+                    if(element instanceof cc.SpriteFrame) this._data.push(element)
+                    else this._data.push(String(element))
                     index.push(this._data.length-1)
+
                 });
             }
-            else {this._data.push(String(data));index.push(this._data.length - 1) }
+            else {
+                if(data instanceof cc.SpriteFrame) this._data.push(data)
+                else this._data.push(String(data));
+                index.push(this._data.length - 1) 
+            }
         }
         else{
             if(typeof data == 'object'){
-                for(var i = 0 ; i<data.length;i++){   
-                    this._data.splice(position+i,0,String(data[i]))
+                for(var i = 0 ; i<data.length;i++){ 
+                    if(data[i] instanceof cc.SpriteFrame) this._data.splice(position+i,0,data[i])
+                    else this._data.splice(position+i,0,String(data[i]))
                     index.push(position+i)
                 }
             }
             else{
-                this._data.splice(position,0,String(data))
+                if(data instanceof cc.SpriteFrame) this._data.splice(position,0,data)
+                else this._data.splice(position,0,String(data))
                 index.push(position)
             }
         }
@@ -310,7 +320,7 @@ export default class List extends cc.Component {
         };
         this.pick = []
     }
-    public ChangeDataByIndex(index:number,data:string){
+    public ChangeDataByIndex(index:number,data:any){
         this._data[index] = data
         cc.log('_data = '+this._data)
     }   
@@ -318,30 +328,42 @@ export default class List extends cc.Component {
         this._data = [];
         this.pick = [];
     }
-    public updateView(){   //操作后更新视图
-        
+    public updateView(){   //操作后更新视图 
         if(this.cycle) var min = Number(this._itemDisplayingPool[0].name)
         else var min = this._deleteList.length > 0?Number(this._deleteList[this._deleteList.length-1]):0     
             for(var i = 0;i<this._itemDisplayingPool.length;i++){
-                if(min <= Number(this._itemDisplayingPool[i].name) ){
-                    
+                if(min <= Number(this._itemDisplayingPool[i].name) ){                    
                     // cc.log('谁大了'+this._itemDisplayingPool[i].name)
                     if(this.cycle){
                         // cc.log('how much ='+this._data)
                         let index = this._cycleIndexProcess(Number(this._itemDisplayingPool[i].name))
                         // cc.log('删除数据'+index)
-                        this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = this._data[index]
-                        this._itemDisplayingPool[i].setPosition(this._calculatePosition(this._itemDisplayingPool[i]))
+                        if(this._data[index] instanceof cc.SpriteFrame) {
+                            if(this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string != (''||null)) this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = ''
+                            this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = this._data[index]
+                        }
+                        else {
+                            if(this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame != null) this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null
+                            this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = this._data[index]
+                        }
                     }
                     else{
-                        if(this._data[Number(this._itemDisplayingPool[i].name)])
-                            {                                                                
-                                this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = this._data[Number(this._itemDisplayingPool[i].name)]
-                                this._itemDisplayingPool[i].setPosition(this._calculatePosition(this._itemDisplayingPool[i]))
+                        if(this._data[Number(this._itemDisplayingPool[i].name)]){   
+                                if(this._data[Number(this._itemDisplayingPool[i].name)] instanceof cc.SpriteFrame) {
+                                    if(this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string != (null || '')) this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = ''
+                                    this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = this._data[Number(this._itemDisplayingPool[i].name)]
+                                }                                                            
+                                else {
+                                    if(this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame != null) this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null
+                                    this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = this._data[Number(this._itemDisplayingPool[i].name)] }                                                               
                             }
-                        else
-                            {this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = ''}
+                        else{
+                                this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null
+                                this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = ''
+                        }
                     }
+                    this._itemDisplayingPool[i].setPosition(this._calculatePosition(this._itemDisplayingPool[i]))
+                    this._itemDisplayingPool[i].getComponent('ListItem').itemOnLoad()
                 }
             }
             for(var num = 0;num < this._deleteList.length;num++) {
@@ -359,7 +381,6 @@ export default class List extends cc.Component {
         }
         return itemList
     }
-    public 
     public sendMessage(){  
         if(this.itemNumY >= this._data.length) return
         this.itemNumY++;
@@ -529,11 +550,15 @@ export default class List extends cc.Component {
     }
     private _creatrSingleItem(){
         var labelNode = new cc.Node('label');
+        var ImgNode = new cc.Node('imgMsg')
         var item = cc.instantiate(this.itemTemplate)
         if(item.getComponent(cc.Sprite) == null && this._imgBg.length != 0) item.addComponent(cc.Sprite) 
         item.color = this.itemColor
         item.addChild(labelNode)
+        labelNode.x += this.contentOffset
+        item.addChild(ImgNode)
         labelNode.addComponent(cc.RichText)
+        ImgNode.addComponent(cc.Sprite)
         let itemCompo = item.addComponent('ListItem')
         itemCompo.setFontSize(this.fontSize)
         return item;
@@ -587,7 +612,7 @@ export default class List extends cc.Component {
                     this.content.y -= (item.height+this.interval)/2
                     this.oriY -= (item.height+this.interval)/2
                     for(var index in this._itemPosition){
-                        if(Number(index) < Number(item.name)) this._itemPosition[index].y += (item.height+this.interval)/2
+                        if(Number(index) < Number(item.name)) {this._itemPosition[index].y += (item.height+this.interval)/2}
                     }
                     if(item.name == '0') this._itemPosition['0'] = cc.v2(0,this.content.height/2-item.height)
                     else {
@@ -836,14 +861,19 @@ export default class List extends cc.Component {
         }
         
         let itemLabel = item.getComponentInChildren(cc.RichText)
+        let itemImgMsg = item.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame
         let listItem = item.getComponent('ListItem')
         item.name = String(index)
         cc.log('create index='+item.name)
         if(this.cycle){
-            if(index >= 0) itemLabel.string = this._data[index%this._data.length]
+            if(index >= 0) {
+                if(this._data[index%this._data.length] instanceof cc.SpriteFrame) itemImgMsg = this._data[index%this._data.length]
+                else itemLabel.string = this._data[index%this._data.length]
+            }
             else {
                 while(index < 0) index +=this._data.length
-                itemLabel.string = this._data[index] 
+                if(this._data[index] instanceof cc.SpriteFrame) itemImgMsg = this._data[index]
+                else itemLabel.string = this._data[index] 
             }
             this.pick.forEach(element => {
                if((Number(item.name)-Number(element))%this._data.length == 0) {
@@ -852,7 +882,10 @@ export default class List extends cc.Component {
         }
         else{
             if(index < this._data.length) {
-                itemLabel.string = this._data[index]
+                if(this._data[index] instanceof cc.SpriteFrame){
+                    itemImgMsg = this._data[index]                    
+                }
+                else itemLabel.string = this._data[index]
             }
             else{
                     itemLabel.string = ''
@@ -865,6 +898,7 @@ export default class List extends cc.Component {
         this.content.addChild(item);
         item.targetOff(cc.Node.EventType.TOUCH_END)
         listItem.itemOnLoad()
+        cc.log('itemlabel fontsize === '+itemLabel.fontSize)
         item.setPosition(this._calculatePosition(item))
         if(flag) this._itemDisplayingPool.push(item)
         else this._itemDisplayingPool.unshift(item)

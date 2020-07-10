@@ -1,4 +1,5 @@
 import { eventCenter } from "../../CustomScroll_2";
+import MessageList from "../MessageList/MessageList";
 
 const {ccclass, property} = cc._decorator;
 
@@ -71,9 +72,7 @@ export default class InputRichText extends cc.Component {
             })
         }
     }
-    calculateCursorPositon(){
-        
-    }
+
     lineNumChange(){
         if(this.lineNum < Math.floor(this.node.height/this.lineHeight)){//下移一行
             this.node.y += this.lineHeight/2

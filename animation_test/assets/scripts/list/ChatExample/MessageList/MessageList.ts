@@ -9,6 +9,8 @@ export default class MessageList extends cc.Component {
     messageList : List = null
     @property(cc.RichText)
     editbox:cc.RichText = null
+    @property(cc.Node)
+    buttonNode:cc.Node = null
     type :number = 0
     channel:number
     private data = []
@@ -37,9 +39,8 @@ export default class MessageList extends cc.Component {
             if(this.listInfo[node[0].name] == 2){
                 node[0].color = cc.color(255,255,255,150)
                 this.messageList.returnPick().length = 0
-                cc.log('pick = ',this.messageList.returnPick().length)
             }
-            else{                
+            else{           
                 cc.loader.loadRes('Prefab/item',cc.Prefab,(err,prefab)=>{
                     let dropListNode = new cc.Node('DropList')
                     let dropList = dropListNode.addComponent('CustomScroll_2')
@@ -69,22 +70,20 @@ export default class MessageList extends cc.Component {
         }
     }
     sendInputMessage(){
-
         let template = this.messageList.SetItemTemplate(this.channel)
         if(this.channel == 0) this.messageList.contentOffset = 10
         else this.messageList.contentOffset = 0
         template.getChildByName('headPic').getComponent(cc.Sprite).spriteFrame = this.headPics[this.channel]
         this.messageList.setItemColor(this.color[this.channel])
         this.messageList.addData(this.editbox.string)
-        cc.log('???= '+this.editbox.string)
         this.messageList.fontSize = 30
         this.messageList.maxWidth = 200
         let index = this.messageList.sendMessage()
-
         this.listInfo[index]= this.channel
         this.editbox.string = ''
         this.editbox.node.getComponent('InputBox').input = ''
         this.editbox.node.getComponent('InputBox').lineNumChange()
+
     }
     showTimeTip(){
         this.messageList.SetItemTemplate(2)
@@ -94,11 +93,17 @@ export default class MessageList extends cc.Component {
         let index = this.messageList.sendMessage()
         let item = this.messageList.getItemByIndex(Number(index))
         let tipText = item.getComponentInChildren(cc.RichText)
+        cc.log('item name = ',item.name)
 
-        item.height = tipText.node.height +10
-        item.width = tipText.node.width + 10
-        cc.log('index = '+item.name)
         this.listInfo[index]= 2
     }
-    
+    onAddPic(){
+        let template = this.messageList.SetItemTemplate(this.channel)
+        if(this.channel == 0) this.messageList.contentOffset = 10
+        else this.messageList.contentOffset = 0
+        template.getChildByName('headPic').getComponent(cc.Sprite).spriteFrame = this.headPics[this.channel]
+        this.messageList.setItemColor(this.color[this.channel])
+        this.messageList.addData(this.buttonNode.getComponent(cc.Sprite).spriteFrame)
+        this.messageList.sendMessage()
+    }
 }

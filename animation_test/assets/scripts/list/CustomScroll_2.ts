@@ -209,7 +209,7 @@ export default class List extends cc.Component {
         if(position >= this._data.length || position == undefined){
             cc.log('data = '+data)
             if(position >=this._data.length) cc.warn('your position is too big')
-            if(typeof data == 'object'){
+            if(data instanceof Array){
                 data.forEach(element => {
                     if(element instanceof cc.SpriteFrame) this._data.push(element)
                     else this._data.push(String(element))
@@ -328,8 +328,9 @@ export default class List extends cc.Component {
         this._data = [];
         this.pick = [];
     }
-    public updateView(){   //操作后更新视图 
+    public updateView(index?:number){   //操作后更新视图 
         if(this.cycle) var min = Number(this._itemDisplayingPool[0].name)
+        else if(index != undefined) var min = index
         else var min = this._deleteList.length > 0?Number(this._deleteList[this._deleteList.length-1]):0     
             for(var i = 0;i<this._itemDisplayingPool.length;i++){
                 if(min <= Number(this._itemDisplayingPool[i].name) ){                    
@@ -385,7 +386,7 @@ export default class List extends cc.Component {
         if(this.itemNumY >= this._data.length) return
         this.itemNumY++;
         this._poolGet(this._itemDisplayingPool.length,true)
-        this.updateView()
+        // this.updateView()
         let lastItemPos = this._itemPosition[this._itemDisplayingPool[this._itemDisplayingPool.length-1].name]
         if(this.content.convertToWorldSpaceAR(lastItemPos).sub(cc.v2(0,320)).y < -this.viewHeight/2){
             this.content.y += this.viewHeight - this._itemDisplayingPool[this._itemDisplayingPool.length-1].height
@@ -507,7 +508,6 @@ export default class List extends cc.Component {
                         eventCenter.dispatch('pick'+this.node.name,element,0,element)
                     }
                     else{
-                        
                         if(this.singlePick){            
                             element.color = cc.Color.RED
                             if(this.pick.length == 0) {
@@ -526,7 +526,7 @@ export default class List extends cc.Component {
                             this.pick.push(element.name)
                         }
                         eventCenter.dispatch('pick'+this.node.name,element,2,element)
-                        cc.log(`pick${this.node.name}--${element.name}`)
+                        cc.log(`pick ${this.node.name}--${element.name}`)
                     }
                 }
             });
@@ -556,6 +556,7 @@ export default class List extends cc.Component {
         item.color = this.itemColor
         item.addChild(labelNode)
         labelNode.x += this.contentOffset
+        ImgNode.x += this.contentOffset
         item.addChild(ImgNode)
         labelNode.addComponent(cc.RichText)
         ImgNode.addComponent(cc.Sprite)
@@ -603,7 +604,7 @@ export default class List extends cc.Component {
                     for(var index in this._itemPosition){
                         if(Number(index) < Number(item.name)) this._itemPosition[index].x -= (item.width+this.interval)/2
                     }
-                    if(item.name == '0') this._itemPosition['0'] = cc.v2(-this.content.width/2+item.width,0)
+                    if(item.name == '0') this._itemPosition['0'] = cc.v2(-this.content.width/2+item.width+this.leftWidget,0)
                     else this._itemPosition[item.name] = cc.v2(this._itemPosition[Number(item.name)-1].x+item.width+this.interval,0)
                     return cc.v2(this._itemPosition[item.name].x-item.width/2,0)
                 }
@@ -614,12 +615,12 @@ export default class List extends cc.Component {
                     for(var index in this._itemPosition){
                         if(Number(index) < Number(item.name)) {this._itemPosition[index].y += (item.height+this.interval)/2}
                     }
-                    if(item.name == '0') this._itemPosition['0'] = cc.v2(0,this.content.height/2-item.height)
+                    if(item.name == '0') this._itemPosition['0'] = cc.v2(0,this.content.height/2-item.height-this.topWidget)
                     else {
                         this._itemPosition[item.name] = cc.v2(0,this._itemPosition[Number(item.name)-1].y - item.height-this.interval)
                         
                     }
-                    cc.log('itemheight = '+this._itemPosition)
+                    cc.log('itemheight = '+this._itemPosition,' itemheight = ',item.height)
                     return cc.v2(0,this._itemPosition[item.name].y+item.height/2)
                 }
             }
@@ -859,21 +860,18 @@ export default class List extends cc.Component {
         else{
             var item = this._creatrSingleItem();
         }
-        
-        let itemLabel = item.getComponentInChildren(cc.RichText)
-        let itemImgMsg = item.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame
         let listItem = item.getComponent('ListItem')
         item.name = String(index)
         cc.log('create index='+item.name)
         if(this.cycle){
             if(index >= 0) {
-                if(this._data[index%this._data.length] instanceof cc.SpriteFrame) itemImgMsg = this._data[index%this._data.length]
-                else itemLabel.string = this._data[index%this._data.length]
+                if(this._data[index%this._data.length] instanceof cc.SpriteFrame) item.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = this._data[index%this._data.length]
+                else item.getComponentInChildren(cc.RichText).string = this._data[index%this._data.length]
             }
             else {
                 while(index < 0) index +=this._data.length
-                if(this._data[index] instanceof cc.SpriteFrame) itemImgMsg = this._data[index]
-                else itemLabel.string = this._data[index] 
+                if(this._data[index] instanceof cc.SpriteFrame) item.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = this._data[index]
+                else item.getComponentInChildren(cc.RichText).string = this._data[index] 
             }
             this.pick.forEach(element => {
                if((Number(item.name)-Number(element))%this._data.length == 0) {
@@ -883,12 +881,12 @@ export default class List extends cc.Component {
         else{
             if(index < this._data.length) {
                 if(this._data[index] instanceof cc.SpriteFrame){
-                    itemImgMsg = this._data[index]                    
+                    item.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = this._data[index]                    
                 }
-                else itemLabel.string = this._data[index]
+                else item.getComponentInChildren(cc.RichText).string = this._data[index]
             }
             else{
-                    itemLabel.string = ''
+                item.getComponentInChildren(cc.RichText).string = ''
             }
             if(this._imgBg[index]) item.getComponent(cc.Sprite).spriteFrame = this._imgBg[index]
             this.pick.forEach(element => {
@@ -896,13 +894,12 @@ export default class List extends cc.Component {
             });
         }
         this.content.addChild(item);
-        item.targetOff(cc.Node.EventType.TOUCH_END)
         listItem.itemOnLoad()
-        cc.log('itemlabel fontsize === '+itemLabel.fontSize)
         item.setPosition(this._calculatePosition(item))
         if(flag) this._itemDisplayingPool.push(item)
         else this._itemDisplayingPool.unshift(item)
-        if(this.adaptiveSize) this.updateView()        
+        if(this.adaptiveSize) this.updateView()  
+             
     }
     private _itemNumRenderByFrame = 12;
     private _pool = new cc.NodePool();

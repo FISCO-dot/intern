@@ -264,17 +264,15 @@ export default class List extends cc.Component {
             .to(.3, {scaleX: .1,scaleY:.1})      
             .call(() => {                     
                 ob.color = this.itemColor
-                cc.log('put le = '+this._pool.size())
-                ob.removeFromParent()
+                // ob.removeFromParent()
                 ob.scaleX = scaleX
                 ob.scaleY = scaleY
                 if(callback != undefined) callback()
-
             })    
             .start()
     }
     private _deleteList = []
-    public deleteItem(){
+    public deleteItem(onCompleteCallback?:any){
         var length = this.pick.length;
         if(length == 0) return;
         this.pick.sort((a,b)=>{return Number(b)-Number(a)})
@@ -296,6 +294,7 @@ export default class List extends cc.Component {
                                 this._Shrinkanimation(this._itemDisplayingPool[j],()=>{
                                     this._deleteList.push(this._itemDisplayingPool[j].name);
                                     this._pool.put(this._itemDisplayingPool[j])
+                                    this.updateView()
                                     j += this._data.length
                                 })                                
                             }
@@ -312,9 +311,13 @@ export default class List extends cc.Component {
                 this._deleteList.push(this.pick[i]);
                 if(pickIndex != null){
                     this._Shrinkanimation(this._itemDisplayingPool[pickIndex],()=>{
-                        this._data.splice(Number(name),1)                       
                         eventCenter.emit('delete',this._itemDisplayingPool[pickIndex])
+                        this._pool.put(this._itemDisplayingPool[pickIndex])
+                        cc.log('put le = '+this._pool.size())
+                        this._data.splice(Number(name),1)    
+                        if(onCompleteCallback != undefined) onCompleteCallback(this._itemDisplayingPool[pickIndex]);
                     })
+                    
                 }
             }
         };
@@ -322,57 +325,69 @@ export default class List extends cc.Component {
     }
     public ChangeDataByIndex(index:number,data:any){
         this._data[index] = data
-        cc.log('_data = '+this._data)
     }   
     public clearData(){  //清空数据
         this._data = [];
         this.pick = [];
     }
     public updateView(index?:number){   //操作后更新视图 
+        cc.log('deletelist = '+this._deleteList)
+        for(var num = 0;num < this._deleteList.length;num++) {
+            cc.log('poolsize = '+this._pool.size())
+            if(this._pool.size() > 0) {
+                let getNode = this._pool.get()
+                this.content.addChild(this._itemDisplayingPool[Number(getNode.name)])
+            }
+        }
         if(this.cycle) var min = Number(this._itemDisplayingPool[0].name)
         else if(index != undefined) var min = index
         else var min = this._deleteList.length > 0?Number(this._deleteList[this._deleteList.length-1]):0     
             for(var i = 0;i<this._itemDisplayingPool.length;i++){
                 if(min <= Number(this._itemDisplayingPool[i].name) ){                    
-                    // cc.log('谁大了'+this._itemDisplayingPool[i].name)
+                    cc.log('谁大了'+this._itemDisplayingPool[i].name)
                     if(this.cycle){
-                        // cc.log('how much ='+this._data)
+                        cc.log('how much ='+this._data)
                         let index = this._cycleIndexProcess(Number(this._itemDisplayingPool[i].name))
-                        // cc.log('删除数据'+index)
+                        cc.log('删除数据'+index)
                         if(this._data[index] instanceof cc.SpriteFrame) {
-                            if(this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string != (''||null)) this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = ''
-                            this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = this._data[index]
+                            try{
+                                this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = ''
+                                this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = this._data[index]
+                            } catch{} 
                         }
                         else {
-                            if(this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame != null) this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null
-                            this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = this._data[index]
+                            try{this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null} 
+                            catch{}
+                            finally {this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = this._data[index]}
                         }
                     }
                     else{
                         if(this._data[Number(this._itemDisplayingPool[i].name)]){   
-                                if(this._data[Number(this._itemDisplayingPool[i].name)] instanceof cc.SpriteFrame) {
-                                    if(this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string != (null || '')) this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = ''
+                            if(this._data[Number(this._itemDisplayingPool[i].name)] instanceof cc.SpriteFrame) {
+                                try{
+                                    this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = ''
                                     this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = this._data[Number(this._itemDisplayingPool[i].name)]
-                                }                                                            
-                                else {
-                                    if(this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame != null) this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null
-                                    this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = this._data[Number(this._itemDisplayingPool[i].name)] }                                                               
-                            }
+                                } catch{} 
+                            }                                                            
+                            else {  
+                                try {this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null}
+                                catch(e) {}
+                                finally {this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = this._data[Number(this._itemDisplayingPool[i].name)]} 
+                            }                                                               
+                        }
                         else{
+                            try{
                                 this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null
-                                this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = ''
+                            } catch(e) {}                               
+                            finally {this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = ''}
                         }
                     }
                     this._itemDisplayingPool[i].setPosition(this._calculatePosition(this._itemDisplayingPool[i]))
-                    this._itemDisplayingPool[i].getComponent('ListItem').itemOnLoad()
+                    // if(this._itemDisplayingPool[i].getComponent('ListItem') == null) this._itemDisplayingPool[i].addComponent('ListItem')
+                    // this._itemDisplayingPool[i].getComponent('ListItem').itemOnLoad()
                 }
             }
-            for(var num = 0;num < this._deleteList.length;num++) {
-                cc.log('poolsize = '+this._pool.size())
-                if(this._pool.size() > 0) {
-                    this.content.addChild(this._pool.get())  
-                }
-            }
+
         this._deleteList = []
     }
     public returnPick(){
@@ -558,7 +573,7 @@ export default class List extends cc.Component {
         labelNode.x += this.contentOffset
         ImgNode.x += this.contentOffset
         item.addChild(ImgNode)
-        labelNode.addComponent(cc.RichText)
+        labelNode.addComponent(cc.RichText).string = ''
         ImgNode.addComponent(cc.Sprite)
         let itemCompo = item.addComponent('ListItem')
         itemCompo.setFontSize(this.fontSize)
@@ -620,7 +635,6 @@ export default class List extends cc.Component {
                         this._itemPosition[item.name] = cc.v2(0,this._itemPosition[Number(item.name)-1].y - item.height-this.interval)
                         
                     }
-                    cc.log('itemheight = '+this._itemPosition,' itemheight = ',item.height)
                     return cc.v2(0,this._itemPosition[item.name].y+item.height/2)
                 }
             }
@@ -881,12 +895,21 @@ export default class List extends cc.Component {
         else{
             if(index < this._data.length) {
                 if(this._data[index] instanceof cc.SpriteFrame){
-                    item.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = this._data[index]                    
+                    try{
+                        item.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = this._data[index]                    
+                        item.getComponentInChildren(cc.RichText).string = ''
+                    }catch{}
                 }
-                else item.getComponentInChildren(cc.RichText).string = this._data[index]
+                else try{
+                    item.getComponentInChildren(cc.RichText).string = this._data[index]
+                    item.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null
+                } catch{}
             }
             else{
-                item.getComponentInChildren(cc.RichText).string = ''
+                try{
+                    item.getComponentInChildren(cc.RichText).string = ''
+                    item.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null
+                }catch{}
             }
             if(this._imgBg[index]) item.getComponent(cc.Sprite).spriteFrame = this._imgBg[index]
             this.pick.forEach(element => {
@@ -919,7 +942,6 @@ export default class List extends cc.Component {
         if(!this.cycle && !this.messageMode){
             if((-this.content.x+this.oriX) < -50 ||(-this.oriY+this.content.y) < -50) this._freshItem(); //上拉或左拉刷新
         }
-        // cc.log('content='+this.view.width+'content='+this.view.height)
     }
     private _setBar(){
         //bar params

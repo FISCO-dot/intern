@@ -13,13 +13,14 @@ export default class EmojiList extends cc.Component {
             this.data.push(String(i))
         }
         cc.loader.loadRes('ChatExample/EmojiPic/faceAll',cc.SpriteAtlas,(err,assets)=>{
-            this.emojiList.loadItemBackground(assets.getSpriteFrames())
+            this.emojiList.loadData(assets.getSpriteFrames())
         })
     }
 
     clickOpenEmoji(){
         this.emojiList.node.active = !this.emojiList.node.active
         if(this.emojiList.node.active){
+            
             let emojilist = this.emojiList.node.getComponent('CustomScroll_2')
             emojilist._freshItem()
         }

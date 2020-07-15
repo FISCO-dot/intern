@@ -42,7 +42,9 @@ enum Direction {
     // emit事件，发送消息
     emit(key:string,...args){                      //key->监听的事件的名字   args->调用时传的参数
         var ary = this.bindFuncList[key];   //取得回调函数
+        
         if(ary){// 如果已经注册了事件，就直接发送消息
+            cc.log('cunzai------------',key)
             for (var i in ary) {
                 if (ary[i][0]) {
                     try {
@@ -51,6 +53,7 @@ enum Direction {
                 }
             }       
         }else {// 没有注册，先将要发送的消息保存，然后等待事件注册后，再一起emit
+            cc.log('bucunzai-------',key)
             if (this.emitList[key]){
                 this.emitList[key].push(args);
             }else {

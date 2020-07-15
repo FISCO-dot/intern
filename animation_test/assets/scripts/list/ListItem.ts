@@ -19,7 +19,8 @@ export default class ListItem extends cc.Component {
         this.textNode = this.node.getChildByName('label')
         this.text = this.node.getComponentInChildren(cc.RichText)
         this.imgNode = this.node.getChildByName('imgMsg')
-        this.img = this.imgNode.getComponent(cc.Sprite)
+        if(this.imgNode == null) this.img = null
+        else this.img = this.imgNode.getComponent(cc.Sprite)
         cc.loader.loadRes('ChatExample/EmojiPic/faceAll',cc.SpriteAtlas,(err,asset)=>{
             this.text.imageAtlas = asset
         })
@@ -37,7 +38,7 @@ export default class ListItem extends cc.Component {
             if(element.length == 0) {element = '';return}
             this.node.height = this.textNode.height + 20 
             this.node.width = this.textNode.width + 20
-            
+
         }
         else{
             if(element == null) return
@@ -63,7 +64,7 @@ export default class ListItem extends cc.Component {
             
             this.node.width = scrollComponent.width
             this.node.height = scrollComponent.height
-            if(this.img.spriteFrame == null) this.text.horizontalAlign = 1
+            if(this.img == null || this.img.spriteFrame == null) this.text.horizontalAlign = 1
             else {
                 this.imgNode.width = this.node.width
                 this.imgNode.height = this.node.height
@@ -71,7 +72,7 @@ export default class ListItem extends cc.Component {
         }
         else{
             if(scrollComponent.scrollHorizontal){
-                if(this.img.spriteFrame == null){
+                if(this.img == null || this.img.spriteFrame == null){
                     this.text.horizontalAlign = 1
                     this.text.maxWidth = 0
                     this._setSize(this.text.string)
@@ -82,16 +83,17 @@ export default class ListItem extends cc.Component {
             }
             else{
                 if(scrollComponent.messageMode){
-                    if(this.img.spriteFrame == null){
+                    if(this.img == null || this.img.spriteFrame == null){
                         if(this.node.getChildByName('headPic') == null) this.text.horizontalAlign = 1
                         else this.text.horizontalAlign = 0
                         this.text.maxWidth = scrollComponent.maxWidth;
                         this._setSize(this.text.string)
+                        
                     }
                     else this._setSize(this.img.spriteFrame)
                 }
                 else{
-                    if(this.img.spriteFrame == null){
+                    if(this.img == null || this.img.spriteFrame == null){
                         this.text.horizontalAlign = 1
                         this.text.maxWidth = scrollComponent.maxWidth;
                         this._setSize(this.text.string)

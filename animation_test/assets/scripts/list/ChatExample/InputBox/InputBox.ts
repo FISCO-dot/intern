@@ -16,14 +16,12 @@ export default class InputRichText extends cc.Component {
         this.lineHeight = this.node.getComponent(cc.RichText).lineHeight
         this.node.on(cc.Node.EventType.TOUCH_END,()=>{
             if(this.node.getChildByName('cursor') == null){
-                this.node.getComponent(cc.RichText).string = ''
-                this.cursorNode = cc.instantiate(this.cursor)
-                this.node.addChild(this.cursorNode)
-                this.cursorNode.setPosition(-65,0)
+                this.CreateCursor()
             }
             cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
         },this)
         eventCenter.on('pickEmojiList',(node)=>{
+            if((this.node.getChildByName('cursor') == null)) this.CreateCursor()
             this.input += `<img src="${(Number(node[0].name)+1)}"/>`
             cc.log(`input = ${this.input}`)
             this.node.getComponent(cc.RichText).string = this.input
@@ -91,5 +89,11 @@ export default class InputRichText extends cc.Component {
             this.cursorNode.x = 60            
             this.lineNum -= (this.lineNum-Math.floor(this.node.height/this.lineHeight))
         }
+    }
+    CreateCursor(){
+        this.node.getComponent(cc.RichText).string = ''
+        this.cursorNode = cc.instantiate(this.cursor)
+        this.node.addChild(this.cursorNode)
+        this.cursorNode.setPosition(-65,0)
     }
 }

@@ -9,8 +9,7 @@ export default class MessageList extends cc.Component {
     messageList : List = null
     @property(cc.RichText)
     editbox:cc.RichText = null
-    @property(cc.Node)
-    buttonNode:cc.Node = null
+
     type :number = 0
     channel:number
     private data = []
@@ -28,19 +27,18 @@ export default class MessageList extends cc.Component {
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onEnterDown, this);
         eventCenter.on('pickUserList',(node)=>{
             this.channel = Number(node[0].name)
+            cc.find('Canvas/UserList').active = false
             cc.log('pick channel '+this.channel)
         },this.node)
         eventCenter.on('unpickMessageList',(node)=>{
+            
             node[0].zIndex --
+            
             node[0].color = this.color[this.listInfo[node[0].name]]
+            cc.log('jhinlaile')
             node[0].getChildByName('DropList').removeFromParent()
         },this.node)
         eventCenter.on('pickMessageList',(node)=>{
-            if(this.listInfo[node[0].name] == 2){
-                node[0].color = cc.color(255,255,255,150)
-                this.messageList.returnPick().length = 0
-            }
-            else{           
                 cc.loader.loadRes('Prefab/item',cc.Prefab,(err,prefab)=>{
                     let dropListNode = new cc.Node('DropList')
                     let dropList = dropListNode.addComponent('CustomScroll_2')
@@ -49,12 +47,11 @@ export default class MessageList extends cc.Component {
                     node[0].addChild(dropListNode)
                     node[0].zIndex ++
                     dropListNode.setPosition(50,-150)
-
                 })
-            }
         },this.node)
-
-        
+        eventCenter.on('pickPicList',(node)=>{
+            this.onAddPic(node[0].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame)
+        },this.node)
     }
     onEnterDown(event){
         if(this.channel == undefined) return
@@ -78,12 +75,10 @@ export default class MessageList extends cc.Component {
         this.messageList.addData(this.editbox.string)
         this.messageList.fontSize = 30
         this.messageList.maxWidth = 200
-        let index = this.messageList.sendMessage()
-        this.listInfo[index]= this.channel
+        this.listInfo[this.messageList.sendMessage()]= this.channel
         this.editbox.string = ''
         this.editbox.node.getComponent('InputBox').input = ''
         this.editbox.node.getComponent('InputBox').lineNumChange()
-
     }
     showTimeTip(){
         this.messageList.SetItemTemplate(2)
@@ -91,19 +86,22 @@ export default class MessageList extends cc.Component {
         this.messageList.fontSize = 10
         this.messageList.maxWidth = 0
         let index = this.messageList.sendMessage()
-        let item = this.messageList.getItemByIndex(Number(index))
-        let tipText = item.getComponentInChildren(cc.RichText)
-        cc.log('item name = ',item.name)
-
+        this.messageList.getItemByIndex(Number(index)).off(cc.Node.EventType.TOUCH_END)
         this.listInfo[index]= 2
     }
-    onAddPic(){
+    onAddPic(pic:cc.SpriteFrame){
+        if(this.channel == undefined) return
+        this.date = new Date()
+        if(this.currentTime == undefined || this.date.getMinutes()-this.currentTime >= 5){
+            this.currentTime = this.date.getMinutes()
+            this.showTimeTip()
+        }
         let template = this.messageList.SetItemTemplate(this.channel)
         if(this.channel == 0) this.messageList.contentOffset = 10
         else this.messageList.contentOffset = 0
         template.getChildByName('headPic').getComponent(cc.Sprite).spriteFrame = this.headPics[this.channel]
         this.messageList.setItemColor(this.color[this.channel])
-        this.messageList.addData(this.buttonNode.getComponent(cc.Sprite).spriteFrame)
-        this.messageList.sendMessage()
+        this.messageList.addData(pic)
+        this.listInfo[this.messageList.sendMessage()] = this.channel
     }
 }

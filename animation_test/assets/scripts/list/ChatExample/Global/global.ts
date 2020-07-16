@@ -1,3 +1,3 @@
 export default class CopyMessage {
-    copyMessage:string = ''
+    copyMessage:any
 }

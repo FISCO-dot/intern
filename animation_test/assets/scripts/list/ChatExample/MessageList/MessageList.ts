@@ -11,7 +11,7 @@ export default class MessageList extends cc.Component {
     editbox:cc.RichText = null
 
     type :number = 0
-    channel:number
+    channel:number 
     private data = []
     private color = [cc.Color.WHITE,cc.Color.CYAN]
     private headPics = []
@@ -23,6 +23,11 @@ export default class MessageList extends cc.Component {
             assets.forEach(element => {
                 this.headPics.push(element)
             });
+        })
+        cc.loader.loadRes('ChatExample/EmojiPic/PicAdd',cc.SpriteFrame,(err,pic)=>{
+            this.channel = 0
+            this.onAddPic(pic)
+            this.channel = 1
         })
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onEnterDown, this);
         eventCenter.on('pickUserList',(node)=>{
@@ -52,6 +57,7 @@ export default class MessageList extends cc.Component {
         eventCenter.on('pickPicList',(node)=>{
             this.onAddPic(node[0].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame)
         },this.node)
+        
     }
     onEnterDown(event){
         if(this.channel == undefined) return

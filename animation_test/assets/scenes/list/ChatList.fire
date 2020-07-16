@@ -1014,7 +1014,7 @@
     "_groupIndex": 0,
     "groupIndex": 0,
     "showInEditor": false,
-    "_id": "cafzqa8mJLbb1OwyyCZm1g"
+    "_id": "4b0xBrdpFOxJ1is4ksirgT"
   },
   {
     "__type__": "cc.Label",
@@ -1044,7 +1044,7 @@
     "_N$fontFamily": "Arial",
     "_N$overflow": 0,
     "_N$cacheMode": 0,
-    "_id": "ebDr2Dk+pMkp5SkBUxlFO7"
+    "_id": "bb+7p8U+pGprFqtjTd64vC"
   },
   {
     "__type__": "cc.Node",
@@ -1804,14 +1804,14 @@
     "singlePick": true,
     "viewBg": null,
     "barBg": null,
-    "pageMode": false,
+    "pageMode": true,
     "cycle": false,
-    "scrollVertical": true,
+    "scrollVertical": false,
     "scrollHorizontal": true,
     "viewWidth": 100,
-    "viewHeight": 100,
-    "itemNumY": 2,
-    "itemNumX": 2,
+    "viewHeight": 50,
+    "itemNumY": 1,
+    "itemNumX": 20,
     "adaptiveSize": false,
     "height": 50,
     "width": 50,

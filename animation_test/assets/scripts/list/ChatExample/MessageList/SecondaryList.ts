@@ -77,8 +77,9 @@ export default class AddList extends cc.Component {
                         else copyMessage.copyMessage = parentList.returnPick()[0].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame
                         break;
                     case 'paste':
-                        if(copyMessage.copyMessage == undefined) break;
+                        if(copyMessage.copyMessage == (undefined)) break;
                         else {
+                            let bia = pickNode.height
                             if(typeof(copyMessage.copyMessage) == 'string'){
                                 try{
                                     pickNode.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null
@@ -87,7 +88,6 @@ export default class AddList extends cc.Component {
                                     parentList.ChangeDataByIndex(Number(parentList.returnPick()[0].name),copyMessage.copyMessage)
                                     pickNode.getComponent('ListItem').itemOnLoad()
                                     this.adjustItemPos(parentList,parentList.returnPick()[0])
-                                    pickNode.children[0].y -= 10
                                 }
                             }
                             else {
@@ -98,14 +98,15 @@ export default class AddList extends cc.Component {
                                     parentList.ChangeDataByIndex(Number(parentList.returnPick()[0].name),copyMessage.copyMessage)
                                     pickNode.getComponent('ListItem').itemOnLoad()
                                     this.adjustItemPos(parentList,parentList.returnPick()[0])
-                                    pickNode.children[0].y += 10 //暂时顶一下
                                 }
                             }
+                            pickNode.children[0].y += (pickNode.height - bia)/2  //调整头像位置
                         }
                         break;
                     case 'quoto':
                         break;
-                    case 'add':
+                    case 'add':  //将图片添加到图片列表
+                        cc.find('Canvas/AddPic/PicList').getComponent('CustomScroll_2').addData(pickNode.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame)
                         break;
                     default:
                         break;

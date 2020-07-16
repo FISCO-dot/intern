@@ -185,20 +185,14 @@ export default class List extends cc.Component {
     public setItemColor(color:cc.Color){
         this.itemColor = color
     }
-    public loadData(data:any[] = [],transverse:boolean = false, autoFill:boolean = false){
+    public loadData(data:any[] = [],transverse:boolean = false){
         if(data.length == 0) {cc.error('input is empty');return}
         
-        if(autoFill && this.cycle) cc.warn('there maybe an interput in cyclic mode and autoFill')
         data.forEach(element => {
             if(element instanceof cc.SpriteFrame) this._data.push(element)
             else this._data.push(String(element))
         });
         if(transverse) this._data.reverse()
-        if(autoFill){
-            while(this._data.length < this.itemNumX*this.itemNumY){
-                this._data.push('')
-            } 
-        }
     }
     public addData(data:any[] | any ,position?: number){ //在指定位置追加数据
         let index = []
@@ -317,7 +311,6 @@ export default class List extends cc.Component {
                         this._data.splice(Number(name),1)    
                         if(onCompleteCallback != undefined) onCompleteCallback(this._itemDisplayingPool[pickIndex]);
                     })
-                    
                 }
             }
         };
@@ -331,12 +324,12 @@ export default class List extends cc.Component {
         this.pick = [];
     }
     public updateView(index?:number){   //操作后更新视图 
-        cc.log('deletelist = '+this._deleteList)
         for(var num = 0;num < this._deleteList.length;num++) {
             cc.log('poolsize = '+this._pool.size())
             if(this._pool.size() > 0) {
                 let getNode = this._pool.get()
-                this.content.addChild(this._itemDisplayingPool[Number(getNode.name)])
+                try{this.content.addChild(this._itemDisplayingPool[Number(getNode.name)])}
+                catch{}  //在产生delmsg之后已经加入了content
             }
         }
         if(this.cycle) var min = Number(this._itemDisplayingPool[0].name)
@@ -344,9 +337,8 @@ export default class List extends cc.Component {
         else var min = this._deleteList.length > 0?Number(this._deleteList[this._deleteList.length-1]):0     
             for(var i = 0;i<this._itemDisplayingPool.length;i++){
                 if(min <= Number(this._itemDisplayingPool[i].name) ){                    
-                    cc.log('谁大了'+this._itemDisplayingPool[i].name)
+                    cc.log('update ',this._itemDisplayingPool[i])
                     if(this.cycle){
-                        cc.log('how much ='+this._data)
                         let index = this._cycleIndexProcess(Number(this._itemDisplayingPool[i].name))
                         cc.log('删除数据'+index)
                         if(this._data[index] instanceof cc.SpriteFrame) {
@@ -401,7 +393,6 @@ export default class List extends cc.Component {
         if(this.itemNumY >= this._data.length) return
         this.itemNumY++;
         this._poolGet(this._itemDisplayingPool.length,true)
-        // this.updateView()
         let lastItemPos = this._itemPosition[this._itemDisplayingPool[this._itemDisplayingPool.length-1].name]
         if(this.content.convertToWorldSpaceAR(lastItemPos).sub(cc.v2(0,320)).y < -this.viewHeight/2){
             this.content.y += this.viewHeight - this._itemDisplayingPool[this._itemDisplayingPool.length-1].height
@@ -606,10 +597,15 @@ export default class List extends cc.Component {
         }
         else{
             if(!this.adaptiveSize){
-                let column = Math.floor(Number(item.name) / this.itemNumX)
-                let row = Number(item.name) % this.itemNumX
-                this._itemPosition[item.name] = cc.v2(-this.content.width/2 +this.width/2+this.leftWidget+row*(this.width+this.interval),this.content.height/2-this.topWidget-(this.height/2+column*(this.height+this.interval)))
-                return this._itemPosition[item.name]
+                if(this.pageMode && (item.name/this.itemNumX>=this.pageNumY || item.name%this.itemNumX>=this.pageNumX)){
+                    return this._itemPosition[String(Number(item.name)%this.itemNumX%this.pageNumX+Math.floor(Number(item.name)/this.itemNumX)%this.pageNumY*this.itemNumX)]
+                }
+                else{
+                    let column = Math.floor(Number(item.name) / this.itemNumX)
+                    let row = Number(item.name) % this.itemNumX
+                    this._itemPosition[item.name] = cc.v2(-this.content.width/2 +this.width/2+this.leftWidget+row*(this.width+this.interval),this.content.height/2-this.topWidget-(this.height/2+column*(this.height+this.interval)))
+                    return this._itemPosition[item.name]
+                }
             }
             else{
                 if(this.scrollHorizontal){
@@ -691,14 +687,14 @@ export default class List extends cc.Component {
             }
         }
         else{ //-4：往左滑 -3：往右滑 -2：往上滑 -1：往下滑
-            if(this.onceControl&&this.scrollHorizontal&& Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name) % this.itemNumX < this.itemNumX-1 && //不是最后一篇
+            if(this.onceControl&&this.scrollHorizontal&& Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name) % this.itemNumX < Math.min(this.itemNumX,this._data.length)-1 && //不是最后一篇
                 this.content.x < -this.viewWidth*1/4){
                 {cc.log('-4');this.onceControl = false;return -4}
             }
             else if(this.onceControl&&this.scrollHorizontal && Number(this._itemDisplayingPool[0].name) % this.itemNumX > 0 &&
                 this.content.x > this.viewWidth/4)
                { cc.log('-3');this.onceControl = false;return -3}
-            else if(this.onceControl&&this.scrollVertical && Math.floor(Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name) /this.itemNumX) < this.itemNumY-1 &&
+            else if(this.onceControl&&this.scrollVertical && Math.floor(Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name) /this.itemNumX) < Math.min(this.itemNumY,this._data.length)-1 &&
                 this.content.y > this.viewHeight/4)
                 {cc.log('-2');this.onceControl = false;return -2}
             else if(this.onceControl&&this.scrollVertical && Math.floor(Number(this._itemDisplayingPool[0].name) /this.itemNumX) > 0 &&
@@ -722,9 +718,15 @@ export default class List extends cc.Component {
                 if(flag == -4) {
                     this._initializePage(index+this.pageNumX)
                 }
-                else if(flag == -3) this._initializePage(index-this.pageNumX)
-                else if(flag == -2) this._initializePage(index+this.pageNumY*this.itemNumX)
-                else if(flag == -1) this._initializePage(index -this.pageNumY*this.itemNumX)
+                else if(flag == -3) {
+                    this._initializePage(index-this.pageNumX)
+                }
+                else if(flag == -2) {
+                    this._initializePage(index+this.pageNumY*this.itemNumX)
+                }
+                else if(flag == -1) {
+                    this._initializePage(index -this.pageNumY*this.itemNumX)
+                }
                 this.content.setPosition(0,0)
             }
         }
@@ -869,6 +871,7 @@ export default class List extends cc.Component {
         this._itemDisplayingPool.splice(index,1)
     }
     private _poolGet(index:number,flag:boolean){
+        if(index > this.itemNumX*this.itemNumY - 1 || (index > this._data.length-1 && !this.cycle)) return
         if(this._findItemByname(this._itemDisplayingPool,String(index))!=null) return;
         if(this._pool.size()>0) {var item = this._pool.get();item.color = this.itemColor}
         else{
@@ -939,9 +942,9 @@ export default class List extends cc.Component {
             }
             this._loadScrollRecord();
         }
-        if(!this.cycle && !this.messageMode){
-            if((-this.content.x+this.oriX) < -50 ||(-this.oriY+this.content.y) < -50) this._freshItem(); //上拉或左拉刷新
-        }
+        // if(!this.cycle && !this.messageMode){
+        //     if((-this.content.x+this.oriX) < -50 ||(-this.oriY+this.content.y) < -50) this._freshItem(); //上拉或左拉刷新
+        // }
     }
     private _setBar(){
         //bar params

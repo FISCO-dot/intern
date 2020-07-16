@@ -13,7 +13,7 @@ export default class MessageList extends cc.Component {
     type :number = 0
     channel:number 
     private data = []
-    private color = [cc.Color.WHITE,cc.Color.CYAN]
+    private color = [cc.Color.WHITE,cc.Color.CYAN,cc.color(255,255,255,255)]
     private headPics = []
     private listInfo = []
     private date = new Date()
@@ -23,11 +23,11 @@ export default class MessageList extends cc.Component {
             assets.forEach(element => {
                 this.headPics.push(element)
             });
-        })
-        cc.loader.loadRes('ChatExample/EmojiPic/PicAdd',cc.SpriteFrame,(err,pic)=>{
-            this.channel = 0
-            this.onAddPic(pic)
-            this.channel = 1
+            cc.loader.loadRes('ChatExample/EmojiPic/PicAdd',cc.SpriteFrame,(err,pic)=>{
+                this.channel = 0
+                this.onAddPic(pic)
+                this.channel = 1
+            })
         })
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onEnterDown, this);
         eventCenter.on('pickUserList',(node)=>{
@@ -36,11 +36,9 @@ export default class MessageList extends cc.Component {
             cc.log('pick channel '+this.channel)
         },this.node)
         eventCenter.on('unpickMessageList',(node)=>{
-            
             node[0].zIndex --
-            
+            cc.log('channel name = ',node[0].name)
             node[0].color = this.color[this.listInfo[node[0].name]]
-            cc.log('jhinlaile')
             node[0].getChildByName('DropList').removeFromParent()
         },this.node)
         eventCenter.on('pickMessageList',(node)=>{
@@ -57,7 +55,9 @@ export default class MessageList extends cc.Component {
         eventCenter.on('pickPicList',(node)=>{
             this.onAddPic(node[0].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame)
         },this.node)
-        
+        eventCenter.on('delete',(node)=>{
+            this.listInfo[node[0].name] = 2
+        },this.node)
     }
     onEnterDown(event){
         if(this.channel == undefined) return
@@ -79,8 +79,7 @@ export default class MessageList extends cc.Component {
         template.getChildByName('headPic').getComponent(cc.Sprite).spriteFrame = this.headPics[this.channel]
         this.messageList.setItemColor(this.color[this.channel])
         this.messageList.addData(this.editbox.string)
-        this.messageList.fontSize = 30
-        this.messageList.maxWidth = 200
+
         this.listInfo[this.messageList.sendMessage()]= this.channel
         this.editbox.string = ''
         this.editbox.node.getComponent('InputBox').input = ''
@@ -94,6 +93,8 @@ export default class MessageList extends cc.Component {
         let index = this.messageList.sendMessage()
         this.messageList.getItemByIndex(Number(index)).off(cc.Node.EventType.TOUCH_END)
         this.listInfo[index]= 2
+        this.messageList.fontSize = 30
+        this.messageList.maxWidth = 200
     }
     onAddPic(pic:cc.SpriteFrame){
         if(this.channel == undefined) return

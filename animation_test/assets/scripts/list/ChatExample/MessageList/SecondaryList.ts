@@ -83,17 +83,20 @@ export default class AddList extends cc.Component {
                             if(typeof(copyMessage.copyMessage) == 'string'){
                                 try{
                                     pickNode.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null
-                                }finally{
+                                }catch{}
+                                finally{
                                     pickNode.getComponentInChildren(cc.RichText).string = copyMessage.copyMessage                                    
                                     parentList.ChangeDataByIndex(Number(parentList.returnPick()[0].name),copyMessage.copyMessage)
                                     pickNode.getComponent('ListItem').itemOnLoad()
+                                    cc.log('fontsize = ',pickNode.getComponentInChildren(cc.RichText).fontSize)
                                     this.adjustItemPos(parentList,parentList.returnPick()[0])
                                 }
                             }
                             else {
                                 try{
                                     pickNode.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = copyMessage.copyMessage
-                                }finally{
+                                }catch{}
+                                finally{
                                     pickNode.getComponentInChildren(cc.RichText).string = ''
                                     parentList.ChangeDataByIndex(Number(parentList.returnPick()[0].name),copyMessage.copyMessage)
                                     pickNode.getComponent('ListItem').itemOnLoad()
@@ -111,7 +114,7 @@ export default class AddList extends cc.Component {
                     default:
                         break;
                 }
-                // eventCenter.emit(`select${parentList.node.name}`,node[0].parent.parent.parent.parent)
+                eventCenter.emit(`select${parentList.node.name}`,node[0].parent.parent.parent.parent)
                 this.node.removeFromParent()
             },this.node)
             

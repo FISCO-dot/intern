@@ -233,7 +233,7 @@ export default class List extends cc.Component {
         }
         return index
     }
-    public loadItemBackground(data : cc.SpriteFrame[] ){
+    public loadItemBackground(data : cc.SpriteFrame[] ){ //node上的sprite
         if(data.length == 0) return
         data.forEach(element => {
             this._imgBg.push(element)
@@ -279,6 +279,7 @@ export default class List extends cc.Component {
                         if(this._itemDisplayingPool.length < this._data.length) {                            
                             this._Shrinkanimation(this._itemDisplayingPool[j],()=>{
                                 this._deleteList.push(this.pick[i]);
+                                eventCenter.emit('delete',this._itemDisplayingPool[j])
                                 this._pool.put(this._itemDisplayingPool[j])
                             })
                             break
@@ -287,6 +288,7 @@ export default class List extends cc.Component {
                             while(j < this._itemDisplayingPool.length){                                
                                 this._Shrinkanimation(this._itemDisplayingPool[j],()=>{
                                     this._deleteList.push(this._itemDisplayingPool[j].name);
+                                    eventCenter.emit('delete',this._itemDisplayingPool[j])
                                     this._pool.put(this._itemDisplayingPool[j])
                                     this.updateView()
                                     j += this._data.length
@@ -348,9 +350,10 @@ export default class List extends cc.Component {
                             } catch{} 
                         }
                         else {
-                            try{this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null} 
-                            catch{}
-                            finally {this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = this._data[index]}
+                            try{
+                                this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = this._data[index]
+                                this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null
+                            } catch {}
                         }
                     }
                     else{
@@ -362,16 +365,17 @@ export default class List extends cc.Component {
                                 } catch{} 
                             }                                                            
                             else {  
-                                try {this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null}
-                                catch(e) {}
-                                finally {this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = this._data[Number(this._itemDisplayingPool[i].name)]} 
+                                try {
+                                    this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = this._data[Number(this._itemDisplayingPool[i].name)]
+                                    this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null
+                                } catch {} 
                             }                                                               
                         }
                         else{
                             try{
+                                this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = ''
                                 this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null
-                            } catch(e) {}                               
-                            finally {this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = ''}
+                            }catch {}
                         }
                     }
                     this._itemDisplayingPool[i].setPosition(this._calculatePosition(this._itemDisplayingPool[i]))

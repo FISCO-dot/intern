@@ -20,9 +20,10 @@ export default class EmojiList extends cc.Component {
     clickOpenEmoji(){
         this.emojiList.node.active = !this.emojiList.node.active
         if(this.emojiList.node.active){
-            
             let emojilist = this.emojiList.node.getComponent('CustomScroll_2')
             emojilist._freshItem()
+            if(this.node.parent.getChildByName('AddPic').getChildByName('PicList').active)
+                this.node.parent.getChildByName('AddPic').getChildByName('PicList').active = false
         }
     }
 

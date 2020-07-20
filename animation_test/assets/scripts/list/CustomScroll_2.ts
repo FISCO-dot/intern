@@ -339,7 +339,7 @@ export default class List extends cc.Component {
         else var min = this._deleteList.length > 0?Number(this._deleteList[this._deleteList.length-1]):0     
             for(var i = 0;i<this._itemDisplayingPool.length;i++){
                 if(min <= Number(this._itemDisplayingPool[i].name) ){                    
-                    cc.log('update ',this._itemDisplayingPool[i])
+                    // cc.log('update ',this._itemDisplayingPool[i])
                     if(this.cycle){
                         let index = this._cycleIndexProcess(Number(this._itemDisplayingPool[i].name))
                         cc.log('删除数据'+index)
@@ -595,8 +595,8 @@ export default class List extends cc.Component {
         if(this._itemPosition[item.name]){
             if(!this.adaptiveSize) return this._itemPosition[item.name]
             else{
-                if(this.scrollHorizontal) return cc.v2(this._itemPosition[item.name].x-item.width/2,0)
-                else return cc.v2(0,this._itemPosition[item.name].y+item.height/2)
+                if(this.scrollHorizontal) return cc.v2(this._itemPosition[item.name].x-item.width/2,this._itemPosition[item.name].y)
+                else return cc.v2(this._itemPosition[item.name].x,this._itemPosition[item.name].y+item.height/2)
             }
         }
         else{
@@ -650,8 +650,10 @@ export default class List extends cc.Component {
                 return index
             }
             else{
-                while(this.content.height/2-this._itemPosition[index].y < y-this.oriY) index ++
-                return index 
+                try{
+                    while(this.content.height/2-this._itemPosition[index].y < y-this.oriY) index ++
+                    return index 
+                }catch{ return -1}
             }
         }
     }
@@ -759,7 +761,7 @@ export default class List extends cc.Component {
                     }  
                 }
                     if(flag == -2){
-    
+
                         for(var i = rowNum;i>=0;i--){
                             if(columnNum > this.pageNumY && rowNum >this.pageNumX ){
                                 this._poolPut(0)

@@ -12,6 +12,7 @@ export default class InputRichText extends cc.Component {
     lineNum : number = 1
     lineHeight : number
     cursorNode : cc.Node = null
+    width_sign : number = 10;
     onLoad () {
         this.lineHeight = this.node.getComponent(cc.RichText).lineHeight
         this.node.on(cc.Node.EventType.TOUCH_END,()=>{
@@ -35,14 +36,24 @@ export default class InputRichText extends cc.Component {
         
         if(event.keyCode > 47 && event.keyCode < 91) {
             this.input += String.fromCharCode(event.keyCode);
-            if(event.keyCode < 57) this.cursorNode.x += 130/11
+            if(event.keyCode < 58) {
+                if(event.keyCode == 49) this.cursorNode.x += 130/13
+                else this.cursorNode.x += 130/11
+            }
             else this.cursorNode.x += 130/9
-            
         }
-        if(event.keyCode == cc.macro.KEY.backspace){
+        else if(event.keyCode > 95 && event.keyCode < 106){
+            this.input += String(event.keyCode - 96)
+            if(event.keyCode == 97) this.cursorNode.x += 130/13;
+            else this.cursorNode.x += 130/11
+        }
+        else if(event.keyCode == cc.macro.KEY.backspace){
             if(this.input.length > 0){
                 if(this.input[this.input.length-1] != '>') {
-                    if(this.input[this.input.length-1] <= '9' && this.input[this.input.length-1] >= '0') this.cursorNode.x -= 130/11
+                    if(this.input[this.input.length-1] <= '9' && this.input[this.input.length-1] >= '0') {
+                        if(this.input[this.input.length-1] == '1') this.cursorNode.x -= 130 / 14
+                        else this.cursorNode.x -= 130/11
+                    }
                     else this.cursorNode.x -= 130/9
                     this.input = this.input.substring(0,this.input.length-1)
                 }
@@ -51,6 +62,36 @@ export default class InputRichText extends cc.Component {
                     this.input = this.input.substring(0,index)
                     this.cursorNode.x -= 130/6
                 }
+            }
+        }
+        else {
+            switch (event.keyCode) {
+                case 188:
+                    this.input += ','
+                    this.cursorNode.x += this.width_sign
+                    break;
+                case 190:
+                    this.input += '.'
+                    this.cursorNode.x += this.width_sign
+                    break;
+                case 186:
+                    this.input += ';'
+                    this.cursorNode.x += this.width_sign
+                    break;
+                case 106:
+                    this.input += '*'
+                    this.cursorNode.x += this.width_sign
+                    break;
+                case 107:
+                    this.input += '+'
+                    this.cursorNode.x += this.width_sign
+                    break;
+                case 108:
+                    this.input += '-'
+                    this.cursorNode.x += this.width_sign
+                    break;
+                default:
+                    break;
             }
         }
         this.node.getComponent(cc.RichText).string = this.input
@@ -75,7 +116,7 @@ export default class InputRichText extends cc.Component {
         if(this.lineNum < Math.floor(this.node.height/this.lineHeight)){//下移一行
             this.node.y += this.lineHeight/2
             this.node.getChildByName('Ground').height += this.lineHeight
-            this.node.getChildByName('EmojiButt').y -= this.lineHeight/2
+            this.node.getChildByName('ToggleContainer').y -= this.lineHeight/2
             this.cursorNode.y -= this.lineHeight/2
             if(this.input[this.input.length-1] >= '0' && this.input[this.input.length-1] <= '9') this.cursorNode.x = -55
             else this.cursorNode.x = -52
@@ -84,7 +125,7 @@ export default class InputRichText extends cc.Component {
         else if(this.lineNum > Math.floor(this.node.height/this.lineHeight)){//上移一行
             this.node.y -= this.lineHeight/2*(this.lineNum-Math.floor(this.node.height/this.lineHeight))
             this.node.getChildByName('Ground').height -= this.lineHeight*(this.lineNum-Math.floor(this.node.height/this.lineHeight))
-            this.node.getChildByName('EmojiButt').y += this.lineHeight/2*(this.lineNum-Math.floor(this.node.height/this.lineHeight))
+            this.node.getChildByName('ToggleContainer').y += this.lineHeight/2*(this.lineNum-Math.floor(this.node.height/this.lineHeight))
             this.cursorNode.y += this.lineHeight/2
             this.cursorNode.x = 60            
             this.lineNum -= (this.lineNum-Math.floor(this.node.height/this.lineHeight))

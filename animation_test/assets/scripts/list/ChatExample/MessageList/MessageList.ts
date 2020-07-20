@@ -24,8 +24,13 @@ export default class MessageList extends cc.Component {
                 this.headPics.push(element)
             });
             cc.loader.loadRes('ChatExample/EmojiPic/PicAdd',cc.SpriteFrame,(err,pic)=>{
+                this.date = new Date()
+                if(this.currentTime == undefined || this.date.getMinutes()-this.currentTime >= 5){
+                    this.currentTime = this.date.getMinutes()
+                    this.showTimeTip()
+                }
                 this.channel = 0
-                this.onAddPic(pic)
+                this.sendInputMessage(pic)
                 this.channel = 1
             })
         })
@@ -53,7 +58,13 @@ export default class MessageList extends cc.Component {
                 })
         },this.node)
         eventCenter.on('pickPicList',(node)=>{
-            this.onAddPic(node[0].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame)
+            if(this.channel == undefined) return
+            this.date = new Date()
+            if(this.currentTime == undefined || this.date.getMinutes()-this.currentTime >= 5){
+                this.currentTime = this.date.getMinutes()
+                this.showTimeTip()
+            }
+            this.sendInputMessage(node[0].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame)
         },this.node)
         eventCenter.on('delete',(node)=>{
             this.listInfo[node[0].name] = 2
@@ -72,15 +83,22 @@ export default class MessageList extends cc.Component {
             this.editbox.node.getChildByName('cursor').setPosition(-65,0) 
         }
     }
-    sendInputMessage(){
+    sendInputMessage(pic?:cc.SpriteFrame){
         let template = this.messageList.SetItemTemplate(this.channel)
         if(this.channel == 0) this.messageList.contentOffset = 10
         else this.messageList.contentOffset = 0
         template.getChildByName('headPic').getComponent(cc.Sprite).spriteFrame = this.headPics[this.channel]
         this.messageList.setItemColor(this.color[this.channel])
-        this.messageList.addData(this.editbox.string)
-
+        pic == undefined? this.messageList.addData(this.editbox.string) : this.messageList.addData(pic)
         this.listInfo[this.messageList.sendMessage()]= this.channel
+        let itemPos = this.messageList.getItemposition()
+        let item = this.messageList.getItemByIndex(this.messageList.getItem().length-1)
+        if(this.channel == 0) itemPos[item.name].x = -this.messageList.viewWidth/2+item.width/2+item.children[0].width
+        else if(this.channel == 1) {
+            itemPos[item.name].x = this.messageList.viewWidth/2-item.width/2-item.children[0].width;        
+    }
+
+        this.messageList.updateView()
         this.editbox.string = ''
         this.editbox.node.getComponent('InputBox').input = ''
         this.editbox.node.getComponent('InputBox').lineNumChange()
@@ -96,19 +114,5 @@ export default class MessageList extends cc.Component {
         this.messageList.fontSize = 30
         this.messageList.maxWidth = 200
     }
-    onAddPic(pic:cc.SpriteFrame){
-        if(this.channel == undefined) return
-        this.date = new Date()
-        if(this.currentTime == undefined || this.date.getMinutes()-this.currentTime >= 5){
-            this.currentTime = this.date.getMinutes()
-            this.showTimeTip()
-        }
-        let template = this.messageList.SetItemTemplate(this.channel)
-        if(this.channel == 0) this.messageList.contentOffset = 10
-        else this.messageList.contentOffset = 0
-        template.getChildByName('headPic').getComponent(cc.Sprite).spriteFrame = this.headPics[this.channel]
-        this.messageList.setItemColor(this.color[this.channel])
-        this.messageList.addData(pic)
-        this.listInfo[this.messageList.sendMessage()] = this.channel
-    }
+
 }

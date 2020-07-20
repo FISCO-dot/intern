@@ -49,7 +49,7 @@ export default class AddList extends cc.Component {
         else if(this.node.parent.parent.parent.parent.name == "MessageList"){
             let parentList = this.node.parent.parent.parent.parent.getComponent('CustomScroll_2')
             if(this.node.parent.getComponentInChildren(cc.RichText).string != ''){
-                this.menuTemplate = ['copy','paste','delete','quote']
+                this.menuTemplate = ['copy','paste','delete','...']
             }
             else{
                 this.menuTemplate = ['copy','paste','delete','add']
@@ -106,10 +106,10 @@ export default class AddList extends cc.Component {
                             pickNode.children[0].y += (pickNode.height - bia)/2  //调整头像位置
                         }
                         break;
-                    case 'quoto':
+                    case '...':
                         break;
                     case 'add':  //将图片添加到图片列表
-                        cc.find('Canvas/AddPic/PicList').getComponent('CustomScroll_2').addData(pickNode.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame)
+                        cc.find('Canvas/InputBox/ToggleContainer/AddPic/PicList').getComponent('CustomScroll_2').addData(pickNode.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame)
                         break;
                     default:
                         break;

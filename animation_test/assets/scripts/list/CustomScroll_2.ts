@@ -330,7 +330,7 @@ export default class List extends cc.Component {
             cc.log('poolsize = '+this._pool.size())
             if(this._pool.size() > 0) {
                 let getNode = this._pool.get()
-                try{this.content.addChild(this._itemDisplayingPool[Number(getNode.name)])}
+                try{this.content.addChild(this._itemDisplayingPool[this._findItemByname(this._itemDisplayingPool,getNode.name)])}
                 catch{}  //在产生delmsg之后已经加入了content
             }
         }
@@ -338,44 +338,31 @@ export default class List extends cc.Component {
         else if(index != undefined) var min = index
         else var min = this._deleteList.length > 0?Number(this._deleteList[this._deleteList.length-1]):0     
             for(var i = 0;i<this._itemDisplayingPool.length;i++){
+                let str = this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string
+                let spf = this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame
                 if(min <= Number(this._itemDisplayingPool[i].name) ){                    
                     // cc.log('update ',this._itemDisplayingPool[i])
                     if(this.cycle){
                         let index = this._cycleIndexProcess(Number(this._itemDisplayingPool[i].name))
                         cc.log('删除数据'+index)
                         if(this._data[index] instanceof cc.SpriteFrame) {
-                            try{
-                                this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = ''
-                                this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = this._data[index]
-                            } catch{} 
+                            try{str = '';spf = this._data[index];} catch{} 
                         }
                         else {
-                            try{
-                                this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = this._data[index]
-                                this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null
-                            } catch {}
+                            try{str = this._data[index];spf = null} catch {}
                         }
                     }
                     else{
                         if(this._data[Number(this._itemDisplayingPool[i].name)]){   
                             if(this._data[Number(this._itemDisplayingPool[i].name)] instanceof cc.SpriteFrame) {
-                                try{
-                                    this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = ''
-                                    this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = this._data[Number(this._itemDisplayingPool[i].name)]
-                                } catch{} 
+                                try{str = '';spf = this._data[Number(this._itemDisplayingPool[i].name)]} catch{} 
                             }                                                            
                             else {  
-                                try {
-                                    this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = this._data[Number(this._itemDisplayingPool[i].name)]
-                                    this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null
-                                } catch {} 
+                                try {str = this._data[Number(this._itemDisplayingPool[i].name)];spf = null} catch {}
                             }                                                               
                         }
                         else{
-                            try{
-                                this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string = ''
-                                this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null
-                            }catch {}
+                            try{str = '';spf = null}catch {}
                         }
                     }
                     this._itemDisplayingPool[i].setPosition(this._calculatePosition(this._itemDisplayingPool[i]))
@@ -383,7 +370,6 @@ export default class List extends cc.Component {
                     // this._itemDisplayingPool[i].getComponent('ListItem').itemOnLoad()
                 }
             }
-
         this._deleteList = []
     }
     public returnPick(){
@@ -502,7 +488,6 @@ export default class List extends cc.Component {
                             cc.log('pick '+index)
                         }
                         else{
-                            cc.log('2')
                             for(var i=0;i < this._itemDisplayingPool.length;i++){
                                 if((Number(this._itemDisplayingPool[i].name) - Number(element.name))%this._data.length == 0) break;
                             }
@@ -528,7 +513,6 @@ export default class List extends cc.Component {
                                 eventCenter.dispatch('unpick'+this.node.name,this._itemDisplayingPool[Number(this.pick[0])],2,this._itemDisplayingPool[Number(this.pick[0])])
                                 cc.log('unpick'+this.node.name)
                                 this.pick[0] = element.name
-                                
                             }                            
                         }
                         else{

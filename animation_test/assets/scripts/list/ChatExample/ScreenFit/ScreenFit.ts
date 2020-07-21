@@ -1,4 +1,3 @@
-
 const {ccclass, property,executionOrder} = cc._decorator;
 
 @ccclass

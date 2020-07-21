@@ -322,7 +322,7 @@
       }
     ],
     "nodeSet": [],
-    "singlePick": true,
+    "singlePick": false,
     "viewBg": {
       "__uuid__": "f0048c10-f03e-4c97-b9d3-3506e1d58952"
     },

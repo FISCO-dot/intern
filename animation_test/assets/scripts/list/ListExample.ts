@@ -14,9 +14,10 @@ export default class NewClass extends cc.Component {
     dropListData = []
     dropListNode : cc.Node = null
     onLoad () {
-        for(var i = 0;i < 100 ;i++){
+        for(var i = 0;i < 10000 ;i++){
             this.data.push(i)
         }
+        this.list.setItemColor(cc.color(100,100,100,255))
         this.list.loadData(this.data,false)
 
     }

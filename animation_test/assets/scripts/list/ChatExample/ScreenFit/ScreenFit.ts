@@ -13,11 +13,11 @@ export default class NewClass extends cc.Component {
     onLoad () {
         this.resetSize(this.node);
         cc.find('Canvas/MessageList').getComponent("CustomScroll_2").viewWidth = this.node.width
+        cc.find('Canvas/MessageList').getComponent("CustomScroll_2").viewHeight = this.node.height
     }
     resetSize(cav) {
         let frameSize = cc.view.getFrameSize();
         let designSize = cc.view.getDesignResolutionSize();
-
         if (frameSize.width / frameSize.height > designSize.width / designSize.height) {
             cav.width = designSize.height * frameSize.width / frameSize.height;
             cav.height = designSize.height;

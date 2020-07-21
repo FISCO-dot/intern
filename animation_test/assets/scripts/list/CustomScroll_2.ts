@@ -661,36 +661,24 @@ export default class List extends cc.Component {
     private _isViewFull(){   
         if(!this.pageMode)
        { //-1:上边行不够   -2：下边行不够   -3：左边列不够    -4：右边列不够 
-            if(this.adaptiveSize){
-                if(this.scrollVertical){
-                    if((Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name) < this.itemNumY-1 ) && -this._itemDisplayingPool[this._itemDisplayingPool.length-1].y + this._itemPosition[String(this._index)].y < this.viewHeight) return -2
-                    else if((Number(this._itemDisplayingPool[0].name) > 0 ) && this._itemDisplayingPool[0].y - this._itemPosition[String(this._index)].y < this.viewHeight) return -1
-                    else return 1
-                }
-                else{
-                    if((Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name) < this.itemNumX-1 ) && this._itemDisplayingPool[this._itemDisplayingPool.length-1].x - this._itemPosition[String(this._index)].x < this.viewWidth) return -4
-                    else if((Number(this._itemDisplayingPool[0].name) > 0 ) && this._itemPosition[String(this._index)].x - this._itemDisplayingPool[0].x < this.viewWidth) return -3;
-                    else return 1
-                }
-            }
-            else{
+            try{
                 if((this.scrollHorizontal) &&  (this._index >=0 &&Number(this._itemDisplayingPool[0].name) % this.itemNumX>0) && //不是第一列
-                this._findItemByname(this._itemDisplayingPool,String(this._index-1)) == null ) //需要显示的列序数小于已经加载的列序数
-                {cc.log('-3 ');cc.log('index-1='+String(this._index-1));return -3;}
-                else if((this.scrollHorizontal)&&this.itemNumX - 1 - this._index % this.itemNumX >= this.pageNumX &&  //不是最后几列
-                Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name)%this.itemNumX - this._index%this.itemNumX  < Math.min(this.itemNumX,this.pageNumX)) //加载出来的item与现在的item列数之差过小
-                {cc.log('-4');return -4;}
+                this._itemPosition[String(this._index)].x - this._itemDisplayingPool[0].x-this._itemDisplayingPool[0].width/2 < 0 ) //需要显示的列序数小于已经加载的列序数
+                    {cc.log('-3 = ');return -3;}
+                else if((this.scrollHorizontal)&&this.itemNumX - 1 - this._index % this.itemNumX >= this.pageNumX && Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name) < this.itemNumX*this.itemNumY-1&& //不是最后几列
+                this._itemDisplayingPool[this._itemDisplayingPool.length-1].x+this._itemDisplayingPool[this._itemDisplayingPool.length-1].width - this._itemPosition[String(this._index)].x < this.viewWidth) //加载出来的item与现在的item列数之差过小
+                    {cc.log('-4 = ');return -4;}
                 else if((this.scrollVertical)&& (Number(this._itemDisplayingPool[0].name) >= this.itemNumX || this.cycle)  && //不是第一行
-                Math.floor(this._index/this.itemNumX-Number(this._itemDisplayingPool[0].name)/this.itemNumX) < 0) //需要显示的行序数小于已经加载的行序数
-                    {cc.log('-1==='+this._index);return -1;}   
+                this._itemDisplayingPool[0].y - this._itemPosition[String(this._index)].y < 0) //需要显示的行序数小于已经加载的行序数
+                    {cc.log('-1='+this._index);return -1;}   
                 else if( (this.scrollVertical) && 
-                (((this.itemNumY*this.itemNumX - 1-this._index)/this.itemNumX >= this.pageNumY)||this.messageMode)  //不是最后几行
-                && Math.floor(Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name)/this.itemNumX-this._index / this.itemNumX) < Math.min(this.itemNumY,this.pageNumY)) //加载出来的item与现在显示的item行数之差国小
-                {cc.log('-2==',this.content.x,'==',this.oriX,'==',this.content.y,'==',this.oriY);return -2}
+                ((Math.floor((this.itemNumY*this.itemNumX - 1-this._index)/this.itemNumX) >= this.pageNumY) && Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name) < this.itemNumX*this.itemNumY-1 )  //不是最后几行
+                && this._itemPosition[String(this._index)].y+this._itemDisplayingPool[this._itemDisplayingPool.length-1].height - this._itemDisplayingPool[this._itemDisplayingPool.length-1].y <this.viewHeight) //加载出来的item与现在显示的item行数之差国小
+                    {cc.log('-2=',);return -2}
                 else {
                     return 1;
                 }
-            }
+            }catch{}
         }
         else{ //-4：往左滑 -3：往右滑 -2：往上滑 -1：往下滑
             if(this.onceControl&&this.scrollHorizontal&& Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name) % this.itemNumX < Math.min(this.itemNumX,this._data.length)-1 && //不是最后一篇
@@ -739,7 +727,6 @@ export default class List extends cc.Component {
         else{
             while(flag < 0  )//
             {
-                
                 this._itemDisplayingPool.sort((a,b)=>{
                     return Number(a.name) - Number(b.name)
                 })
@@ -761,7 +748,6 @@ export default class List extends cc.Component {
                     }  
                 }
                     if(flag == -2){
-
                         for(var i = rowNum;i>=0;i--){
                             if(columnNum > this.pageNumY && rowNum >this.pageNumX ){
                                 this._poolPut(0)
@@ -948,9 +934,9 @@ export default class List extends cc.Component {
             }
             this._loadScrollRecord();
         }
-        // if(!this.cycle && !this.messageMode){
-        //     if((-this.content.x+this.oriX) < -50 ||(-this.oriY+this.content.y) < -50) this._freshItem(); //上拉或左拉刷新
-        // }
+        if(!this.cycle && !this.messageMode){
+            if((-this.content.x+this.oriX) < -50 ||(-this.oriY+this.content.y) < -50) this._freshItem(); //上拉或左拉刷新
+        }
     }
     private _setBar(){
         //bar params

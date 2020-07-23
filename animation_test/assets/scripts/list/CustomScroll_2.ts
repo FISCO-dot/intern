@@ -319,7 +319,7 @@ export default class List extends cc.Component {
                     let index = this.cycle? this._cycleIndexProcess(Number(this._itemDisplayingPool[i].name)):Number(this._itemDisplayingPool[i].name)
                     try{
                         str.string = (!this._data[index])||(this._data[index] instanceof cc.SpriteFrame) ? '':this._data[index]
-                        spf.spriteFrame = (!this._data[index])|| (this._data[index] instanceof String) ? null:this._data[index]
+                        spf.spriteFrame = (!this._data[index])|| typeof(this._data[index]) == 'string'? null:this._data[index]
                     }catch{}
                     this._itemDisplayingPool[i].setPosition(this._calculatePosition(this._itemDisplayingPool[i]))
                     // if(this._itemDisplayingPool[i].getComponent('ListItem') == null) this._itemDisplayingPool[i].addComponent('ListItem')
@@ -548,7 +548,7 @@ export default class List extends cc.Component {
                     let column = Math.floor(Number(item.name) / this.itemNumX)
                     let row = Number(item.name) % this.itemNumX
                     this._itemPosition[item.name] = cc.v2(-this.content.width/2 +this.width/2+this.leftWidget+row*(this.width+this.interval),this.content.height/2-this.topWidget-(this.height/2+column*(this.height+this.interval)))
-                    cc.log('jinlaile = ',this.content.height)
+                    
                     return this._itemPosition[item.name]
                 }
             }
@@ -650,24 +650,15 @@ export default class List extends cc.Component {
                 var index = Number(this._itemDisplayingPool[0].name)
                 while(this._itemDisplayingPool.length !=0) this._poolPut(0)
                 this._itemDisplayingPool = []
-                if(flag == -4) {
-                    this._initializePage(index+this.pageNumX)
-                }
-                else if(flag == -3) {
-                    this._initializePage(index-this.pageNumX)
-                }
-                else if(flag == -2) {
-                    this._initializePage(index+this.pageNumY*this.itemNumX)
-                }
-                else if(flag == -1) {
-                    this._initializePage(index -this.pageNumY*this.itemNumX)
-                }
+                if(flag == -4) this._initializePage(index+this.pageNumX)                
+                else if(flag == -3) this._initializePage(index-this.pageNumX)                
+                else if(flag == -2) this._initializePage(index+this.pageNumY*this.itemNumX)               
+                else if(flag == -1) this._initializePage(index -this.pageNumY*this.itemNumX)                
                 this.content.setPosition(0,0)
             }
         }
         else{
-            while(flag < 0  )//
-            {
+            while(flag < 0 ){
                 this._itemDisplayingPool.sort((a,b)=>{
                     return Number(a.name) - Number(b.name)
                 })
@@ -675,59 +666,28 @@ export default class List extends cc.Component {
                 var idStart= Number(this._itemDisplayingPool[0].name)
                 var columnNum = Math.floor(idLast/this.itemNumX - idStart /this.itemNumX)
                 var rowNum = idLast%this.itemNumX - idStart % this.itemNumX
-                if(flag == -1){
-
+                if(flag + 3 > 0){
                     for(var i = rowNum; i>=0;i--){
-                        if(columnNum > this.pageNumY && rowNum >this.pageNumX ){
-                            this._poolPut(this._itemDisplayingPool.length-1)
-                        }
-                        this._poolGet(idStart-this.itemNumX+i,false)
-                        if(this.cycle) this.itemNumY ++
-                        
-                    }  
-                }
-                    if(flag == -2){
-                        for(var i = rowNum;i>=0;i--){
-                            if(columnNum > this.pageNumY && rowNum >this.pageNumX ){
-                                this._poolPut(0)
-                            }
-                            this._poolGet(idLast+this.itemNumX-i,true)
-                            if(this.cycle) this.itemNumY ++
-                              
-                        }
-                    }                
-                    if(flag == -3){
-
-                        for(var i = columnNum;i >=0;i--){
-                            this._poolGet(idStart-1+i*this.itemNumX,false)
-                        }
-                        if(this.cycle) this.itemNumX++
-                        
-                        if(columnNum > this.pageNumY || rowNum > this.pageNumX)
-                        {
-                            for(var i = 0;i < this._itemDisplayingPool.length;i++){
-                            if(((Number(this._itemDisplayingPool[i].name) - idLast) % this.itemNumX) == 1 ){
-
-                                this._poolPut(i)
-                                i--;
-                            }
-                        }} 
+                        this._poolPut((flag+2)*(this._itemDisplayingPool.length-1))
                     }
-                    if(flag == -4){
-                        for(var i = columnNum;i>=0;i--){
-                            this._poolGet(idLast+1-i*this.itemNumX,true)
-                        }
-                        if(this.cycle) this.itemNumX++                       
-                        if(columnNum > this.pageNumY || rowNum > this.pageNumX)
-                        {for(var i = 0;i < this._itemDisplayingPool.length;i++){
-                            if(((Number(this._itemDisplayingPool[i].name) - idStart) % this.itemNumX) == 0 ){
-
+                    this._poolGet(idStart+(flag+1.5)*2*(-this.itemNumX+i),flag == -2)               
+                    if(this.cycle) this.itemNumY++
+                }
+                else{
+                    for(var i = columnNum;i >=0;i--){
+                        this._poolGet(idStart+(flag+3.5)*2*(-1+i*this.itemNumX),flag == -4)
+                    }
+                    if(this.cycle) this.itemNumX++
+                    if(columnNum > this.pageNumY || rowNum > this.pageNumX){
+                        for(var i = 0;i < this._itemDisplayingPool.length;i++){
+                            if(((Number(this._itemDisplayingPool[i].name) - (flag == -3?idLast:idStart)) % this.itemNumX) == flag + 4) {
                                 this._poolPut(i);
                                 i--;
                             }
-                        }}       
+                        }
                     }
-                    flag = this._isViewFull();
+                }                
+                flag = this._isViewFull();
             }
         }
     }
@@ -742,20 +702,13 @@ export default class List extends cc.Component {
         this._itemPosition = []
         if(this.pageMode) {
             this.content.width = this.viewWidth
-            this.content.height =this.viewHeight
+            this.content.height = this.viewHeight
             this.content.setPosition(0,0)
         }
         else if(this.adaptiveSize || this.cycle) {
-            if(this.scrollVertical){
-                this.content.width =this.viewWidth
-                this.content.height = 60
-                this.content.setPosition(0,this.viewHeight/2)
-            }
-            else{
-                this.content.height = this.viewHeight
-                this.content.width = 0
-                this.content.setPosition(-this.viewWidth/2,0)
-            }
+            this.content.width = this.scrollVertical?this.viewWidth:0;
+            this.content.height = this.scrollHorizontal?this.viewHeight:0;
+            this.content.setPosition(this.scrollVertical?0:-this.viewWidth/2,this.scrollHorizontal?this.viewHeight/2:0)
         }
         else {
             this.content.width = this.itemNumX*this.width + this.interval*(this.itemNumX-1)
@@ -772,7 +725,6 @@ export default class List extends cc.Component {
         this._initializePage(0);
     }
     private _initializePage(num:number){ //输入要生成page的第一个item序号
-        cc.log('1111v = ',Math.min(this.itemNumY,this.pageNumY))
         for(var i = 0;i < Math.min(this.itemNumX,this.pageNumX);i++){
             for(var j = 0; j < Math.min(this.itemNumY,this.pageNumY);j++){
                 if(!this.alignCenter) this._poolGet(num+i+j*this.itemNumX,true)
@@ -798,56 +750,23 @@ export default class List extends cc.Component {
         if(index > this.itemNumX*this.itemNumY - 1 || (index > this._data.length-1 && !this.cycle)) return
         if(this._findItemByname(this._itemDisplayingPool,String(index))!=null) return;
         if(this._pool.size()>0) {var item = this._pool.get();item.color = this.itemColor}
-        else{
-            var item = this._creatrSingleItem();
-        }
-        let listItem = item.getComponent('ListItem')
+        else var item = this._creatrSingleItem();
         item.name = String(index)
         cc.log('create index='+item.name)
-        if(this.cycle){
-            if(index >= 0) {
-                if(this._data[index%this._data.length] instanceof cc.SpriteFrame) item.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = this._data[index%this._data.length]
-                else item.getComponentInChildren(cc.RichText).string = this._data[index%this._data.length]
-            }
-            else {
-                while(index < 0) index +=this._data.length
-                if(this._data[index] instanceof cc.SpriteFrame) item.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = this._data[index]
-                else item.getComponentInChildren(cc.RichText).string = this._data[index] 
-            }
-            this.pick.forEach(element => {
-               if((Number(item.name)-Number(element))%this._data.length == 0) {
-                   item.color = cc.Color.RED}
-            });
-        }
-        else{
-            if(index < this._data.length) {
-                if(this._data[index] instanceof cc.SpriteFrame){
-                    try{
-                        item.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = this._data[index]                    
-                        item.getComponentInChildren(cc.RichText).string = ''
-                    }catch{}
-                }
-                else try{
-                    item.getComponentInChildren(cc.RichText).string = this._data[index]
-                    item.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null
-                } catch{}
-            }
-            else{
-                try{
-                    item.getComponentInChildren(cc.RichText).string = ''
-                    item.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = null
-                }catch{}
-            }
-            if(this._imgBg[index]) item.getComponent(cc.Sprite).spriteFrame = this._imgBg[index]
-            this.pick.forEach(element => {
-                if(element == item.name) {item.color = cc.Color.RED;}
-            });
-        }
+        if(this.cycle) index = this._cycleIndexProcess(index)
+        try{
+            item.getComponentInChildren(cc.RichText).string = typeof(this._data[index]) == 'string'?this._data[index] :''
+            item.getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame = this._data[index] instanceof cc.SpriteFrame? this._data[index] : null
+        }catch{}
+        if(this._imgBg[index]) item.getComponent(cc.Sprite).spriteFrame = this._imgBg[index]
+        this.pick.forEach(element => {
+            if((Number(item.name)-Number(element))%this._data.length == 0) {
+                item.color = cc.Color.RED}
+         });
         this.content.addChild(item);
-        listItem.itemOnLoad()
+        item.getComponent('ListItem').itemOnLoad()
         item.setPosition(this._calculatePosition(item))
-        if(flag) this._itemDisplayingPool.push(item)
-        else this._itemDisplayingPool.unshift(item)
+        flag?this._itemDisplayingPool.push(item):this._itemDisplayingPool.unshift(item)
         if(this.adaptiveSize || this.cycle) this.updateView()  
     }
     private _itemNumRenderByFrame = 12;

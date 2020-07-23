@@ -330,9 +330,9 @@
       "__uuid__": "e7aba14b-f956-4480-b254-8d57832e273f"
     },
     "pageMode": false,
-    "cycle": true,
+    "cycle": false,
     "scrollVertical": true,
-    "scrollHorizontal": false,
+    "scrollHorizontal": true,
     "viewWidth": 300,
     "viewHeight": 300,
     "itemNumY": 20,

@@ -273,51 +273,26 @@ export default class List extends cc.Component {
         cc.log('pick =',this.pick)
         for(var i = 0;i < this.pick.length;i++) {
             let name = this.pick[i];
-            if(this.cycle){
-                for(var j = 0; j< this._itemDisplayingPool.length;j++){
-                    if((Number(this._itemDisplayingPool[j].name)-Number(this.pick[i]))%this._data.length == 0) {
-                        if(this._itemDisplayingPool.length < this._data.length) {                            
-                            this._Shrinkanimation(this._itemDisplayingPool[j],()=>{
-                                this._deleteList.push(this.pick[i]);
-                                eventCenter.emit('delete',this._itemDisplayingPool[j])
-                                this._pool.put(this._itemDisplayingPool[j])
-                            })
-                            break
-                        }
-                        else{
-                            while(j < this._itemDisplayingPool.length){                                
-                                this._Shrinkanimation(this._itemDisplayingPool[j],()=>{
-                                    this._deleteList.push(this._itemDisplayingPool[j].name);
-                                    eventCenter.emit('delete',this._itemDisplayingPool[j])
-                                    this._pool.put(this._itemDisplayingPool[j])
-                                    this.updateView()
-                                    j += this._data.length
-                                })                                
-                            }
-                        }
-                    }
-                }
-                var index = this._cycleIndexProcess(Number(name))
-                cc.log('删除数据'+index)
-                this._data.splice(index,1)
-                this.updateView();
+            let pickIndex = this.cycle?this._cycleIndexProcess(this._findItemByname(this._itemDisplayingPool,name)):this._findItemByname(this._itemDisplayingPool,name)
+            this._data.splice(Number(this._itemDisplayingPool[pickIndex].name),1)    
+            let pickList = [];
+            pickList.push(pickIndex)
+            if(this.cycle) while (pickIndex < this._itemDisplayingPool.length) {
+                pickIndex += this._data.length
+                pickList.push(pickIndex)
             }
-            else{
-                let pickIndex = this._findItemByname(this._itemDisplayingPool,this.pick[i])
-                this._deleteList.push(this.pick[i]);
-                if(pickIndex != null){
-                    this._Shrinkanimation(this._itemDisplayingPool[pickIndex],()=>{
-                        eventCenter.emit('delete',this._itemDisplayingPool[pickIndex])
-                        this._pool.put(this._itemDisplayingPool[pickIndex])
-                        cc.log('put le = '+this._pool.size())
-                        this._data.splice(Number(name),1)    
-                        if(onCompleteCallback != undefined) onCompleteCallback(this._itemDisplayingPool[pickIndex]);
-                    })
-                }
-            }
-        };
+            pickList.forEach(element => {
+                this._Shrinkanimation(this._itemDisplayingPool[element],()=>{
+                    this._deleteList.push(this._itemDisplayingPool[element]);
+                    eventCenter.emit('delete',this._itemDisplayingPool[element])
+                    this._pool.put(this._itemDisplayingPool[element])
+                    if(onCompleteCallback != undefined) onCompleteCallback(this._itemDisplayingPool[element]);
+                })
+            })
+        }
         this.pick = []
     }
+
     public ChangeDataByIndex(index:number,data:any){
         this._data[index] = data
     }   
@@ -327,7 +302,6 @@ export default class List extends cc.Component {
     }
     public updateView(index?:number){   //操作后更新视图 
         for(var num = 0;num < this._deleteList.length;num++) {
-            cc.log('poolsize = '+this._pool.size())
             if(this._pool.size() > 0) {
                 let getNode = this._pool.get()
                 try{this.content.addChild(this._itemDisplayingPool[this._findItemByname(this._itemDisplayingPool,getNode.name)])}
@@ -336,35 +310,17 @@ export default class List extends cc.Component {
         }
         if(this.cycle) var min = Number(this._itemDisplayingPool[0].name)
         else if(index != undefined) var min = index
-        else var min = this._deleteList.length > 0?Number(this._deleteList[this._deleteList.length-1]):0     
+        else var min = this._deleteList.length > 0?Number(this._deleteList[this._deleteList.length-1].name):0     
             for(var i = 0;i<this._itemDisplayingPool.length;i++){
-                let str = this._itemDisplayingPool[i].getComponentInChildren(cc.RichText).string
-                let spf = this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite).spriteFrame
+                let str = this._itemDisplayingPool[i].getComponentInChildren(cc.RichText)
+                let spf = this._itemDisplayingPool[i].getChildByName('imgMsg')?this._itemDisplayingPool[i].getChildByName('imgMsg').getComponent(cc.Sprite):null
                 if(min <= Number(this._itemDisplayingPool[i].name) ){                    
                     // cc.log('update ',this._itemDisplayingPool[i])
-                    if(this.cycle){
-                        let index = this._cycleIndexProcess(Number(this._itemDisplayingPool[i].name))
-                        cc.log('删除数据'+index)
-                        if(this._data[index] instanceof cc.SpriteFrame) {
-                            try{str = '';spf = this._data[index];} catch{} 
-                        }
-                        else {
-                            try{str = this._data[index];spf = null} catch {}
-                        }
-                    }
-                    else{
-                        if(this._data[Number(this._itemDisplayingPool[i].name)]){   
-                            if(this._data[Number(this._itemDisplayingPool[i].name)] instanceof cc.SpriteFrame) {
-                                try{str = '';spf = this._data[Number(this._itemDisplayingPool[i].name)]} catch{} 
-                            }                                                            
-                            else {  
-                                try {str = this._data[Number(this._itemDisplayingPool[i].name)];spf = null} catch {}
-                            }                                                               
-                        }
-                        else{
-                            try{str = '';spf = null}catch {}
-                        }
-                    }
+                    let index = this.cycle? this._cycleIndexProcess(Number(this._itemDisplayingPool[i].name)):Number(this._itemDisplayingPool[i].name)
+                    try{
+                        str.string = (!this._data[index])||(this._data[index] instanceof cc.SpriteFrame) ? '':this._data[index]
+                        spf.spriteFrame = (!this._data[index])|| (this._data[index] instanceof String) ? null:this._data[index]
+                    }catch{}
                     this._itemDisplayingPool[i].setPosition(this._calculatePosition(this._itemDisplayingPool[i]))
                     // if(this._itemDisplayingPool[i].getComponent('ListItem') == null) this._itemDisplayingPool[i].addComponent('ListItem')
                     // this._itemDisplayingPool[i].getComponent('ListItem').itemOnLoad()
@@ -413,11 +369,11 @@ export default class List extends cc.Component {
         //setparams
         if(!this.scrollHorizontal) {
             this.itemNumX = 1;
-            if(this.cycle) this.itemNumY = this._data.length+1
+            if(this.cycle) this.itemNumY = Math.ceil(this.viewHeight/this.height)
         }
         if(!this.scrollVertical) {
             this.itemNumY =1
-            if(this.cycle) this.itemNumX = this._data.length+1 
+            if(this.cycle) this.itemNumX = Math.ceil(this.viewWidth/this.width) 
         };
         if(this.scrollVertical && this.scrollHorizontal) this.alignCenter = false
         if(this.messageMode) this.itemNumY = 0
@@ -577,14 +533,14 @@ export default class List extends cc.Component {
     */
     private _calculatePosition(item:any){  //计算过直接返回，没计算过计算返回 
         if(this._itemPosition[item.name]){
-            if(!this.adaptiveSize) return this._itemPosition[item.name]
+            if(!this.adaptiveSize && !this.cycle) return this._itemPosition[item.name]
             else{
                 if(this.scrollHorizontal) return cc.v2(this._itemPosition[item.name].x-item.width/2,this._itemPosition[item.name].y)
                 else return cc.v2(this._itemPosition[item.name].x,this._itemPosition[item.name].y+item.height/2)
             }
         }
         else{
-            if(!this.adaptiveSize){
+            if(!this.adaptiveSize && !this.cycle){
                 if(this.pageMode && (item.name/this.itemNumX>=this.pageNumY || item.name%this.itemNumX>=this.pageNumX)){
                     return this._itemPosition[String(Number(item.name)%this.itemNumX%this.pageNumX+Math.floor(Number(item.name)/this.itemNumX)%this.pageNumY*this.itemNumX)]
                 }
@@ -592,6 +548,7 @@ export default class List extends cc.Component {
                     let column = Math.floor(Number(item.name) / this.itemNumX)
                     let row = Number(item.name) % this.itemNumX
                     this._itemPosition[item.name] = cc.v2(-this.content.width/2 +this.width/2+this.leftWidget+row*(this.width+this.interval),this.content.height/2-this.topWidget-(this.height/2+column*(this.height+this.interval)))
+                    cc.log('jinlaile = ',this.content.height)
                     return this._itemPosition[item.name]
                 }
             }
@@ -617,7 +574,6 @@ export default class List extends cc.Component {
                     if(item.name == '0') this._itemPosition['0'] = cc.v2(0,this.content.height/2-item.height-this.topWidget)
                     else {
                         this._itemPosition[item.name] = cc.v2(0,this._itemPosition[Number(item.name)-1].y - item.height-this.interval)
-                        
                     }
                     return cc.v2(0,this._itemPosition[item.name].y+item.height/2)
                 }
@@ -646,7 +602,7 @@ export default class List extends cc.Component {
         if(!this.pageMode)
        { //-1:上边行不够   -2：下边行不够   -3：左边列不够    -4：右边列不够 
             try{
-                if((this.scrollHorizontal) &&  (this._index >=0 &&Number(this._itemDisplayingPool[0].name) % this.itemNumX>0) && //不是第一列
+                if((this.scrollHorizontal) &&  (this._index >=0 &&(Number(this._itemDisplayingPool[0].name) % this.itemNumX>0) || this.cycle) && //不是第一列
                 this._itemPosition[String(this._index)].x - this._itemDisplayingPool[0].x-this._itemDisplayingPool[0].width/2 < 0 ) //需要显示的列序数小于已经加载的列序数
                     {cc.log('-3 = ');return -3;}
                 else if((this.scrollHorizontal)&&this.itemNumX - 1 - this._index % this.itemNumX >= this.pageNumX && Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name) < this.itemNumX*this.itemNumY-1&& //不是最后几列
@@ -658,9 +614,9 @@ export default class List extends cc.Component {
                 else if( (this.scrollVertical) && 
                 ((Math.floor((this.itemNumY*this.itemNumX - 1-this._index)/this.itemNumX) >= this.pageNumY) && Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name) < this.itemNumX*this.itemNumY-1 )  //不是最后几行
                 && this._itemPosition[String(this._index)].y+this._itemDisplayingPool[this._itemDisplayingPool.length-1].height - this._itemDisplayingPool[this._itemDisplayingPool.length-1].y <this.viewHeight) //加载出来的item与现在显示的item行数之差国小
-                    {cc.log('-2=',);return -2}
+                    {cc.log('-2=',this._itemDisplayingPool[this._itemDisplayingPool.length-1].name);return -2}
                 else {
-                    return 1;
+                    cc.log('1 = ',Math.floor((this.itemNumY*this.itemNumX - 1-this._index)/this.itemNumX) >= this.pageNumY);return 1;
                 }
             }catch{}
         }
@@ -680,6 +636,7 @@ export default class List extends cc.Component {
                { cc.log('-1 ');this.onceControl = false;return -1}
             else{
                 if(Math.abs(this.content.x) < 0.01) {this.onceControl = true;}
+                cc.log('1')
                 return 1
             }
         }
@@ -725,10 +682,8 @@ export default class List extends cc.Component {
                             this._poolPut(this._itemDisplayingPool.length-1)
                         }
                         this._poolGet(idStart-this.itemNumX+i,false)
-                        if(this.cycle){
-                            this.content.height += this.height*2
-                            this.itemNumY ++
-                        }
+                        if(this.cycle) this.itemNumY ++
+                        
                     }  
                 }
                     if(flag == -2){
@@ -737,10 +692,8 @@ export default class List extends cc.Component {
                                 this._poolPut(0)
                             }
                             this._poolGet(idLast+this.itemNumX-i,true)
-                            if(this.cycle){
-                                this.content.height += this.height*2
-                                this.itemNumY ++
-                            }   
+                            if(this.cycle) this.itemNumY ++
+                              
                         }
                     }                
                     if(flag == -3){
@@ -748,10 +701,8 @@ export default class List extends cc.Component {
                         for(var i = columnNum;i >=0;i--){
                             this._poolGet(idStart-1+i*this.itemNumX,false)
                         }
-                        if(this.cycle){
-                            this.content.width += 2*this.width
-                            this.itemNumX++
-                        }
+                        if(this.cycle) this.itemNumX++
+                        
                         if(columnNum > this.pageNumY || rowNum > this.pageNumX)
                         {
                             for(var i = 0;i < this._itemDisplayingPool.length;i++){
@@ -763,14 +714,10 @@ export default class List extends cc.Component {
                         }} 
                     }
                     if(flag == -4){
-
                         for(var i = columnNum;i>=0;i--){
                             this._poolGet(idLast+1-i*this.itemNumX,true)
                         }
-                        if(this.cycle) {
-                            this.content.width += 2*this.width
-                            this.itemNumX++
-                        }
+                        if(this.cycle) this.itemNumX++                       
                         if(columnNum > this.pageNumY || rowNum > this.pageNumX)
                         {for(var i = 0;i < this._itemDisplayingPool.length;i++){
                             if(((Number(this._itemDisplayingPool[i].name) - idStart) % this.itemNumX) == 0 ){
@@ -798,10 +745,10 @@ export default class List extends cc.Component {
             this.content.height =this.viewHeight
             this.content.setPosition(0,0)
         }
-        else if(this.adaptiveSize) {
+        else if(this.adaptiveSize || this.cycle) {
             if(this.scrollVertical){
                 this.content.width =this.viewWidth
-                this.content.height = 0
+                this.content.height = 60
                 this.content.setPosition(0,this.viewHeight/2)
             }
             else{
@@ -825,6 +772,7 @@ export default class List extends cc.Component {
         this._initializePage(0);
     }
     private _initializePage(num:number){ //输入要生成page的第一个item序号
+        cc.log('1111v = ',Math.min(this.itemNumY,this.pageNumY))
         for(var i = 0;i < Math.min(this.itemNumX,this.pageNumX);i++){
             for(var j = 0; j < Math.min(this.itemNumY,this.pageNumY);j++){
                 if(!this.alignCenter) this._poolGet(num+i+j*this.itemNumX,true)
@@ -900,8 +848,7 @@ export default class List extends cc.Component {
         item.setPosition(this._calculatePosition(item))
         if(flag) this._itemDisplayingPool.push(item)
         else this._itemDisplayingPool.unshift(item)
-        if(this.adaptiveSize) this.updateView()  
-             
+        if(this.adaptiveSize || this.cycle) this.updateView()  
     }
     private _itemNumRenderByFrame = 12;
     private _pool = new cc.NodePool();
@@ -916,11 +863,11 @@ export default class List extends cc.Component {
                     this._pool.put(element);
                 });
             }
-            this._loadScrollRecord();
         }
         if(!this.cycle && !this.messageMode){
             if((-this.content.x+this.oriX) < -50 ||(-this.oriY+this.content.y) < -50) this._freshItem(); //上拉或左拉刷新
         }
+        if(this.node.getComponent(cc.ScrollView).isScrolling() || this.node.getComponent(cc.ScrollView).isAutoScrolling()) this._loadScrollRecord();
     }
     private _setBar(){
         //bar params

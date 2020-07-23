@@ -603,13 +603,13 @@ export default class List extends cc.Component {
        { //-1:上边行不够   -2：下边行不够   -3：左边列不够    -4：右边列不够 
             try{
                 if((this.scrollHorizontal) &&  (this._index >=0 &&(Number(this._itemDisplayingPool[0].name) % this.itemNumX>0) || this.cycle) && //不是第一列
-                this._itemPosition[String(this._index)].x - this._itemDisplayingPool[0].x-this._itemDisplayingPool[0].width/2 < 0 ) //需要显示的列序数小于已经加载的列序数
+                (this._itemPosition[String(this._index)].x - this._itemDisplayingPool[0].x-this._itemDisplayingPool[0].width/2 < 0 || this._findItemByname(this._itemDisplayingPool,String(this._index)) == null)) //需要显示的列序数小于已经加载的列序数
                     {cc.log('-3 = ');return -3;}
                 else if((this.scrollHorizontal)&&this.itemNumX - 1 - this._index % this.itemNumX >= this.pageNumX && Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name) < this.itemNumX*this.itemNumY-1&& //不是最后几列
                 this._itemDisplayingPool[this._itemDisplayingPool.length-1].x+this._itemDisplayingPool[this._itemDisplayingPool.length-1].width - this._itemPosition[String(this._index)].x < this.viewWidth) //加载出来的item与现在的item列数之差过小
                     {cc.log('-4 = ');return -4;}
                 else if((this.scrollVertical)&& (Number(this._itemDisplayingPool[0].name) >= this.itemNumX || this.cycle)  && //不是第一行
-                this._itemDisplayingPool[0].y - this._itemPosition[String(this._index)].y < 0) //需要显示的行序数小于已经加载的行序数
+                (this._itemDisplayingPool[0].y - this._itemPosition[String(this._index)].y < 0 || this._findItemByname(this._itemDisplayingPool,String(this._index)) == null)) //需要显示的行序数小于已经加载的行序数
                     {cc.log('-1='+this._index);return -1;}   
                 else if( (this.scrollVertical) && 
                 ((Math.floor((this.itemNumY*this.itemNumX - 1-this._index)/this.itemNumX) >= this.pageNumY) && Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name) < this.itemNumX*this.itemNumY-1 )  //不是最后几行
@@ -668,14 +668,16 @@ export default class List extends cc.Component {
                 var rowNum = idLast%this.itemNumX - idStart % this.itemNumX
                 if(flag + 3 > 0){
                     for(var i = rowNum; i>=0;i--){
-                        this._poolPut((flag+2)*(this._itemDisplayingPool.length-1))
+                        if(columnNum > this.pageNumY && rowNum >this.pageNumX){
+                            this._poolPut((flag+2)*(this._itemDisplayingPool.length-1))
+                        }
+                        this._poolGet((flag == -1?idStart:idLast)+(flag+1.5)*2*(-this.itemNumX+i),flag == -2)               
+                        if(this.cycle) this.itemNumY++
                     }
-                    this._poolGet(idStart+(flag+1.5)*2*(-this.itemNumX+i),flag == -2)               
-                    if(this.cycle) this.itemNumY++
                 }
                 else{
                     for(var i = columnNum;i >=0;i--){
-                        this._poolGet(idStart+(flag+3.5)*2*(-1+i*this.itemNumX),flag == -4)
+                        this._poolGet((flag == -3?idStart:idLast)+(flag+3.5)*2*(-1+i*this.itemNumX),flag == -4)
                     }
                     if(this.cycle) this.itemNumX++
                     if(columnNum > this.pageNumY || rowNum > this.pageNumX){

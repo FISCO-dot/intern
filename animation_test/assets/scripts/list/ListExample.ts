@@ -8,8 +8,6 @@ export default class NewClass extends cc.Component {
 
     @property(List)
     list: List = null;
-
-
     data = []
     dropListData = []
     dropListNode : cc.Node = null
@@ -19,7 +17,6 @@ export default class NewClass extends cc.Component {
         }
         this.list.setItemColor(cc.color(100,100,100,255))
         this.list.loadData(this.data,false)
-
     }
 
     clickdelete(){
@@ -29,7 +26,7 @@ export default class NewClass extends cc.Component {
         this.list.updateView();
     }
     clickAddData(){
-        var data = ['a','b','c','d']
+        var data = 'a'
         this.list.addData(data,0)
     }
     clickClear(){

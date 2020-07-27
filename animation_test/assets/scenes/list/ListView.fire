@@ -322,7 +322,7 @@
       }
     ],
     "nodeSet": [],
-    "singlePick": false,
+    "singlePick": true,
     "viewBg": {
       "__uuid__": "f0048c10-f03e-4c97-b9d3-3506e1d58952"
     },
@@ -330,9 +330,9 @@
       "__uuid__": "e7aba14b-f956-4480-b254-8d57832e273f"
     },
     "pageMode": false,
-    "cycle": false,
+    "cycle": true,
     "scrollVertical": true,
-    "scrollHorizontal": true,
+    "scrollHorizontal": false,
     "viewWidth": 300,
     "viewHeight": 300,
     "itemNumY": 20,

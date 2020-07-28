@@ -13,9 +13,6 @@ export default class AddList extends cc.Component {
     onLoad () {
         this.node.addComponent(cc.BlockInputEvents)
         let dropList = this.node.getComponent('CustomScroll_2')
-        // eventCenter.on('delete',(node)=>{
-        //     node[0].parent.parent.parent.getComponent('CustomScroll_2').updateView()
-        // },this.node)
         if(this.node.parent.name == "InputBox"){
             this.menuTemplate = ['copy','paste']
             dropList.viewWidth = 80           
@@ -25,8 +22,7 @@ export default class AddList extends cc.Component {
             dropList.height = 25
             dropList.itemNumY = 2
             dropList.loadData(this.menuTemplate)
-            dropList.setItemColor(cc.color(144,169,214,255))
-
+            dropList.setItemColor(cc.color(144,169,214))
             eventCenter.on('pickDropList',(node)=>{
                 let event = node[0].getComponentInChildren(cc.RichText).string
                 
@@ -61,7 +57,7 @@ export default class AddList extends cc.Component {
             dropList.itemNumY = this.menuTemplate.length
             dropList.viewHeight = dropList.height * dropList.itemNumY
             dropList.loadData(this.menuTemplate)
-            dropList.setItemColor(cc.color(144,169,214,255))
+            dropList.setItemColor(cc.color(144,169,214))
             eventCenter.on('pickDropList',(node)=>{
                 let event = node[0].getComponentInChildren(cc.RichText).string
                 let pickNode = parentList.returnPick()[0]

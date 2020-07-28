@@ -420,14 +420,9 @@ export default class List extends cc.Component {
     }
     public SetItemTemplate(index?:number){
         if(index == undefined) return this.itemTemplate
-        if(this.templateType == 2) {
-            this.itemTemplate = cc.instantiate(this.prefabSet[index]);
-            return this.itemTemplate
-        }
-        else {
-            this.itemTemplate = cc.instantiate(this.nodeSet[index])
-            return this.itemTemplate
-        }
+        if(this.templateType == 2) this.itemTemplate = cc.instantiate(this.prefabSet[index]);
+        else this.itemTemplate = cc.instantiate(this.nodeSet[index])
+        return this.itemTemplate
     }
     private _creatrSingleItem(){
         var labelNode = new cc.Node('label');
@@ -492,9 +487,7 @@ export default class List extends cc.Component {
                 else{
                     this.content.height += item.height+this.interval
                     if(item.name == '0') this._itemPosition['0'] = cc.v2(0,-item.height-this.topWidget)
-                    else {
-                        this._itemPosition[item.name] = cc.v2(0,this._itemPosition[Number(item.name)-1].y - item.height-this.interval)
-                    }
+                    else  this._itemPosition[item.name] = cc.v2(0,this._itemPosition[Number(item.name)-1].y - item.height-this.interval)
                     return cc.v2(0,this._itemPosition[item.name].y+item.height/2)
                 }
             }
@@ -506,12 +499,12 @@ export default class List extends cc.Component {
         else{
             let index = 0
             if(this.scrollHorizontal){
-                while(this._itemPosition[index].x+this.content.width/2 < this.oriX - x ) {index++}
+                while(this._itemPosition[index].x < this.oriX - x ) {index++}
                 return index
             }
             else{
                 try{
-                    while(this.content.height/2-this._itemPosition[index].y < y-this.oriY) index ++
+                    while(-this._itemPosition[index].y < y-this.oriY) index ++
                     return index 
                 }catch{ return -1}
             }
@@ -519,7 +512,6 @@ export default class List extends cc.Component {
     }
     private onceControl = true;
     private _isViewFull(){   
-        
         if(!this.pageMode)
        { //-1:上边行不够   -2：下边行不够   -3：左边列不够    -4：右边列不够 
                 cc.log('index = ',this._index,' itemposition ',this._itemPosition)
@@ -652,13 +644,13 @@ export default class List extends cc.Component {
     private _initializePage(num:number){ //输入要生成page的第一个item序号
         for(var i = 0;i < Math.min(this.itemNumX,this.pageNumX);i++){
             for(var j = 0; j < Math.min(this.itemNumY,this.pageNumY);j++){
-                cc.log('i = ',i,' j = ',j)
-                if(!this.alignCenter) this._poolGet(num+i+j*this.itemNumX,true)
-                else{
-                    if(this.scrollVertical) this._poolGet(num+i+j*this.itemNumX,true)
-                    if(this.scrollHorizontal) this._poolGet(num+i+j*this.itemNumX,true)
-                }
+                this._poolGet(num+i+j*this.itemNumX,true)
             }
+        }
+        while(this._itemDisplayingPool.length > 0 && this._isViewFull() < 0) {
+            let pg = this._isViewFull() == -2 ? (Math.floor(Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name) / this.itemNumX)+1)*this.itemNumX:
+            Number(this._itemDisplayingPool[this._itemDisplayingPool.length-1].name)%this.itemNumX+1
+            this._initializePage(pg)
         }
     }
     private _findItemByname(list : any[],name : string){
@@ -699,7 +691,7 @@ export default class List extends cc.Component {
     private _pool = new cc.NodePool();
     private _itemDisplayingPool = [];
     private _createDone : boolean = false;
-    update (dt) {
+    update () {
         if(!this.messageMode){
             if(this._pool.size() >= this.pageNumX*this.pageNumY*3) this._createDone = true;
             if(!this._createDone) {
@@ -713,8 +705,6 @@ export default class List extends cc.Component {
             if((-this.content.x+this.oriX) < -50 ||(-this.oriY+this.content.y) < -50) this._freshItem(); //上拉或左拉刷新
         }
         if(this.node.getComponent(cc.ScrollView).isScrolling() || this.node.getComponent(cc.ScrollView).isAutoScrolling()) this._loadScrollRecord();
-        cc.log("oriy = ",this.oriY,' contenty = ',this.content.y)
-        // cc.log('oriy = ',this.oriY,' ',Math.floor((this.content.y - this.oriY) / (this.height+this.interval)) * this.itemNumX + Math.floor((- this.content.x + this.oriX) / (this.width+this.interval)))
     }
     private _setBar(){
         //bar params

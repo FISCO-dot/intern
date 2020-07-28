@@ -50,6 +50,7 @@ export default class MessageList extends cc.Component {
                 cc.loader.loadRes('Prefab/item',cc.Prefab,(err,prefab)=>{
                     let dropListNode = new cc.Node('DropList')
                     let dropList = dropListNode.addComponent('CustomScroll_2')
+
                     dropListNode.addComponent('SecondaryList')
                     dropList.prefabSet.push(prefab)
                     node[0].addChild(dropListNode)

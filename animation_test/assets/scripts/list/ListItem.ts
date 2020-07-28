@@ -29,6 +29,7 @@ export default class ListItem extends cc.Component {
         this._setItemSize()
         this.node.off(cc.Node.EventType.TOUCH_END)
         this.node.on(cc.Node.EventType.TOUCH_END,function(event){  
+            cc.log('youle')
             if(event.target.name == ('label'||'imgMsg')) event.target = event.target.parent
             eventCenter.dispatch('select'+this.node.parent.parent.parent.name,event.target,2,event.target)            
         },this)
